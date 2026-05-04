@@ -1,32 +1,29 @@
-import { Github } from "@medusajs/icons"
-import { Button, Heading } from "@medusajs/ui"
+import { Button, Heading, Text } from "@medusajs/ui"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 const Hero = () => {
   return (
-    <div className="h-[75vh] w-full border-b border-ui-border-base relative bg-ui-bg-subtle">
-      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-center small:p-32 gap-6">
-        <span>
+    <div className="h-[75vh] w-full border-b border-ui-border-base relative bg-black">
+      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-center small:p-32 gap-6 px-6">
+        <span className="flex flex-col gap-4 max-w-2xl">
           <Heading
             level="h1"
-            className="text-3xl leading-10 text-ui-fg-base font-normal"
+            className="text-4xl small:text-6xl leading-tight text-white font-semibold tracking-tight"
           >
-            Well done! You have successfully deployed your Medusa 2.0 store on Railway!
+            Dab Pal
           </Heading>
           <Heading
             level="h2"
-            className="text-3xl leading-10 text-ui-fg-subtle font-normal"
+            className="text-xl small:text-2xl leading-snug text-white/70 font-normal"
           >
-            Need help customizing your store?
+            Portable Q-tip and isopropyl alcohol case for Puffco and quartz bangers. Made to order in NY.
           </Heading>
         </span>
-        <a
-          href="https://funkyton.com/medusajs-2-0-is-finally-here/"
-          target="_blank"
-        >
-          <h1 style={{ textDecoration: "underline" }}>
-            Visit the tutorial
-          </h1>
-        </a>
+        <LocalizedClientLink href="/products/dab-pal">
+          <Button variant="secondary" size="large" className="bg-white text-black hover:bg-white/90">
+            Shop the Dab Pal
+          </Button>
+        </LocalizedClientLink>
       </div>
     </div>
   )
