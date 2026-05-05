@@ -50,13 +50,77 @@ export async function POST(
     return
   }
 
-  let provider
-  try {
-    provider = req.scope.resolve("fp_shippo_shippo")
-  } catch {
-    // Shippo provider not registered (e.g. SHIPPO_API_TOKEN missing). Treat
-    // the address as valid so we don't block checkout in that case.
-    res.json({ valid: true, messages: [] })
+  const logger = req.scope.resolve("logger") as {
+    warn?: (msg: string) => void
+    info?: (msg: string) => void
+  }
+
+  // The provider is registered as `fp_<identifier>_<id>` inside the
+  // FULFILLMENT module's container. The app-level req.scope can't reach into
+  // the module container, so we resolve the FULFILLMENT module first and ask
+  // it for the provider directly.
+  let provider:
+    | {
+        validateAddress: (input: Record<string, unknown>) => Promise<unknown>
+      }
+    | null = null
+
+  // Try a few candidate names: direct provider container path, and the
+  // FulfillmentProviderService exposed via the FULFILLMENT module's nested
+  // container.
+  const candidates = [
+    "fp_shippo_shippo",
+    "fp_shippo",
+    "shippo",
+  ]
+  let lastResolveErr = ""
+  for (const name of candidates) {
+    try {
+      const candidate = req.scope.resolve(name) as Record<string, unknown>
+      if (candidate && typeof (candidate as { validateAddress?: unknown }).validateAddress === "function") {
+        provider = candidate as typeof provider
+        break
+      }
+    } catch (e) {
+      lastResolveErr = (e as Error).message
+    }
+  }
+
+  if (!provider) {
+    // Try fulfillmentProviderService.retrieveProviderRegistration as a fallback.
+    try {
+      const fulfillmentSvc = req.scope.resolve("fulfillment") as {
+        retrieveProviderRegistration?: (id: string) => unknown
+      }
+      if (fulfillmentSvc?.retrieveProviderRegistration) {
+        const reg = fulfillmentSvc.retrieveProviderRegistration(
+          "shippo_shippo"
+        ) as Record<string, unknown> | undefined
+        if (
+          reg &&
+          typeof (reg as { validateAddress?: unknown }).validateAddress ===
+            "function"
+        ) {
+          provider = reg as typeof provider
+        }
+      }
+    } catch (e) {
+      lastResolveErr = (e as Error).message
+    }
+  }
+
+  if (!provider) {
+    logger.warn?.(
+      `[validate-address] could not resolve Shippo provider; lastErr=${lastResolveErr}`
+    )
+    res.json({
+      valid: true,
+      messages: [
+        {
+          text: "Address validation provider unavailable",
+        },
+      ],
+    })
     return
   }
 
@@ -74,8 +138,9 @@ export async function POST(
     })
     res.json(result)
   } catch (e) {
-    // Shippo failed. Fail open so the customer can still complete checkout;
-    // we'd rather take a possibly-bad address than block a sale.
+    logger.warn?.(
+      `[validate-address] Shippo call failed: ${(e as Error).message}`
+    )
     res.json({
       valid: true,
       messages: [
