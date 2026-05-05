@@ -9,6 +9,8 @@ type CartTotalsProps = {
   totals: {
     total?: number | null
     subtotal?: number | null
+    item_subtotal?: number | null
+    item_total?: number | null
     tax_total?: number | null
     shipping_total?: number | null
     discount_total?: number | null
@@ -22,11 +24,25 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
     currency_code,
     total,
     subtotal,
+    item_subtotal,
+    item_total,
     tax_total,
     shipping_total,
     discount_total,
     gift_card_total,
   } = totals
+
+  // Medusa's `discount_total` rolls in the tax-portion that was eliminated
+  // alongside the items-portion (e.g. on a 95%-off $25 cart in NY it shows
+  // -$25.86, which to a customer looks broken: "how is the discount more
+  // than the subtotal?"). Display only the items-portion of the discount
+  // here. `item_total` includes per-line tax, so subtract it back out.
+  // Math still ties: subtotal - displayDiscount + tax_total = total.
+  const itemSubtotal = item_subtotal ?? subtotal ?? 0
+  const itemTotal = item_total ?? itemSubtotal
+  const itemTax = tax_total ?? 0
+  const itemsDiscount = Math.max(0, itemSubtotal - (itemTotal - itemTax))
+  const displayDiscount = itemsDiscount || discount_total || 0
 
   return (
     <div>
@@ -39,16 +55,16 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
             {convertToLocale({ amount: subtotal ?? 0, currency_code })}
           </span>
         </div>
-        {!!discount_total && (
+        {!!displayDiscount && (
           <div className="flex items-center justify-between">
             <span>Discount</span>
             <span
               className="text-ui-fg-interactive"
               data-testid="cart-discount"
-              data-value={discount_total || 0}
+              data-value={displayDiscount}
             >
               -{" "}
-              {convertToLocale({ amount: discount_total ?? 0, currency_code })}
+              {convertToLocale({ amount: displayDiscount, currency_code })}
             </span>
           </div>
         )}
