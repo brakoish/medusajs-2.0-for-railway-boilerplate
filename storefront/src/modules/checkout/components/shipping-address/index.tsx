@@ -1,5 +1,6 @@
 import { HttpTypes } from "@medusajs/types"
 import { Container } from "@medusajs/ui"
+import AddressAutocomplete from "@modules/checkout/components/address-autocomplete"
 import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
 import { mapKeys } from "lodash"
@@ -166,14 +167,32 @@ const ShippingAddress = ({
           required
           data-testid="shipping-last-name-input"
         />
-        <Input
+        <AddressAutocomplete
           label="Address"
           name="shipping_address.address_1"
-          autoComplete="address-line1"
-          value={formData["shipping_address.address_1"]}
+          value={formData["shipping_address.address_1"] || ""}
           onChange={handleChange}
+          countryCode={(formData["shipping_address.country_code"] || "us")
+            .toString()
+            .toLowerCase()}
           required
           data-testid="shipping-address-input"
+          onSelect={(p) => {
+            setFormData((prev: Record<string, any>) => ({
+              ...prev,
+              "shipping_address.address_1": p.line1 || prev["shipping_address.address_1"] || "",
+              "shipping_address.city": p.city || prev["shipping_address.city"] || "",
+              "shipping_address.province":
+                p.province || prev["shipping_address.province"] || "",
+              "shipping_address.postal_code":
+                p.postalCode || prev["shipping_address.postal_code"] || "",
+              "shipping_address.country_code": (
+                p.country ||
+                prev["shipping_address.country_code"] ||
+                "us"
+              ).toLowerCase(),
+            }))
+          }}
         />
         <Input
           label="Company"
