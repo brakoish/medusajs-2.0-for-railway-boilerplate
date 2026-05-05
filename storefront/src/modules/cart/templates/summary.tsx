@@ -5,6 +5,7 @@ import { Button, Heading } from "@medusajs/ui"
 import CartTotals from "@modules/common/components/cart-totals"
 import Divider from "@modules/common/components/divider"
 import DiscountCode from "@modules/checkout/components/discount-code"
+import ExpressCheckout from "@modules/checkout/components/express-checkout"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 
@@ -35,6 +36,7 @@ const Summary = ({ cart }: SummaryProps) => {
       <DiscountCode cart={cart} />
       <Divider />
       <CartTotals totals={cart} />
+      <ExpressCheckout cart={cart} showDivider />
       <LocalizedClientLink
         href={"/checkout?step=" + step}
         data-testid="checkout-button"
