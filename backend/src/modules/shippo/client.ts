@@ -1,6 +1,7 @@
 import { MedusaError } from "@medusajs/framework/utils"
 import {
   ShippoAddress,
+  ShippoAddressWithValidation,
   ShippoLiveRateRequest,
   ShippoLiveRateResponse,
   ShippoParcel,
@@ -159,6 +160,42 @@ export class ShippoClient {
     return this.request<ShippoRefund>("/refunds", {
       method: "POST",
       body: JSON.stringify({ transaction: transactionId, async: false }),
+    })
+  }
+
+  /**
+   * Create + validate an address in one shot.
+   *
+   * Pass `validate: true` so Shippo returns `validation_results` with
+   * is_valid + messages. Used at checkout to catch typos before payment.
+   */
+  async createAndValidateAddress(
+    input: ShippoAddress
+  ): Promise<ShippoAddressWithValidation> {
+    return this.request<ShippoAddressWithValidation>("/addresses", {
+      method: "POST",
+      body: JSON.stringify({ ...input, validate: true }),
+    })
+  }
+
+  /**
+   * Register a tracking webhook. Shippo will POST status updates to the URL
+   * we provide every time the carrier scans the package. Idempotent on
+   * (carrier, tracking_number, metadata).
+   */
+  async registerTracking(input: {
+    carrier: string
+    tracking_number: string
+    metadata?: string
+  }): Promise<{
+    object_id?: string
+    carrier: string
+    tracking_number: string
+    metadata?: string
+  }> {
+    return this.request("/tracks", {
+      method: "POST",
+      body: JSON.stringify(input),
     })
   }
 }

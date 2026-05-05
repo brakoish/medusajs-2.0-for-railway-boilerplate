@@ -17,6 +17,7 @@ import {
 import { ShippoClient, ShippoClientOptions } from "./client"
 import {
   ShippoAddress,
+  ShippoAddressWithValidation,
   ShippoLiveRateLineItem,
   ShippoParcel,
 } from "./types"
@@ -448,6 +449,17 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
       )
     }
 
+    // Register a tracking webhook so subsequent USPS scans update Medusa
+    // automatically. Failures don't block the label purchase.
+    if (tx.tracking_number && rate.provider) {
+      await this.registerTracking({
+        carrier: rate.provider.toLowerCase(),
+        tracking_number: tx.tracking_number,
+        fulfillment_id:
+          (fulfillment.id as string | undefined) ?? undefined,
+      })
+    }
+
     return {
       data: {
         ...((fulfillment.data as object) || {}),
@@ -490,6 +502,94 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
 
   async getFulfillmentDocuments(_data: Record<string, unknown>): Promise<never[]> {
     return []
+  }
+
+  // ------- public helpers (called from API routes / subscribers) -------
+
+  /**
+   * Validate a shipping address against Shippo's address-correction service.
+   * Returns a normalized `{ valid, suggestion?, messages[] }` so storefront
+   * can either accept the address or surface a correction.
+   */
+  async validateAddress(input: {
+    name?: string
+    street1: string
+    street2?: string
+    city: string
+    state: string
+    zip: string
+    country?: string
+    phone?: string
+    email?: string
+  }): Promise<{
+    valid: boolean
+    suggestion?: ShippoAddress
+    messages: { code?: string; text: string }[]
+  }> {
+    const result: ShippoAddressWithValidation =
+      await this.client.createAndValidateAddress({
+        name: input.name,
+        street1: input.street1,
+        street2: input.street2,
+        city: input.city,
+        state: input.state,
+        zip: input.zip,
+        country: (input.country || "US").toUpperCase(),
+        phone: input.phone,
+        email: input.email,
+      })
+
+    const isValid =
+      result.validation_results?.is_valid === true ||
+      result.is_complete === true
+
+    return {
+      valid: !!isValid,
+      // Shippo returns the corrected version inline; surface it so the UI
+      // can offer "did you mean ...?".
+      suggestion: isValid
+        ? {
+            name: result.name,
+            company: result.company,
+            street1: result.street1,
+            street2: result.street2,
+            city: result.city,
+            state: result.state,
+            zip: result.zip,
+            country: result.country,
+            phone: result.phone,
+            email: result.email,
+          }
+        : undefined,
+      messages: result.validation_results?.messages || [],
+    }
+  }
+
+  /**
+   * Register a tracking webhook with Shippo for a carrier+tracking_number
+   * pair. Called from createFulfillment after we have a label, so that
+   * subsequent USPS scans flow back to /hooks/shippo/tracking and update
+   * the Medusa fulfillment status.
+   */
+  async registerTracking(input: {
+    carrier: string
+    tracking_number: string
+    fulfillment_id?: string
+  }): Promise<void> {
+    if (!input.carrier || !input.tracking_number) return
+    try {
+      await this.client.registerTracking({
+        carrier: input.carrier,
+        tracking_number: input.tracking_number,
+        metadata: input.fulfillment_id,
+      })
+    } catch (e) {
+      this.logger_?.warn(
+        `Shippo tracking webhook register failed for ${input.tracking_number}: ${
+          (e as Error).message
+        }`
+      )
+    }
   }
 }
 

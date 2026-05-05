@@ -110,3 +110,43 @@ export type ShippoLiveRateResponse = {
   results: ShippoLiveRate[]
   count: number
 }
+
+export type ShippoAddressValidationResults = {
+  is_valid: boolean
+  messages?: { code?: string; text: string; source?: string }[]
+}
+
+export type ShippoAddressWithValidation = ShippoAddress & {
+  object_id: string
+  is_complete?: boolean
+  validation_results?: ShippoAddressValidationResults
+}
+
+export type ShippoTrackingStatus = {
+  status:
+    | "UNKNOWN"
+    | "PRE_TRANSIT"
+    | "TRANSIT"
+    | "DELIVERED"
+    | "RETURNED"
+    | "FAILURE"
+  status_details?: string
+  status_date?: string
+  location?: {
+    city?: string
+    state?: string
+    zip?: string
+    country?: string
+  }
+}
+
+export type ShippoTrackWebhookPayload = {
+  event?: string
+  carrier: string
+  tracking_number: string
+  tracking_status: ShippoTrackingStatus
+  tracking_history?: ShippoTrackingStatus[]
+  servicelevel?: { token: string; name: string }
+  metadata?: string
+  transaction?: string
+}
