@@ -5,9 +5,10 @@
  *
  * The Stripe wallet sheet returns the buyer's name + email + phone +
  * shipping + billing + a confirmable payment method. We mirror those into
- * the Medusa cart, lock in the only available shipping method, create a
- * Stripe PaymentSession, then call `stripe.confirmPayment` and finalize
- * the order with `placeOrder()`.
+ * the Medusa cart, lock in the buyer-picked shipping method (or the first
+ * available one if Stripe didn't surface a picker), create a Stripe
+ * PaymentSession, then call `stripe.confirmPayment` and finalize the order
+ * with `placeOrder()`.
  */
 
 import {
@@ -31,6 +32,34 @@ type WalletConfirmInput = {
   event: any
   /** Used to build the success return URL. Default: cart shipping country, then "us". */
   defaultCountry?: string
+}
+
+/**
+ * Build the wallet sheet's `shippingRates` array from the Medusa cart's
+ * available shipping options. Stripe wants ids that are stable strings;
+ * we use the Medusa shipping_option id directly so we can look it up
+ * after the buyer picks one.
+ *
+ * Returns an array of `{ id, displayName, amount }` (Stripe expects amount
+ * in the cart's smallest currency unit, same as Medusa stores).
+ */
+export async function fetchWalletShippingRates(
+  cartId: string
+): Promise<{ id: string; displayName: string; amount: number }[]> {
+  const options = await listCartShippingMethods(cartId)
+  if (!options || !options.length) return []
+  return options
+    .map((o: any) => ({
+      id: o.id as string,
+      displayName: (o.name as string) || "Shipping",
+      amount:
+        typeof o.amount === "number"
+          ? o.amount
+          : typeof o.calculated_price?.calculated_amount === "number"
+          ? o.calculated_price.calculated_amount
+          : 0,
+    }))
+    .sort((a, b) => a.amount - b.amount)
 }
 
 export async function walletConfirm({
@@ -91,10 +120,16 @@ export async function walletConfirm({
     billing_address: billAddress as any,
   })
 
-  // ---------- 3. Pick a shipping method (single US rate today) ----------
+  // ---------- 3. Lock in a shipping method ----------
+  // Prefer the rate the buyer picked in the wallet sheet (event.shippingRate.id
+  // is the Medusa option id we passed into onClick.resolve). Fall back to the
+  // first/cheapest available option if the wallet didn't surface a picker
+  // (e.g. Apple Pay on a single-rate flow).
+  const pickedRateId: string | undefined = event.shippingRate?.id
   const methods = await listCartShippingMethods(cart.id)
-  const method = methods?.[0]
-  if (!method) throw new Error("No shipping methods available")
+  if (!methods?.length) throw new Error("No shipping methods available")
+  const method =
+    methods.find((m: any) => m.id === pickedRateId) || methods[0]
   await setShippingMethod({ cartId: cart.id, shippingMethodId: method.id })
 
   // ---------- 4. Create / refresh Stripe payment session ----------
@@ -145,17 +180,42 @@ export async function walletConfirm({
   }
 }
 
-export const walletClickResolve = (event: any) => {
-  event.resolve({
+/**
+ * Build the `event.resolve()` payload for ExpressCheckoutElement's onClick.
+ * Pulls real shipping rates from the cart so the wallet sheet shows
+ * actual prices instead of a "Free" placeholder.
+ *
+ * If `cartId` is not provided yet (PDP — cart hasn't been created), we
+ * skip the rates and let the wallet sheet open without a shipping picker.
+ * The PDP flow creates the cart on click and the rates get loaded during
+ * walletConfirm before the PaymentIntent is created, so the buyer sees
+ * the real total on the confirmation screen.
+ */
+export async function buildWalletClickPayload(cartId?: string) {
+  const base = {
     emailRequired: true,
     phoneNumberRequired: true,
     shippingAddressRequired: true,
     billingAddressRequired: true,
     allowedShippingCountries: ["US"],
-    shippingRates: [
-      // Placeholder rate so the wallet sheet renders. We pick the real
-      // Medusa shipping option after the wallet returns.
-      { id: "standard", displayName: "Standard shipping", amount: 0 },
-    ],
-  })
+  }
+
+  if (!cartId) {
+    return {
+      ...base,
+      shippingRates: [
+        // Sane default while the cart doesn't exist yet (PDP buy-now).
+        // Real rates lock in during walletConfirm.
+        { id: "standard", displayName: "Standard Shipping", amount: 700 },
+      ],
+    }
+  }
+
+  const rates = await fetchWalletShippingRates(cartId)
+  return {
+    ...base,
+    shippingRates: rates.length
+      ? rates
+      : [{ id: "standard", displayName: "Standard Shipping", amount: 700 }],
+  }
 }

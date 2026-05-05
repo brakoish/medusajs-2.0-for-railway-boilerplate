@@ -38,10 +38,15 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
       return
     }
     const input = document.getElementById("promotion-input") as HTMLInputElement
+    // Keep already-applied codes (the original `=== undefined` check
+    // dropped them all). Promo codes are stored case-sensitively in
+    // Medusa, so normalize to upper-case to match the typical
+    // ALL-CAPS convention; if a merchant deliberately created a
+    // mixed-case code they can swap this for a different normalization.
     const codes = promotions
-      .filter((p) => p.code === undefined)
+      .filter((p) => p.code !== undefined)
       .map((p) => p.code!)
-    codes.push(code.toString())
+    codes.push(code.toString().trim().toUpperCase())
 
     await applyPromotions(codes)
 

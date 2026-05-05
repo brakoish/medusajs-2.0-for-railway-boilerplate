@@ -17,13 +17,18 @@
  * after add-to-cart succeeds, which is what actually charges the buyer.
  */
 
-import { Elements, ExpressCheckoutElement } from "@stripe/react-stripe-js"
+import {
+  Elements,
+  ExpressCheckoutElement,
+  useElements,
+  useStripe,
+} from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { addToCart, retrieveCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import { walletClickResolve, walletConfirm } from "./wallet-confirm"
+import { buildWalletClickPayload, walletConfirm } from "./wallet-confirm"
 
 const stripeKey = process.env.NEXT_PUBLIC_STRIPE_KEY
 const stripePromise = stripeKey ? loadStripe(stripeKey) : null
@@ -58,8 +63,11 @@ const PdpBuyNow: React.FC<Props> = ({
   ).toLowerCase()
   if (!amount) return null
 
+  // Estimate item total + $7 placeholder shipping so the wallet sheet
+  // shows a realistic number before tap. Real total locks in during
+  // walletConfirm when shipping method is set on the cart.
   const totalCents = useMemo(() => {
-    return Math.max(50, Math.round(amount * quantity))
+    return Math.max(50, Math.round(amount * quantity + 700))
   }, [amount, quantity])
 
   return (
@@ -96,7 +104,16 @@ const PdpBuyNowInner: React.FC<{
   quantity: number
 }> = ({ variantId, countryCode, quantity }) => {
   const router = useRouter()
+  const stripe = useStripe()
+  const elements = useElements()
   const [error, setError] = useState<string | null>(null)
+
+  const handleClick = async (event: any) => {
+    // Cart doesn't exist yet — show a sensible default rate. The real
+    // rate locks in during walletConfirm after the cart is created.
+    const payload = await buildWalletClickPayload(undefined)
+    event.resolve(payload)
+  }
 
   const handleConfirm = async (event: any) => {
     setError(null)
@@ -109,8 +126,8 @@ const PdpBuyNowInner: React.FC<{
       // 2. Same wallet -> place-order flow as the checkout page.
       await walletConfirm({
         cart,
-        stripe: event.stripe,
-        elements: event.elements,
+        stripe,
+        elements,
         event,
         defaultCountry: countryCode,
       })
@@ -125,7 +142,7 @@ const PdpBuyNowInner: React.FC<{
   return (
     <>
       <ExpressCheckoutElement
-        onClick={walletClickResolve}
+        onClick={handleClick as any}
         onConfirm={handleConfirm as any}
         options={{
           buttonHeight: 44,

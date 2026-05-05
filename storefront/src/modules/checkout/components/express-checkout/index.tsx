@@ -10,13 +10,18 @@
  * can reuse the same logic.
  */
 
-import { Elements, ExpressCheckoutElement } from "@stripe/react-stripe-js"
+import {
+  Elements,
+  ExpressCheckoutElement,
+  useElements,
+  useStripe,
+} from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { retrieveCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import { walletClickResolve, walletConfirm } from "./wallet-confirm"
+import { buildWalletClickPayload, walletConfirm } from "./wallet-confirm"
 
 const stripeKey = process.env.NEXT_PUBLIC_STRIPE_KEY
 const stripePromise = stripeKey ? loadStripe(stripeKey) : null
@@ -34,10 +39,16 @@ const ExpressCheckout: React.FC<Props> = ({ cart, showDivider = true }) => {
   if (!stripeKey || !stripePromise) return null
   if (!cart?.region) return null
 
+  // Stripe minimum charge is 50 cents. The wallet sheet still wants a
+  // realistic estimate so the buyer doesn't see "$0.50" before tapping;
+  // we estimate cart subtotal + a placeholder $7 standard shipping. The
+  // real total locks in during walletConfirm when we set the shipping
+  // method on the cart and create the payment session.
   const totalCents = useMemo(() => {
-    const total = cart.total ?? 0
-    return Math.max(50, Math.round(total)) // Stripe minimum is 50 cents
-  }, [cart.total])
+    const itemTotal = cart.item_total ?? cart.subtotal ?? 0
+    const estimate = itemTotal + 700 // +$7 placeholder Standard
+    return Math.max(50, Math.round(estimate))
+  }, [cart.item_total, cart.subtotal])
 
   return (
     <div className="mb-6">
@@ -72,15 +83,22 @@ const ExpressCheckout: React.FC<Props> = ({ cart, showDivider = true }) => {
 
 const ExpressInner: React.FC<{ cart: HttpTypes.StoreCart }> = ({ cart }) => {
   const router = useRouter()
+  const stripe = useStripe()
+  const elements = useElements()
   const [error, setError] = useState<string | null>(null)
+
+  const handleClick = async (event: any) => {
+    const payload = await buildWalletClickPayload(cart.id)
+    event.resolve(payload)
+  }
 
   const handleConfirm = async (event: any) => {
     setError(null)
     try {
       await walletConfirm({
         cart,
-        stripe: event.stripe,
-        elements: event.elements,
+        stripe,
+        elements,
         event,
       })
     } catch (e: any) {
@@ -95,7 +113,7 @@ const ExpressInner: React.FC<{ cart: HttpTypes.StoreCart }> = ({ cart }) => {
   return (
     <>
       <ExpressCheckoutElement
-        onClick={walletClickResolve}
+        onClick={handleClick as any}
         onConfirm={handleConfirm as any}
         options={{
           buttonHeight: 48,
