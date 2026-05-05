@@ -1,6 +1,8 @@
 import { MedusaError } from "@medusajs/framework/utils"
 import {
   ShippoAddress,
+  ShippoLiveRateRequest,
+  ShippoLiveRateResponse,
   ShippoParcel,
   ShippoRefund,
   ShippoShipment,
@@ -65,8 +67,50 @@ export class ShippoClient {
   }
 
   /**
-   * Create a shipment and synchronously return rates.
-   * `async: false` makes Shippo wait until rates are computed (~600ms-2s).
+   * Live Rates at Checkout. This is the API behind Shippo's hosted Rates-at-Checkout
+   * widget: it filters by the Service Groups you configured in the dashboard,
+   * applies the markup % and fallback rates, and returns one row per Service
+   * Group instead of every carrier rate.
+   *
+   * Means dashboard config (service selection, markup, fallback, sender address,
+   * default parcel) is the source of truth; we just send the cart context.
+   */
+  async getLiveRates(
+    input: ShippoLiveRateRequest
+  ): Promise<ShippoLiveRateResponse> {
+    return this.request<ShippoLiveRateResponse>("/live-rates", {
+      method: "POST",
+      body: JSON.stringify(input),
+    })
+  }
+
+  /**
+   * List the Service Groups configured on the account. Each one becomes a
+   * shipping option Medusa admin can attach to a service zone.
+   */
+  async listServiceGroups(): Promise<
+    {
+      object_id: string
+      name: string
+      description: string
+      flat_rate: string
+      flat_rate_currency: string
+      rate_adjustment: number
+      is_active: boolean
+      type: string
+      service_levels: {
+        account_object_id: string
+        service_level_token: string
+      }[]
+    }[]
+  > {
+    return this.request("/service-groups")
+  }
+
+  /**
+   * Create a shipment and synchronously return all carrier rates. Used when
+   * we need a Shippo rate.object_id to feed into /transactions for label
+   * purchase, since /live-rates results don't carry one.
    */
   async createShipment(input: {
     address_from: ShippoAddress

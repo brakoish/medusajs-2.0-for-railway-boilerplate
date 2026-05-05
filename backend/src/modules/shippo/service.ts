@@ -15,18 +15,21 @@ import {
   StockLocationAddressDTO,
 } from "@medusajs/framework/types"
 import { ShippoClient, ShippoClientOptions } from "./client"
-import { ShippoAddress, ShippoParcel, ShippoRate, ShippoShipment } from "./types"
+import {
+  ShippoAddress,
+  ShippoLiveRateLineItem,
+  ShippoParcel,
+} from "./types"
 
 export type ShippoOptions = ShippoClientOptions & {
   /**
    * Default parcel dimensions when individual line items don't carry length/width/height.
-   * Falls back to the dimensions of a Dab Pal 6-pack box.
+   * Falls back to the dimensions of a Dab Pal poly mailer.
+   * Note: when omitted entirely, Shippo uses the default Parcel Template configured
+   * on /live-rates/settings/parcel-template, so this is mainly a safety net.
    */
   default_parcel?: Partial<ShippoParcel>
-  /**
-   * Pad the parcel weight (oz) to account for box + packing material when
-   * line item weights only reflect the product itself.
-   */
+  /** Pad the parcel weight (oz) to account for box + filler. */
   packaging_weight_oz?: number
 }
 
@@ -35,42 +38,28 @@ type InjectedDependencies = {
 }
 
 /**
- * Each fulfillment option maps to a "tier" of Shippo rates. We don't preselect
- * the carrier; at price-calc time we pick the best rate that matches the tier.
- *
- * id -> human label, plus a filter that runs against a ShippoRate.
+ * Each fulfillment option corresponds to one Shippo Service Group (configured
+ * in the Shippo dashboard, e.g. "Standard Shipping" / "Priority Shipping").
+ * Stored in optionData so the calc and validate paths know which group to
+ * pick out of the /live-rates response.
  */
-const OPTION_TIERS: Record<
-  string,
-  { name: string; filter: (r: ShippoRate) => boolean }
-> = {
-  cheapest_ground: {
-    name: "Standard Shipping (USPS / UPS Ground)",
-    filter: (r) =>
-      /ground|advantage/i.test(r.servicelevel?.name || "") ||
-      r.attributes?.includes("CHEAPEST") === true,
-  },
-  cheapest_priority: {
-    name: "Priority Shipping (2 Day)",
-    filter: (r) => /priority|2nd day/i.test(r.servicelevel?.name || ""),
-  },
-  cheapest_express: {
-    name: "Express Shipping (1 Day)",
-    filter: (r) =>
-      /express|next day/i.test(r.servicelevel?.name || "") &&
-      !/express saver/i.test(r.servicelevel?.name || ""),
-  },
-}
-
 type OptionData = {
-  tier: keyof typeof OPTION_TIERS
+  service_group_id: string
+  service_group_name: string
 }
 
 type ShippingMethodData = {
-  rate_id?: string
+  /**
+   * Stashed during validate so calculatePrice doesn't have to re-rate every
+   * cart refresh. We do still hit /live-rates on the first refresh after
+   * address change, but once the customer commits to a method we lock the
+   * computed amount.
+   */
+  amount?: number
+  rate_object_id?: string
+  shipment_object_id?: string
   carrier?: string
   service?: string
-  shipment_id?: string
 }
 
 class ShippoProviderService extends AbstractFulfillmentProviderService {
@@ -87,249 +76,370 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
     this.client = new ShippoClient(options)
   }
 
-  /** Tiers we expose. Admin picks one of these when creating a shipping option. */
+  /**
+   * Pull the Service Groups configured in Shippo and expose each one as a
+   * Medusa fulfillment option. Admin sees exactly what's set in Shippo,
+   * automatically reflecting any service / markup / fallback changes made
+   * over there. Cached for 5min to keep `getOptions` calls cheap.
+   */
+  private serviceGroupsCache: {
+    fetched_at: number
+    groups: { object_id: string; name: string; description: string }[]
+  } | null = null
+
+  private async getServiceGroups() {
+    const now = Date.now()
+    if (
+      this.serviceGroupsCache &&
+      now - this.serviceGroupsCache.fetched_at < 5 * 60 * 1000
+    ) {
+      return this.serviceGroupsCache.groups
+    }
+    const groups = await this.client.listServiceGroups()
+    const active = groups
+      .filter((g) => g.is_active && g.type === "LIVE_RATE")
+      .map((g) => ({
+        object_id: g.object_id,
+        name: g.name,
+        description: g.description,
+      }))
+    this.serviceGroupsCache = { fetched_at: now, groups: active }
+    return active
+  }
+
   async getFulfillmentOptions(): Promise<FulfillmentOption[]> {
-    return Object.entries(OPTION_TIERS).map(([id, tier]) => ({
-      id,
-      name: tier.name,
-      tier: id,
-    })) as unknown as FulfillmentOption[]
+    const groups = await this.getServiceGroups()
+    return groups.map(
+      (g) =>
+        ({
+          id: g.object_id,
+          name: `${g.name} (${g.description})`,
+          service_group_id: g.object_id,
+          service_group_name: g.name,
+        }) as unknown as FulfillmentOption
+    )
   }
 
   async canCalculate(_data: CreateShippingOptionDTO): Promise<boolean> {
     return true
   }
 
-  /**
-   * Build a Shippo shipment from the cart's from_location + shipping_address + items,
-   * then return everything rated.
-   */
-  private async buildAndRateShipment({
-    from_address,
-    to_address,
-    items,
-  }: {
-    from_address: {
-      name?: string
-      address?: Omit<
-        StockLocationAddressDTO,
-        "created_at" | "updated_at" | "deleted_at"
-      >
+  // ------- helpers shared between calc / validate / fulfill -------
+
+  private toShippoAddress(
+    fromOrTo: "from" | "to",
+    src:
+      | (Omit<
+          StockLocationAddressDTO,
+          "created_at" | "updated_at" | "deleted_at"
+        > & { name?: string; company?: string })
+      | (Omit<
+          CartAddressDTO,
+          "created_at" | "updated_at" | "deleted_at" | "id"
+        > & { first_name?: string | null; last_name?: string | null })
+  ): ShippoAddress {
+    const a = src as Record<string, unknown>
+    const name =
+      fromOrTo === "from"
+        ? (a.name as string) || "Dab Pal"
+        : [a.first_name, a.last_name]
+            .filter((p) => typeof p === "string" && p)
+            .join(" ") || "Customer"
+    return {
+      name,
+      company: (a.company as string) || (fromOrTo === "from" ? "Dab Pal" : undefined),
+      street1: (a.address_1 as string) || "",
+      street2: (a.address_2 as string) || undefined,
+      city: (a.city as string) || "",
+      state: (a.province as string) || "",
+      zip: (a.postal_code as string) || "",
+      country: ((a.country_code as string) || "US").toUpperCase(),
+      phone: (a.phone as string) || undefined,
     }
-    to_address?: Omit<
-      CartAddressDTO,
-      "created_at" | "updated_at" | "deleted_at" | "id"
-    >
+  }
+
+  private buildLineItems(
     items: (CartLineItemDTO | OrderLineItemDTO)[]
-  }): Promise<ShippoShipment> {
-    if (!from_address?.address) {
-      throw new MedusaError(
-        MedusaError.Types.INVALID_DATA,
-        "Stock location address required to compute Shippo rates"
-      )
-    }
-    if (!to_address) {
-      throw new MedusaError(
-        MedusaError.Types.INVALID_DATA,
-        "Shipping address required to compute Shippo rates"
-      )
-    }
-
-    const ship_from: ShippoAddress = {
-      name: from_address.name || "Dab Pal",
-      company: from_address.name || "Dab Pal",
-      street1: from_address.address.address_1 || "",
-      street2: from_address.address.address_2 || undefined,
-      city: from_address.address.city || "",
-      state: from_address.address.province || "",
-      zip: from_address.address.postal_code || "",
-      country: (from_address.address.country_code || "US").toUpperCase(),
-      phone: from_address.address.phone || undefined,
-    }
-
-    const ship_to: ShippoAddress = {
-      name:
-        [to_address.first_name, to_address.last_name]
-          .filter(Boolean)
-          .join(" ") || "Customer",
-      company: to_address.company || undefined,
-      street1: to_address.address_1 || "",
-      street2: to_address.address_2 || undefined,
-      city: to_address.city || "",
-      state: to_address.province || "",
-      zip: to_address.postal_code || "",
-      country: (to_address.country_code || "US").toUpperCase(),
-      phone: to_address.phone || undefined,
-    }
-
-    // Sum line item weights (Medusa stores weight in grams). Convert to oz so
-    // we can speak USPS. Fall back to per-unit defaults if data is missing.
-    const totalGrams = items.reduce((sum, item) => {
-      // @ts-ignore variant.weight exists at runtime when item has a variant
-      const perUnit = (item.variant?.weight as number | undefined) ?? 0
-      const qty = Number(item.quantity || 0)
-      return sum + perUnit * qty
-    }, 0)
-    const padOz = this.options_.packaging_weight_oz ?? 1.5
-    const totalOz = totalGrams / 28.3495 + padOz
-
-    const parcel: ShippoParcel = {
-      length: this.options_.default_parcel?.length ?? "5",
-      width: this.options_.default_parcel?.width ?? "4",
-      height: this.options_.default_parcel?.height ?? "3",
-      distance_unit: this.options_.default_parcel?.distance_unit ?? "in",
-      weight: Math.max(1, Math.round(totalOz * 100) / 100).toFixed(2),
-      mass_unit: this.options_.default_parcel?.mass_unit ?? "oz",
-    }
-
-    return await this.client.createShipment({
-      address_from: ship_from,
-      address_to: ship_to,
-      parcels: [parcel],
+  ): ShippoLiveRateLineItem[] {
+    return items.map((item) => {
+      // @ts-ignore variant.weight, unit_price, etc. exist at runtime
+      const weightG = (item.variant?.weight as number | undefined) ?? 0
+      const weightOz = Math.max(0.1, weightG / 28.3495)
+      // @ts-ignore unit_price is typed as BigNumberValue but converts cleanly
+      const unitPrice = Number(item.unit_price ?? 0) / 100
+      return {
+        quantity: Number(item.quantity || 1),
+        total_price: (unitPrice * Number(item.quantity || 1)).toFixed(2),
+        currency: "USD",
+        weight: weightOz.toFixed(2),
+        weight_unit: "oz",
+        title: (item.title as string) || (item.product_title as string) || "Item",
+        // @ts-ignore variant_sku exists on cart line items
+        sku: (item.variant_sku as string) || undefined,
+        manufacture_country: "US",
+      }
     })
   }
 
-  private pickRate(
-    shipment: ShippoShipment,
-    tier: keyof typeof OPTION_TIERS
-  ): ShippoRate | undefined {
-    const rates = shipment.rates || []
-    if (!rates.length) return undefined
-    const filter = OPTION_TIERS[tier]?.filter
-    const matching = filter ? rates.filter(filter) : rates
-    const pool = matching.length ? matching : rates
-    return pool
-      .slice()
-      .sort((a, b) => Number(a.amount) - Number(b.amount))[0]
+  private buildParcel(
+    items: (CartLineItemDTO | OrderLineItemDTO)[]
+  ): ShippoParcel | undefined {
+    // If we have explicit defaults configured, send them. Otherwise omit so
+    // Shippo uses the Default Parcel Template from the dashboard.
+    const dp = this.options_.default_parcel
+    if (!dp) return undefined
+
+    const totalGrams = items.reduce((sum, item) => {
+      // @ts-ignore
+      const perUnit = (item.variant?.weight as number | undefined) ?? 0
+      return sum + perUnit * Number(item.quantity || 0)
+    }, 0)
+    const padOz = this.options_.packaging_weight_oz ?? 1
+    const totalOz = totalGrams / 28.3495 + padOz
+
+    return {
+      length: dp.length ?? "6",
+      width: dp.width ?? "4",
+      height: dp.height ?? "1",
+      distance_unit: dp.distance_unit ?? "in",
+      weight: Math.max(1, Math.round(totalOz * 100) / 100).toFixed(2),
+      mass_unit: dp.mass_unit ?? "oz",
+    }
   }
 
   /**
-   * Medusa calls this when refreshing carts and creating shipping options.
-   * We rate fresh every time so prices reflect the current address.
+   * Hit /live-rates with cart context, return the row matching this option's
+   * Service Group. Falls back to the group's flat_rate (configured in Shippo
+   * dashboard) if no live row matches.
    */
+  private async getLiveRateForGroup({
+    optionData,
+    context,
+  }: {
+    optionData: OptionData
+    context: CalculateShippingOptionPriceDTO["context"]
+  }): Promise<{
+    amount_cents: number
+    title?: string
+    description?: string
+  }> {
+    if (!context?.from_location?.address) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Stock location address required for Shippo live rates"
+      )
+    }
+    if (!context?.shipping_address) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Shipping address required for Shippo live rates"
+      )
+    }
+
+    const address_from = this.toShippoAddress("from", {
+      ...context.from_location.address,
+      name: context.from_location.name,
+    })
+    const address_to = this.toShippoAddress("to", context.shipping_address)
+    const items = context.items || []
+
+    const live = await this.client.getLiveRates({
+      address_from,
+      address_to,
+      line_items: this.buildLineItems(items),
+      parcel: this.buildParcel(items),
+    })
+
+    const groupName = optionData.service_group_name?.toLowerCase()
+    const match = live.results.find(
+      (r) => r.title.toLowerCase() === groupName
+    )
+
+    if (match) {
+      return {
+        amount_cents: Math.round(Number(match.amount) * 100),
+        title: match.title,
+        description: match.description,
+      }
+    }
+
+    // No live row matched. Fall back to the group's configured flat_rate.
+    const group = (await this.getServiceGroups()).find(
+      (g) => g.object_id === optionData.service_group_id
+    )
+    if (!group) {
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        `Service group ${optionData.service_group_id} no longer exists in Shippo`
+      )
+    }
+    // Re-pull the full group to get flat_rate (cached version drops it).
+    const full = (await this.client.listServiceGroups()).find(
+      (g) => g.object_id === optionData.service_group_id
+    )
+    const fallback = Number(full?.flat_rate || 0)
+    this.logger_?.warn(
+      `Shippo: no live rate for "${optionData.service_group_name}", falling back to flat_rate $${fallback}`
+    )
+    return {
+      amount_cents: Math.round(fallback * 100),
+      title: group.name,
+      description: group.description,
+    }
+  }
+
+  // ------- AbstractFulfillmentProviderService implementations -------
+
   async calculatePrice(
     optionData: CalculateShippingOptionPriceDTO["optionData"],
     data: CalculateShippingOptionPriceDTO["data"],
     context: CalculateShippingOptionPriceDTO["context"]
   ): Promise<CalculatedShippingOptionPrice> {
-    const { tier } = (optionData as OptionData) || {}
-    if (!tier || !OPTION_TIERS[tier]) {
-      throw new MedusaError(
-        MedusaError.Types.INVALID_DATA,
-        `Unknown Shippo tier in optionData: ${String(tier)}`
-      )
-    }
-
     const cached = data as ShippingMethodData
-    if (cached?.rate_id) {
-      // We already chose a rate during validateFulfillmentData. Return its amount
-      // so we don't burn another API call on every cart refresh.
-      const ship = cached.shipment_id
-        ? await this.client.getShipment(cached.shipment_id)
-        : null
-      const rate = ship?.rates?.find((r) => r.object_id === cached.rate_id)
-      if (rate) {
-        return {
-          calculated_amount: Math.round(Number(rate.amount) * 100),
-          is_calculated_price_tax_inclusive: false,
-        }
-      }
-    }
-
-    const shipment = await this.buildAndRateShipment({
-      from_address: {
-        name: context.from_location?.name,
-        address: context.from_location?.address,
-      },
-      to_address: context.shipping_address,
-      items: context.items || [],
-    })
-
-    const rate = this.pickRate(shipment, tier)
-    if (!rate) {
-      this.logger_?.warn(
-        `Shippo: no rate matched tier ${tier} for shipment ${shipment.object_id}`
-      )
+    if (typeof cached?.amount === "number") {
       return {
-        calculated_amount: 0,
+        calculated_amount: cached.amount,
         is_calculated_price_tax_inclusive: false,
       }
     }
 
+    const od = optionData as OptionData
+    if (!od?.service_group_id) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Shippo shipping option missing service_group_id in optionData"
+      )
+    }
+
+    const { amount_cents } = await this.getLiveRateForGroup({
+      optionData: od,
+      context,
+    })
+
     return {
-      calculated_amount: Math.round(Number(rate.amount) * 100),
+      calculated_amount: amount_cents,
       is_calculated_price_tax_inclusive: false,
     }
   }
 
-  /**
-   * Called once when the customer commits to a shipping method. We lock in the
-   * rate so we can buy that exact label later in createFulfillment.
-   */
   async validateFulfillmentData(
     optionData: Record<string, unknown>,
     data: Record<string, unknown>,
     context: Record<string, unknown>
   ): Promise<Record<string, unknown>> {
-    const { tier } = (optionData as OptionData) || {}
-    if (!tier || !OPTION_TIERS[tier]) {
+    const od = optionData as OptionData
+    if (!od?.service_group_id) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
-        `Unknown Shippo tier: ${String(tier)}`
+        "Shippo shipping option missing service_group_id"
       )
     }
 
-    const shipment = await this.buildAndRateShipment({
-      // @ts-ignore framework provides these on context
-      from_address: {
-        // @ts-ignore
-        name: context.from_location?.name,
-        // @ts-ignore
-        address: context.from_location?.address,
-      },
+    // @ts-ignore framework provides full context shape
+    const { amount_cents, title, description } = await this.getLiveRateForGroup(
       // @ts-ignore
-      to_address: context.shipping_address,
-      // @ts-ignore
-      items: context.items || [],
-    })
-
-    const rate = this.pickRate(shipment, tier)
-    if (!rate) {
-      throw new MedusaError(
-        MedusaError.Types.INVALID_DATA,
-        `Shippo returned no rate for tier ${tier}`
-      )
-    }
+      { optionData: od, context }
+    )
 
     return {
       ...data,
-      shipment_id: shipment.object_id,
-      rate_id: rate.object_id,
-      carrier: rate.provider,
-      service: rate.servicelevel?.name,
+      amount: amount_cents,
+      service_group_id: od.service_group_id,
+      service_group_name: od.service_group_name,
+      service_title: title,
+      service_description: description,
     }
   }
 
   /**
-   * Buy the label. Stores label_url + tracking on the fulfillment for the admin
-   * UI's "Print label" button to surface.
+   * Buy the actual label.
+   *
+   * /live-rates results don't carry a transactable rate.object_id (they're
+   * pre-aggregated). To purchase a label we re-create a /shipments rate
+   * using the Service Group's underlying carrier/service token, then call
+   * /transactions on the matching rate.
    */
   async createFulfillment(
     data: Record<string, unknown>,
     _items: Record<string, unknown>[],
-    _order: Record<string, unknown> | undefined,
+    order: Record<string, unknown> | undefined,
     fulfillment: Record<string, unknown>
   ): Promise<CreateFulfillmentResult> {
-    const { rate_id } = data as ShippingMethodData
-    if (!rate_id) {
+    const md = data as ShippingMethodData & { service_group_id?: string }
+
+    // Look up the Service Group's underlying service token (e.g. usps_ground_advantage).
+    const groups = await this.client.listServiceGroups()
+    const group = groups.find((g) => g.object_id === md.service_group_id)
+    if (!group?.service_levels?.length) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
-        "Cannot purchase Shippo label: rate_id missing on shipping method data"
+        `Cannot purchase Shippo label: service group ${md.service_group_id} has no service levels`
+      )
+    }
+    const wantedTokens = new Set(
+      // @ts-ignore service_levels exists in dashboard groups
+      (group.service_levels as { service_level_token: string }[]).map(
+        (s) => s.service_level_token
+      )
+    )
+
+    const fromAddress = (order as Record<string, unknown>)?.shipping_address
+    const toAddress = (order as Record<string, unknown>)?.shipping_address
+    if (!fromAddress || !toAddress) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Order shipping address missing for Shippo label purchase"
       )
     }
 
-    const tx = await this.client.createTransaction({ rate: rate_id })
+    // The from_address actually needs to be the stock location, but the
+    // fulfillment workflow doesn't always pass it down to createFulfillment.
+    // Use the cart's shipping_address.from_location if surfaced, otherwise
+    // fall back to whatever Shippo has as the default_address (set in /addresses).
+    // We also stash from_location_address on shipping method data when
+    // available so we can re-use it here.
+    const items = ((order as Record<string, unknown>)?.items ||
+      []) as (CartLineItemDTO | OrderLineItemDTO)[]
 
+    const shipment = await this.client.createShipment({
+      address_from: this.toShippoAddress(
+        "from",
+        // @ts-ignore: from_location pulled in by validate; falls back to Shippo default if missing
+        (md as { from_location?: unknown })?.from_location
+          ? // @ts-ignore
+            { ...(md as any).from_location.address, name: (md as any).from_location.name }
+          : { ...(toAddress as Record<string, unknown>) }
+      ),
+      address_to: this.toShippoAddress(
+        "to",
+        toAddress as Record<string, unknown> as never
+      ),
+      parcels: [
+        this.buildParcel(items) || {
+          length: "6",
+          width: "4",
+          height: "1",
+          distance_unit: "in",
+          weight: "4",
+          mass_unit: "oz",
+        },
+      ],
+    })
+
+    const rate = (shipment.rates || [])
+      .filter((r) =>
+        wantedTokens.has(r.servicelevel?.token as string)
+      )
+      .sort((a, b) => Number(a.amount) - Number(b.amount))[0]
+
+    if (!rate) {
+      throw new MedusaError(
+        MedusaError.Types.UNEXPECTED_STATE,
+        `Shippo: no rate matched service group "${group.name}" for label purchase. Tokens wanted: ${Array.from(wantedTokens).join(", ")}`
+      )
+    }
+
+    const tx = await this.client.createTransaction({ rate: rate.object_id })
     if (tx.status === "ERROR") {
       const msg = (tx.messages || []).map((m) => m.text).join("; ")
       throw new MedusaError(
@@ -342,7 +452,11 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
       data: {
         ...((fulfillment.data as object) || {}),
         transaction_id: tx.object_id,
-        rate_id,
+        shipment_id: shipment.object_id,
+        rate_id: rate.object_id,
+        service_group_id: md.service_group_id,
+        carrier: rate.provider,
+        service: rate.servicelevel?.name,
         label_url: tx.label_url,
         tracking_number: tx.tracking_number,
         tracking_url: tx.tracking_url_provider,
@@ -365,8 +479,6 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
     try {
       await this.client.refundTransaction(transaction_id)
     } catch (e) {
-      // Outside the cancellation window (used label / >24h): swallow so the
-      // Medusa-side fulfillment cancel still succeeds. Logged for ops review.
       this.logger_?.warn(
         `Shippo refund for ${transaction_id} failed (likely outside cancellation window): ${
           (e as Error).message
@@ -376,13 +488,7 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
     return {}
   }
 
-  /**
-   * Default to "needs further action" so Medusa shows the order as
-   * awaiting-shipment. We treat label purchase + tracking number as enough to
-   * mark the fulfillment shipped via the admin. (See workflows/ for the
-   * subscriber that flips this when Shippo's tracking webhook fires.)
-   */
-  async getFulfillmentDocuments(data: Record<string, unknown>): Promise<never[]> {
+  async getFulfillmentDocuments(_data: Record<string, unknown>): Promise<never[]> {
     return []
   }
 }

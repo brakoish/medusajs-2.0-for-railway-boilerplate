@@ -77,3 +77,36 @@ export type ShippoRefund = {
   status: "QUEUED" | "PENDING" | "SUCCESS" | "ERROR"
   transaction: string
 }
+
+export type ShippoLiveRateLineItem = {
+  quantity: number
+  total_price: string
+  currency: string
+  weight: string
+  weight_unit: "oz" | "lb" | "g" | "kg"
+  title: string
+  sku?: string
+  manufacture_country?: string
+}
+
+export type ShippoLiveRateRequest = {
+  address_from: ShippoAddress
+  address_to: ShippoAddress
+  line_items: ShippoLiveRateLineItem[]
+  parcel?: ShippoParcel
+}
+
+export type ShippoLiveRate = {
+  title: string
+  description: string
+  amount: string
+  currency: string
+  amount_local: string
+  currency_local: string
+  estimated_days?: number
+}
+
+export type ShippoLiveRateResponse = {
+  results: ShippoLiveRate[]
+  count: number
+}
