@@ -2,7 +2,6 @@
 
 import { Button } from "@medusajs/ui"
 import { isEqual } from "lodash"
-import { useParams } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useIntersection } from "@lib/hooks/use-in-view"
@@ -14,6 +13,8 @@ import PdpBuyNow from "@modules/checkout/components/express-checkout/pdp-buy-now
 import ProductPrice from "../product-price"
 import { addToCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
+
+const COUNTRY = "us"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -39,7 +40,7 @@ export default function ProductActions({
 }: ProductActionsProps) {
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
-  const countryCode = useParams().countryCode as string
+  const countryCode = COUNTRY
 
   // If there is only 1 variant, preselect the options
   useEffect(() => {

@@ -85,7 +85,7 @@ export async function signout(countryCode: string) {
   removeAuthToken()
   revalidateTag("auth")
   revalidateTag("customer")
-  redirect(`/${countryCode}/account`)
+  redirect(`/account`)
 }
 
 export const addCustomerAddress = async (
