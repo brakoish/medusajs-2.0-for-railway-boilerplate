@@ -21,7 +21,9 @@ import {
   MINIO_SECRET_KEY,
   MINIO_BUCKET,
   MEILISEARCH_HOST,
-  MEILISEARCH_ADMIN_KEY
+  MEILISEARCH_ADMIN_KEY,
+  SHIPPO_API_TOKEN,
+  SHIPPO_API_URL
 } from 'lib/constants';
 
 loadEnv(process.env.NODE_ENV, process.cwd());
@@ -128,6 +130,26 @@ const medusaConfig = {
             options: {
               apiKey: STRIPE_API_KEY,
               webhookSecret: STRIPE_WEBHOOK_SECRET,
+            },
+          },
+        ],
+      },
+    }] : []),
+    ...(SHIPPO_API_TOKEN ? [{
+      key: Modules.FULFILLMENT,
+      resolve: '@medusajs/medusa/fulfillment',
+      options: {
+        providers: [
+          {
+            resolve: '@medusajs/medusa/fulfillment-manual',
+            id: 'manual',
+          },
+          {
+            resolve: './src/modules/shippo',
+            id: 'shippo',
+            options: {
+              api_token: SHIPPO_API_TOKEN,
+              api_url: SHIPPO_API_URL,
             },
           },
         ],

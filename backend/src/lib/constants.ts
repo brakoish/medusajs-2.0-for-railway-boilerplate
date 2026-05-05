@@ -91,6 +91,12 @@ export const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST;
 export const MEILISEARCH_ADMIN_KEY = process.env.MEILISEARCH_ADMIN_KEY;
 
 /**
+ * (optional) Shippo API token. Use the test token for staging, live token for prod.
+ */
+export const SHIPPO_API_TOKEN = process.env.SHIPPO_API_TOKEN;
+export const SHIPPO_API_URL = process.env.SHIPPO_API_URL;
+
+/**
  * Worker mode
  */
 export const WORKER_MODE =
