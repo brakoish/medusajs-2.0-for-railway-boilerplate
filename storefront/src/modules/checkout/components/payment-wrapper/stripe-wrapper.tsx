@@ -19,6 +19,37 @@ const StripeWrapper: React.FC<StripeWrapperProps> = ({
 }) => {
   const options: StripeElementsOptions = {
     clientSecret: paymentSession!.data?.client_secret as string | undefined,
+    // Brand-matched appearance so the PaymentElement (and Apple Pay /
+    // Google Pay buttons) inherit the Dab Pal amber accent.
+    appearance: {
+      theme: "stripe",
+      variables: {
+        colorPrimary: "#f59e0b", // amber-500
+        colorBackground: "#ffffff",
+        colorText: "#0a0a0a",
+        colorDanger: "#dc2626",
+        fontFamily: "Inter, system-ui, sans-serif",
+        borderRadius: "8px",
+        spacingUnit: "4px",
+      },
+      rules: {
+        ".Input": {
+          border: "1px solid #e5e7eb",
+          boxShadow: "none",
+        },
+        ".Input:focus": {
+          border: "1px solid #f59e0b",
+          boxShadow: "0 0 0 3px rgba(245, 158, 11, 0.2)",
+        },
+        ".Tab": {
+          border: "1px solid #e5e7eb",
+        },
+        ".Tab--selected": {
+          borderColor: "#f59e0b",
+          boxShadow: "0 0 0 1px #f59e0b",
+        },
+      },
+    },
   }
 
   if (!stripeKey) {

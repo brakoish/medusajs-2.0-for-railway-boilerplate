@@ -106,7 +106,6 @@ const StripePaymentButton = ({
 
   const stripe = useStripe()
   const elements = useElements()
-  const card = elements?.getElement("card")
 
   const session = cart.payment_collection?.payment_sessions?.find(
     (s) => s.status === "pending"
@@ -117,20 +116,36 @@ const StripePaymentButton = ({
   const handlePayment = async () => {
     setSubmitting(true)
 
-    if (!stripe || !elements || !card || !cart) {
+    if (!stripe || !elements || !cart) {
       setSubmitting(false)
       return
     }
 
-    await stripe
-      .confirmCardPayment(session?.data.client_secret as string, {
-        payment_method: {
-          card: card,
+    // Validate the PaymentElement before confirming. Catches missing fields
+    // and surfaces a nice inline error instead of a Stripe console warning.
+    const { error: submitError } = await elements.submit()
+    if (submitError) {
+      setErrorMessage(submitError.message || null)
+      setSubmitting(false)
+      return
+    }
+
+    // confirmPayment handles cards, Apple Pay, Google Pay, Link, etc.
+    // Wallets and 3DS may redirect; return_url brings the buyer back to the
+    // order confirmation flow on success.
+    const returnUrl = `${window.location.origin}/${cart.region?.countries?.[0]?.iso_2 || "us"}/order/confirmed`
+
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      clientSecret: session?.data.client_secret as string,
+      confirmParams: {
+        return_url: returnUrl,
+        payment_method_data: {
           billing_details: {
             name:
-              cart.billing_address?.first_name +
+              (cart.billing_address?.first_name || "") +
               " " +
-              cart.billing_address?.last_name,
+              (cart.billing_address?.last_name || ""),
             address: {
               city: cart.billing_address?.city ?? undefined,
               country: cart.billing_address?.country_code ?? undefined,
@@ -143,31 +158,38 @@ const StripePaymentButton = ({
             phone: cart.billing_address?.phone ?? undefined,
           },
         },
-      })
-      .then(({ error, paymentIntent }) => {
-        if (error) {
-          const pi = error.payment_intent
+      },
+      // Stay on this page when no redirect is needed (cards, Apple Pay
+      // sheet, Google Pay sheet that confirm inline). Stripe will only
+      // redirect when a method requires it (3DS challenge, BNPL, etc.).
+      redirect: "if_required",
+    })
 
-          if (
-            (pi && pi.status === "requires_capture") ||
-            (pi && pi.status === "succeeded")
-          ) {
-            onPaymentCompleted()
-          }
+    if (error) {
+      const pi = error.payment_intent
 
-          setErrorMessage(error.message || null)
-          return
-        }
-
-        if (
-          (paymentIntent && paymentIntent.status === "requires_capture") ||
-          paymentIntent.status === "succeeded"
-        ) {
-          return onPaymentCompleted()
-        }
-
+      if (
+        (pi && pi.status === "requires_capture") ||
+        (pi && pi.status === "succeeded")
+      ) {
+        onPaymentCompleted()
         return
-      })
+      }
+
+      setErrorMessage(error.message || null)
+      setSubmitting(false)
+      return
+    }
+
+    if (
+      paymentIntent &&
+      (paymentIntent.status === "requires_capture" ||
+        paymentIntent.status === "succeeded")
+    ) {
+      return onPaymentCompleted()
+    }
+
+    setSubmitting(false)
   }
 
   return (
