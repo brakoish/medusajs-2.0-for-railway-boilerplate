@@ -17,7 +17,7 @@ import {
   setShippingMethod,
   updateCart,
 } from "@lib/data/cart"
-import { listCartShippingMethods } from "@lib/data/fulfillment"
+import { fetchCartShippingMethods } from "@lib/data/fulfillment"
 import { HttpTypes } from "@medusajs/types"
 import type { Stripe, StripeElements } from "@stripe/stripe-js"
 
@@ -46,7 +46,7 @@ type WalletConfirmInput = {
 export async function fetchWalletShippingRates(
   cartId: string
 ): Promise<{ id: string; displayName: string; amount: number }[]> {
-  const options = await listCartShippingMethods(cartId)
+  const options = await fetchCartShippingMethods(cartId)
   if (!options || !options.length) return []
   return options
     .map((o: any) => ({
@@ -114,11 +114,18 @@ export async function walletConfirm({
     : shipAddress
 
   // ---------- 2. Write to cart ----------
-  await updateCart({
-    email: event.payerEmail || billing?.email || "",
-    shipping_address: shipAddress as any,
-    billing_address: billAddress as any,
-  })
+  try {
+    await updateCart({
+      email: event.payerEmail || billing?.email || "",
+      shipping_address: shipAddress as any,
+      billing_address: billAddress as any,
+    })
+  } catch (err: any) {
+    console.error("[walletConfirm] updateCart failed:", err)
+    throw new Error(
+      `Could not save address to cart: ${err?.message || "unknown error"}`
+    )
+  }
 
   // ---------- 3. Lock in a shipping method ----------
   // Prefer the rate the buyer picked in the wallet sheet (event.shippingRate.id
@@ -126,16 +133,30 @@ export async function walletConfirm({
   // first/cheapest available option if the wallet didn't surface a picker
   // (e.g. Apple Pay on a single-rate flow).
   const pickedRateId: string | undefined = event.shippingRate?.id
-  const methods = await listCartShippingMethods(cart.id)
-  if (!methods?.length) throw new Error("No shipping methods available")
+  const methods = await fetchCartShippingMethods(cart.id)
+  console.log("[walletConfirm] shipping methods:", methods?.length ?? "null", methods)
+  if (!methods?.length) {
+    throw new Error(
+      "No shipping methods available (cart may need a shipping address; check the browser network tab for the actual API error)"
+    )
+  }
   const method =
     methods.find((m: any) => m.id === pickedRateId) || methods[0]
   await setShippingMethod({ cartId: cart.id, shippingMethodId: method.id })
 
   // ---------- 4. Create / refresh Stripe payment session ----------
-  const refreshed = (await initiatePaymentSession(cart, {
-    provider_id: "pp_stripe_stripe",
-  })) as any
+  let refreshed: any
+  try {
+    refreshed = await initiatePaymentSession(cart, {
+      provider_id: "pp_stripe_stripe",
+    })
+    console.log("[walletConfirm] payment session created:", refreshed)
+  } catch (err: any) {
+    console.error("[walletConfirm] initiatePaymentSession failed:", err)
+    throw new Error(
+      `Could not start payment session: ${err?.message || "unknown error"}`
+    )
+  }
   const sessionCart =
     refreshed?.cart || refreshed?.payment_collection || refreshed
   const sessions =
