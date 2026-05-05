@@ -21,6 +21,13 @@ const Payment = ({
   cart: any
   availablePaymentMethods: any[]
 }) => {
+  // Hide Manual Payment from customers. The provider may still be
+  // registered on the region in Medusa admin (set via the seed script),
+  // but for retail we only ever want Stripe to be selectable.
+  const visiblePaymentMethods = (availablePaymentMethods || []).filter(
+    (m: any) => m?.id !== "pp_system_default"
+  )
+
   const activeSession = cart.payment_collection?.payment_sessions?.find(
     (paymentSession: any) => paymentSession.status === "pending"
   )
@@ -28,8 +35,10 @@ const Payment = ({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [paymentReadyToConfirm, setPaymentReadyToConfirm] = useState(false)
+  // Auto-select the only visible method (Stripe) so the customer never sees
+  // an empty radio group.
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
-    activeSession?.provider_id ?? ""
+    activeSession?.provider_id ?? visiblePaymentMethods[0]?.id ?? ""
   )
 
   const searchParams = useSearchParams()
@@ -124,27 +133,31 @@ const Payment = ({
       </div>
       <div>
         <div className={isOpen ? "block" : "hidden"}>
-          {!paidByGiftcard && availablePaymentMethods?.length && (
+          {!paidByGiftcard && visiblePaymentMethods?.length ? (
             <>
-              <RadioGroup
-                value={selectedPaymentMethod}
-                onChange={(value: string) => setSelectedPaymentMethod(value)}
-              >
-                {availablePaymentMethods
-                  .sort((a, b) => {
-                    return a.provider_id > b.provider_id ? 1 : -1
-                  })
-                  .map((paymentMethod) => {
-                    return (
-                      <PaymentContainer
-                        paymentInfoMap={paymentInfoMap}
-                        paymentProviderId={paymentMethod.id}
-                        key={paymentMethod.id}
-                        selectedPaymentOptionId={selectedPaymentMethod}
-                      />
-                    )
-                  })}
-              </RadioGroup>
+              {visiblePaymentMethods.length > 1 && (
+                <RadioGroup
+                  value={selectedPaymentMethod}
+                  onChange={(value: string) =>
+                    setSelectedPaymentMethod(value)
+                  }
+                >
+                  {visiblePaymentMethods
+                    .sort((a, b) => {
+                      return a.provider_id > b.provider_id ? 1 : -1
+                    })
+                    .map((paymentMethod) => {
+                      return (
+                        <PaymentContainer
+                          paymentInfoMap={paymentInfoMap}
+                          paymentProviderId={paymentMethod.id}
+                          key={paymentMethod.id}
+                          selectedPaymentOptionId={selectedPaymentMethod}
+                        />
+                      )
+                    })}
+                </RadioGroup>
+              )}
               {isStripe && stripeReady && (
                 <div className="mt-5 transition-all duration-150 ease-in-out">
                   <Text className="txt-medium-plus text-ui-fg-base mb-1">
@@ -167,7 +180,7 @@ const Payment = ({
                 </div>
               )}
             </>
-          )}
+          ) : null}
 
           {paidByGiftcard && (
             <div className="flex flex-col w-1/3">
