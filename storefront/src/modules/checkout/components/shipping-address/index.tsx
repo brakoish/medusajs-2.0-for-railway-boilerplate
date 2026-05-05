@@ -81,6 +81,39 @@ const ShippingAddress = ({
     })
   }
 
+  // Auto-fill city + state from US zip via zippopotam.us (free, no key).
+  // Quietly no-op on non-US or network errors so it never blocks checkout.
+  const lookupZip = async (zip: string) => {
+    const country = (formData["shipping_address.country_code"] || "us")
+      .toString()
+      .toLowerCase()
+    if (country !== "us") return
+    if (!/^\d{5}$/.test(zip)) return
+    try {
+      const r = await fetch(`https://api.zippopotam.us/us/${zip}`)
+      if (!r.ok) return
+      const j = await r.json()
+      const place = j?.places?.[0]
+      if (!place) return
+      setFormData((prev: Record<string, any>) => ({
+        ...prev,
+        "shipping_address.city":
+          prev["shipping_address.city"] || place["place name"] || "",
+        "shipping_address.province":
+          prev["shipping_address.province"] ||
+          place["state abbreviation"] ||
+          "",
+      }))
+    } catch {
+      /* offline / blocked — skip silently */
+    }
+  }
+
+  const handleZipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleChange(e)
+    lookupZip(e.target.value)
+  }
+
   return (
     <>
       {customer && (addressesInRegion?.length || 0) > 0 && (
@@ -99,6 +132,21 @@ const ShippingAddress = ({
           />
         </Container>
       )}
+      {/* Email first: lets Stripe Link recognize returning shoppers and
+          autofill the rest of the form once they tap the verify code. */}
+      <div className="grid grid-cols-1 gap-4 mb-4">
+        <Input
+          label="Email"
+          name="email"
+          type="email"
+          title="Enter a valid email address."
+          autoComplete="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+          data-testid="shipping-email-input"
+        />
+      </div>
       <div className="grid grid-cols-2 gap-4">
         <Input
           label="First name"
@@ -140,7 +188,7 @@ const ShippingAddress = ({
           name="shipping_address.postal_code"
           autoComplete="postal-code"
           value={formData["shipping_address.postal_code"]}
-          onChange={handleChange}
+          onChange={handleZipChange}
           required
           data-testid="shipping-postal-code-input"
         />
@@ -172,27 +220,7 @@ const ShippingAddress = ({
           data-testid="shipping-province-input"
         />
       </div>
-      <div className="my-8">
-        <Checkbox
-          label="Billing address same as shipping address"
-          name="same_as_billing"
-          checked={checked}
-          onChange={onChange}
-          data-testid="billing-address-checkbox"
-        />
-      </div>
       <div className="grid grid-cols-2 gap-4 mb-4">
-        <Input
-          label="Email"
-          name="email"
-          type="email"
-          title="Enter a valid email address."
-          autoComplete="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          data-testid="shipping-email-input"
-        />
         <Input
           label="Phone"
           name="shipping_address.phone"
@@ -200,6 +228,15 @@ const ShippingAddress = ({
           value={formData["shipping_address.phone"]}
           onChange={handleChange}
           data-testid="shipping-phone-input"
+        />
+      </div>
+      <div className="my-8">
+        <Checkbox
+          label="Billing address same as shipping address"
+          name="same_as_billing"
+          checked={checked}
+          onChange={onChange}
+          data-testid="billing-address-checkbox"
         />
       </div>
     </>

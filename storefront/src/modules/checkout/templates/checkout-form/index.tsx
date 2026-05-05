@@ -2,6 +2,7 @@ import { listCartShippingMethods } from "@lib/data/fulfillment"
 import { listCartPaymentMethods } from "@lib/data/payment"
 import { HttpTypes } from "@medusajs/types"
 import Addresses from "@modules/checkout/components/addresses"
+import ExpressCheckout from "@modules/checkout/components/express-checkout"
 import Payment from "@modules/checkout/components/payment"
 import Review from "@modules/checkout/components/review"
 import Shipping from "@modules/checkout/components/shipping"
@@ -27,6 +28,9 @@ export default async function CheckoutForm({
   return (
     <div>
       <div className="w-full grid grid-cols-1 gap-y-8">
+        <div>
+          <ExpressCheckout cart={cart} />
+        </div>
         <div>
           <Addresses cart={cart} customer={customer} />
         </div>
