@@ -39,16 +39,22 @@ const ExpressCheckout: React.FC<Props> = ({ cart, showDivider = true }) => {
   if (!stripeKey || !stripePromise) return null
   if (!cart?.region) return null
 
-  // Stripe minimum charge is 50 cents. The wallet sheet still wants a
-  // realistic estimate so the buyer doesn't see "$0.50" before tapping;
-  // we estimate cart subtotal + a placeholder $7 standard shipping. The
-  // real total locks in during walletConfirm when we set the shipping
-  // method on the cart and create the payment session.
+  // Stripe minimum charge is 50 cents. If the cart total (after promos /
+  // discounts) puts us below that, hide the wallet buttons entirely —
+  // Stripe can't create a PaymentIntent for $0 and the buttons would just
+  // fail on confirm. Free orders need to flow through a different path
+  // (TODO: free-checkout button when total === 0).
+  const itemTotal = cart.item_total ?? cart.subtotal ?? 0
+  if (itemTotal < 50) return null
+
+  // Wallet sheet wants a realistic estimate so the buyer doesn't see
+  // "$0.50" before tapping; estimate items + a placeholder $7 standard
+  // shipping. Real total locks in during walletConfirm when we set the
+  // shipping method and create the payment session.
   const totalCents = useMemo(() => {
-    const itemTotal = cart.item_total ?? cart.subtotal ?? 0
     const estimate = itemTotal + 700 // +$7 placeholder Standard
     return Math.max(50, Math.round(estimate))
-  }, [cart.item_total, cart.subtotal])
+  }, [itemTotal])
 
   return (
     <div className="mb-6">
