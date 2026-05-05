@@ -125,7 +125,10 @@ const medusaConfig = {
       options: {
         providers: [
           {
-            resolve: '@medusajs/payment-stripe',
+            // Custom wrapper around @medusajs/payment-stripe that fixes the
+            // 100x amount over-multiplication bug. See
+            // backend/src/modules/dabpal-stripe/service.ts for context.
+            resolve: './src/modules/dabpal-stripe',
             id: 'stripe',
             options: {
               apiKey: STRIPE_API_KEY,
