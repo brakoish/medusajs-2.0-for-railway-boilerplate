@@ -30,10 +30,10 @@ export default function DetailBlock() {
                 The details
               </span>
               <h2 className="text-3xl small:text-5xl font-semibold tracking-tight mt-4 leading-tight">
-                One small kit. No compromises.
+                Everything your Puffco needs. Nothing it doesn't.
               </h2>
               <p className="text-white/70 mt-4 max-w-md leading-relaxed">
-                Engineered to be the cleanest, most organized way to keep your banger spotless — at home or on the move.
+                Built for daily Puffco and quartz banger users who care about a clean dab and want their gear organized, at home or on the move.
               </p>
             </div>
             <dl className="divide-y divide-white/10 border-t border-white/10">

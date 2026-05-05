@@ -10,9 +10,9 @@ const features = [
       "Built-in divider keeps fresh swabs separate from used ones. Stay hygienic on the road.",
   },
   {
-    title: "Pocket-sized, friction lid",
+    title: "Pocket-sized, made for dabbers",
     description:
-      "No magnets, no hinges to break. Slips into a backpack, glove box, or back pocket.",
+      "No magnets to fail, no hinges to snap. Slips into a backpack, dab bag, or glove box.",
   },
 ]
 

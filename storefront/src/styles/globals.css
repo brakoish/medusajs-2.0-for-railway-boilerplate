@@ -2,6 +2,20 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+/* Dab Pal brand: amber/gold accent (replaces Medusa UI default blue) */
+:root,
+.light,
+.dark {
+  --fg-interactive: rgb(217, 119, 6);              /* amber-600 */
+  --fg-interactive-hover: rgb(180, 83, 9);         /* amber-700 */
+  --bg-interactive: rgb(245, 158, 11);             /* amber-500 */
+  --border-interactive: rgb(245, 158, 11);         /* amber-500 */
+  --details-contrast-on-bg-interactive: 0px 1px 2px 0px rgba(120, 53, 15, 0.5);
+  --borders-interactive-with-focus: 0px 1px 2px 0px rgba(120, 53, 15, 0.4), 0px 0px 0px 1px rgb(245, 158, 11), 0px 0px 0px 2px rgb(255, 255, 255), 0px 0px 0px 4px rgba(245, 158, 11, 0.5);
+  --borders-interactive-with-shadow: 0px 1px 2px 0px rgba(120, 53, 15, 0.4), 0px 0px 0px 1px rgb(245, 158, 11);
+  --borders-interactive-with-active: 0px 0px 0px 4px rgba(245, 158, 11, 0.2), 0px 0px 0px 1px rgb(245, 158, 11);
+}
+
 @layer utilities {
   /* Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {

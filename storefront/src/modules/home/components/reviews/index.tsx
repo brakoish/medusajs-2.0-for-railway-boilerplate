@@ -3,28 +3,28 @@ const reviews = [
     quote:
       "Outstanding communication with seller. Product is as described. Been looking for something like this for the longest, this definitely exceeded my expectations. Exceptional quality! A must have.",
     name: "Martin K.",
-    date: "Apr 12",
+    label: "Verified buyer",
     stars: 5,
   },
   {
     quote:
-      "Great little tool — will work great with my erig when I'm on the go. Arrived super quickly and well packaged! Thanks so much!",
+      "Great little tool, will work great with my erig when I'm on the go. Arrived super quickly and well packaged! Thanks so much!",
     name: "RichyFlows",
-    date: "Apr 9",
+    label: "Verified buyer",
     stars: 5,
   },
   {
     quote:
       "Made from a durable plastic with a moveable piece for separating used from unused. Love it.",
     name: "Verified buyer",
-    date: "Mar 9",
+    label: "5-star review",
     stars: 5,
   },
   {
     quote:
       "Absolutely incredible service. Item is cool. Seller was spot on with communications.",
     name: "Sarah C.",
-    date: "Mar 2",
+    label: "Verified buyer",
     stars: 5,
   },
 ]
@@ -55,7 +55,7 @@ export default function Reviews() {
             What people say
           </span>
           <h2 className="text-3xl small:text-5xl font-semibold tracking-tight mt-4 leading-tight">
-            Rated 5/5 from verified Etsy buyers.
+            Rated 5/5 by dabbers who actually use it.
           </h2>
         </div>
         <div className="grid grid-cols-1 small:grid-cols-2 gap-6">
@@ -69,7 +69,7 @@ export default function Reviews() {
                 &ldquo;{r.quote}&rdquo;
               </blockquote>
               <figcaption className="text-sm text-gray-500 mt-auto">
-                — {r.name} · {r.date}
+                {r.name} · {r.label}
               </figcaption>
             </figure>
           ))}

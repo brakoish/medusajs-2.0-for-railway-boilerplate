@@ -5,7 +5,7 @@ import { useState } from "react"
 const faqs = [
   {
     q: "Will this fit my Puffco Peak / Pro / Proxy?",
-    a: "Yes — the Dab Pal is designed for Puffco Peak, Peak Pro, and Proxy users, plus traditional quartz bangers and any e-rig setup. The kit holds the Q-tips and iso you use after every dab.",
+    a: "Yes, the Dab Pal is designed for Puffco Peak, Peak Pro, and Proxy users, plus traditional quartz bangers and any e-rig setup. The kit holds the Q-tips and iso you use after every dab.",
   },
   {
     q: "Is the iso bottle filled?",
@@ -13,11 +13,11 @@ const faqs = [
   },
   {
     q: "How does the slider work?",
-    a: "There's a moveable divider inside the case. As you use Q-tips, slide them to the 'used' side — clean ones stay separate, so you never grab a dirty swab by mistake.",
+    a: "There's a moveable divider inside the case. As you use Q-tips, slide them to the 'used' side, so clean ones stay separate and you never grab a dirty swab by mistake.",
   },
   {
     q: "How fast does it ship?",
-    a: "Each Dab Pal is made to order in our Astoria, NY shop. Most orders ship within 2–3 business days. You'll get tracking when it goes out.",
+    a: "Each Dab Pal is made to order in our Astoria, NY shop. Most orders ship in 2 to 3 business days. You'll get tracking when it goes out.",
   },
   {
     q: "Returns?",

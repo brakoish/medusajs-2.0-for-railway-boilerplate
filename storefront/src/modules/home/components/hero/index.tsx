@@ -22,21 +22,21 @@ const Hero = () => {
       <div className="relative z-10 min-h-[78vh] small:min-h-[88vh] flex items-end pb-10 small:pb-24">
         <div className="content-container w-full">
           <div className="max-w-2xl flex flex-col gap-4 small:gap-6 text-white">
-            <span className="uppercase tracking-[0.25em] text-[10px] small:text-xs text-white/60">
-              The portable cleaning kit
+            <span className="uppercase tracking-[0.25em] text-[10px] small:text-xs text-amber-400/90">
+              Dab cleaning kit · Made in NY
             </span>
             <h1 className="text-3xl small:text-6xl xl:text-7xl font-semibold leading-[1.1] small:leading-[1.05] tracking-tight">
               The clean banger kit you can actually carry.
             </h1>
             <p className="text-base small:text-xl text-white/75 max-w-xl leading-relaxed">
-              30 Q-tips, a 1oz iso bottle, and a slider that keeps clean and dirty separate. Made to order in NY.
+              30 Q-tips, a 1oz iso bottle, and a built-in slider for used vs. fresh swabs. Fits Puffco Peak, Pro, Proxy, and any quartz banger setup.
             </p>
             <div className="flex flex-wrap items-center gap-3 small:gap-4 pt-1 small:pt-2">
               <a
                 href="#shop"
                 className="inline-flex items-center justify-center rounded-full bg-white text-black px-6 small:px-8 py-3 small:py-3.5 text-sm small:text-base font-medium hover:bg-white/90 transition-colors"
               >
-                Shop now — from $25
+                Shop now, from $25
               </a>
               <a
                 href="#details"
