@@ -59,8 +59,11 @@ export default function Nav() {
 
           {/* Spacer pushes cart to the right edge on mobile (where the
               wordmark is in normal flow) and balances the layout on
-              desktop (where the wordmark is absolutely positioned). */}
-          <div className="flex-1 basis-0 flex justify-end">
+              desktop (where the wordmark is absolutely positioned).
+              `items-center` is critical — without it, flex justify-end
+              alone lets the cart button stretch vertically and the icon
+              floats out of line. */}
+          <div className="flex-1 basis-0 flex items-center justify-end">
           <Suspense
             fallback={
               <LocalizedClientLink
