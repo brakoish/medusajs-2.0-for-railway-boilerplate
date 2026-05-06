@@ -6,6 +6,7 @@ import FeatureTrio from "@modules/home/components/feature-trio"
 import DetailBlock from "@modules/home/components/detail-block"
 import Reviews from "@modules/home/components/reviews"
 import FAQ from "@modules/home/components/faq"
+import StructuredData from "@modules/home/components/structured-data"
 
 export const metadata: Metadata = {
   title: "Dab Pal — Portable Q-tip and Iso Case for Puffco & Quartz Bangers",
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
 export default async function Home() {
   return (
     <>
+      <StructuredData />
       <Hero />
       <BuySection countryCode="us" />
       <FeatureTrio />
