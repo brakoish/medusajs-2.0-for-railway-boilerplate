@@ -125,10 +125,7 @@ const medusaConfig = {
       options: {
         providers: [
           {
-            // Custom wrapper around @medusajs/payment-stripe that fixes the
-            // 100x amount over-multiplication bug. See
-            // backend/src/modules/dabpal-stripe/service.ts for context.
-            resolve: './src/modules/dabpal-stripe',
+            resolve: '@medusajs/payment-stripe',
             id: 'stripe',
             options: {
               apiKey: STRIPE_API_KEY,
@@ -136,8 +133,7 @@ const medusaConfig = {
               // Capture immediately on confirm. The default (manual) is
               // for pre-auth holds and breaks Stripe Elements wallet
               // confirmation: "capture_method (manual) does not match the
-              // expected capture_method (automatic)". Standard storefronts
-              // want automatic.
+              // expected capture_method (automatic)".
               capture: true,
             },
           },
