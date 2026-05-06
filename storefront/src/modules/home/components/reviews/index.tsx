@@ -48,7 +48,7 @@ const Stars = ({ count }: { count: number }) => (
 
 export default function Reviews() {
   return (
-    <section className="bg-zinc-50 py-20 small:py-32 border-y border-gray-100">
+    <section id="reviews" className="bg-zinc-50 py-20 small:py-32 border-y border-gray-100 scroll-mt-24">
       <div className="content-container">
         <div className="max-w-2xl mb-12 small:mb-16">
           <span className="uppercase tracking-[0.25em] text-xs text-gray-500">

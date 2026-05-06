@@ -1,70 +1,101 @@
 import { Suspense } from "react"
 
-import { listRegions } from "@lib/data/regions"
-import { StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import AnnouncementBar from "@modules/layout/components/announcement-bar"
 import CartButton from "@modules/layout/components/cart-button"
-import SideMenu from "@modules/layout/components/side-menu"
+import NavShell from "@modules/layout/components/nav-shell"
 
-export default async function Nav() {
-  const regions = await listRegions().then((regions: StoreRegion[]) => regions)
-
+/**
+ * Top-of-app navigation.
+ *
+ * Layout:
+ *   1. Announcement bar (free shipping / Brooklyn / lead time) — black
+ *   2. Sticky main nav — translucent over hero, solid on scroll
+ *
+ * Decisions worth remembering:
+ *   - No hamburger menu: this is a 1-product store, hidden nav adds a
+ *     tap that doesn't convert and signals "more inside" when there
+ *     isn't.
+ *   - No "Account" link: ~all checkouts are wallet-based; account
+ *     surface is at /account directly, not promoted in nav.
+ *   - No "Search": one product, search is noise.
+ *   - Cart is icon-only with an amber count badge (see CartDropdown).
+ *   - Wordmark is left-aligned, not centered, so the cart button sits
+ *     comfortably on the right without competing for centerline focus.
+ *   - 2 inline links (Reviews, FAQ) on desktop, hidden on mobile to
+ *     keep the bar tight on small screens.
+ */
+export default function Nav() {
   return (
-    <div className="sticky top-0 inset-x-0 z-50 group">
-      <header className="relative h-16 mx-auto border-b duration-200 bg-white border-ui-border-base">
-        <nav className="content-container txt-xsmall-plus text-ui-fg-subtle flex items-center justify-between w-full h-full text-small-regular">
-          <div className="flex-1 basis-0 h-full flex items-center">
-            <div className="h-full">
-              <SideMenu regions={regions} />
-            </div>
+    <div className="sticky top-0 inset-x-0 z-50">
+      <AnnouncementBar />
+      <NavShell>
+        <nav className="content-container flex items-center justify-between w-full h-full">
+          {/* Wordmark */}
+          <LocalizedClientLink
+            href="/"
+            data-testid="nav-store-link"
+            className="text-base small:text-lg font-semibold tracking-tight text-ui-fg-base hover:text-ui-fg-base"
+          >
+            Dab Pal
+          </LocalizedClientLink>
+
+          {/* Inline links — desktop only */}
+          <div className="hidden small:flex items-center gap-x-7 absolute left-1/2 -translate-x-1/2">
+            <NavLink href="/#reviews">Reviews</NavLink>
+            <NavLink href="/#faq">FAQ</NavLink>
           </div>
 
-          <div className="flex items-center h-full">
-            <LocalizedClientLink
-              href="/"
-              className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase"
-              data-testid="nav-store-link"
-            >
-              Dab Pal
-            </LocalizedClientLink>
-          </div>
-
-          <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
-            <div className="hidden small:flex items-center gap-x-6 h-full">
-              {process.env.NEXT_PUBLIC_FEATURE_SEARCH_ENABLED && (
-                <LocalizedClientLink
-                  className="hover:text-ui-fg-base"
-                  href="/search"
-                  scroll={false}
-                  data-testid="nav-search-link"
-                >
-                  Search
-                </LocalizedClientLink>
-              )}
+          {/* Cart */}
+          <Suspense
+            fallback={
               <LocalizedClientLink
-                className="hover:text-ui-fg-base"
-                href="/account"
-                data-testid="nav-account-link"
+                href="/cart"
+                data-testid="nav-cart-link"
+                aria-label="Cart"
+                className="relative inline-flex items-center justify-center w-10 h-10 rounded-full text-ui-fg-base"
               >
-                Account
-              </LocalizedClientLink>
-            </div>
-            <Suspense
-              fallback={
-                <LocalizedClientLink
-                  className="hover:text-ui-fg-base flex gap-2"
-                  href="/cart"
-                  data-testid="nav-cart-link"
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.6}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-[22px] h-[22px]"
+                  aria-hidden
                 >
-                  Cart
-                </LocalizedClientLink>
-              }
-            >
-              <CartButton />
-            </Suspense>
-          </div>
+                  <path d="M5 7h14l-1.4 11.2a2 2 0 0 1-2 1.8H8.4a2 2 0 0 1-2-1.8L5 7Z" />
+                  <path d="M9 7V5a3 3 0 0 1 6 0v2" />
+                </svg>
+              </LocalizedClientLink>
+            }
+          >
+            <CartButton />
+          </Suspense>
         </nav>
-      </header>
+      </NavShell>
     </div>
   )
 }
+
+/**
+ * Inline desktop nav link with an amber underline that draws in on hover.
+ * Subtle motion = "this is interactive" without being loud.
+ */
+const NavLink: React.FC<{ href: string; children: React.ReactNode }> = ({
+  href,
+  children,
+}) => (
+  <LocalizedClientLink
+    href={href}
+    className="relative text-sm text-ui-fg-subtle hover:text-ui-fg-base transition-colors group"
+  >
+    {children}
+    <span
+      aria-hidden
+      className="absolute left-0 -bottom-0.5 h-px w-full origin-left scale-x-0 bg-amber-500 transition-transform duration-200 group-hover:scale-x-100"
+    />
+  </LocalizedClientLink>
+)

@@ -17,6 +17,17 @@
 }
 
 @layer utilities {
+  /* Cart-badge bounce when count changes (subtle pop, not chaotic). */
+  @keyframes cart-pop {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.25); }
+    65% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+  }
+  .animate-cart-pop {
+    animation: cart-pop 320ms cubic-bezier(.34,1.56,.64,1);
+  }
+
   /* Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;

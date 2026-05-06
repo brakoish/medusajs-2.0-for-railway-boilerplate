@@ -46,6 +46,17 @@ const CartDropdown = ({
   const subtotal = cartState?.subtotal ?? 0
   const itemRef = useRef<number>(totalItems || 0)
 
+  // Bounce the cart icon's badge whenever the count changes.
+  // Subtle motion = "yep, the thing you tapped did something."
+  const [bounce, setBounce] = useState(false)
+  useEffect(() => {
+    if (itemRef.current !== totalItems) {
+      setBounce(true)
+      const t = setTimeout(() => setBounce(false), 320)
+      return () => clearTimeout(t)
+    }
+  }, [totalItems])
+
   const timedOpen = () => {
     open()
 
@@ -88,12 +99,37 @@ const CartDropdown = ({
       onMouseLeave={close}
     >
       <Popover className="relative h-full">
-        <Popover.Button className="h-full">
-          <LocalizedClientLink
-            className="hover:text-ui-fg-base"
-            href="/cart"
-            data-testid="nav-cart-link"
-          >{`Cart (${totalItems})`}</LocalizedClientLink>
+        <Popover.Button
+          as={LocalizedClientLink}
+          href="/cart"
+          data-testid="nav-cart-link"
+          aria-label={`Cart, ${totalItems} item${totalItems === 1 ? "" : "s"}`}
+          className="relative inline-flex items-center justify-center w-10 h-10 rounded-full text-ui-fg-base hover:bg-ui-bg-base-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.6}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-[22px] h-[22px]"
+            aria-hidden
+          >
+            <path d="M5 7h14l-1.4 11.2a2 2 0 0 1-2 1.8H8.4a2 2 0 0 1-2-1.8L5 7Z" />
+            <path d="M9 7V5a3 3 0 0 1 6 0v2" />
+          </svg>
+          {totalItems > 0 && (
+            <span
+              className={`absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-500 text-white text-[10px] font-semibold leading-[18px] text-center shadow-sm transition-transform ${
+                bounce ? "animate-cart-pop" : ""
+              }`}
+              aria-hidden
+            >
+              {totalItems}
+            </span>
+          )}
         </Popover.Button>
         <Transition
           show={cartDropdownOpen}
