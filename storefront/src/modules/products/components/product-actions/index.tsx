@@ -12,6 +12,7 @@ import MobileActions from "./mobile-actions"
 import PdpBuyNow from "@modules/checkout/components/express-checkout/pdp-buy-now"
 import ProductPrice from "../product-price"
 import { addToCart } from "@lib/data/cart"
+import { dispatchCartChange } from "@lib/util/cart-events"
 import { HttpTypes } from "@medusajs/types"
 
 const COUNTRY = "us"
@@ -109,6 +110,7 @@ export default function ProductActions({
       countryCode,
     })
 
+    dispatchCartChange()
     setIsAdding(false)
   }
 

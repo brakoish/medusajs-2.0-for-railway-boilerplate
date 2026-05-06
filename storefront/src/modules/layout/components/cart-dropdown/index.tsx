@@ -2,8 +2,9 @@
 
 import { Popover, Transition } from "@headlessui/react"
 import { Button } from "@medusajs/ui"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Fragment, useEffect, useRef, useState } from "react"
+import { subscribeToCartChange } from "@lib/util/cart-events"
 
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
@@ -25,6 +26,17 @@ const CartDropdown = ({
 
   const open = () => setCartDropdownOpen(true)
   const close = () => setCartDropdownOpen(false)
+  const router = useRouter()
+
+  // The nav lives in the layout, so server-action revalidateTag("cart")
+  // doesn't refresh it. When client code dispatches a cart-change event
+  // (after add/remove/update), force a server-component refresh so the
+  // CartButton re-renders with the new count.
+  useEffect(() => {
+    return subscribeToCartChange(() => {
+      router.refresh()
+    })
+  }, [router])
 
   const totalItems =
     cartState?.items?.reduce((acc, item) => {
