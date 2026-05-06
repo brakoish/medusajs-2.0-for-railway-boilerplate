@@ -31,11 +31,14 @@ export default function Nav() {
       <AnnouncementBar />
       <NavShell>
         <nav className="content-container flex items-center justify-between w-full h-full">
-          {/* Wordmark */}
+          {/* Wordmark — bumped slightly inward (ml-1) so it optically
+              aligns with the cart icon's centerline on the right, since
+              the icon sits inside a 40px hit area that pushes the glyph
+              visually inward. */}
           <LocalizedClientLink
             href="/"
             data-testid="nav-store-link"
-            className="text-base small:text-lg font-semibold tracking-tight text-ui-fg-base hover:text-ui-fg-base"
+            className="ml-1 text-base small:text-lg font-semibold tracking-tight text-ui-fg-base hover:text-ui-fg-base"
           >
             Dab Pal
           </LocalizedClientLink>
@@ -46,14 +49,15 @@ export default function Nav() {
             <NavLink href="/#faq">FAQ</NavLink>
           </div>
 
-          {/* Cart */}
+          {/* Cart — pulled outward (-mr-2) so the icon centers in the
+              same right gutter as the wordmark's left edge. */}
           <Suspense
             fallback={
               <LocalizedClientLink
                 href="/cart"
                 data-testid="nav-cart-link"
                 aria-label="Cart"
-                className="relative inline-flex items-center justify-center w-10 h-10 rounded-full text-ui-fg-base"
+                className="relative -mr-2 inline-flex items-center justify-center w-10 h-10 rounded-full text-ui-fg-base"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

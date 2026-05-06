@@ -104,7 +104,7 @@ const CartDropdown = ({
           href="/cart"
           data-testid="nav-cart-link"
           aria-label={`Cart, ${totalItems} item${totalItems === 1 ? "" : "s"}`}
-          className="relative inline-flex items-center justify-center w-10 h-10 rounded-full text-ui-fg-base hover:bg-ui-bg-base-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40"
+          className="relative -mr-2 inline-flex items-center justify-center w-10 h-10 rounded-full text-ui-fg-base hover:bg-ui-bg-base-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

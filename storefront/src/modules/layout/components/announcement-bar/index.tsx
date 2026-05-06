@@ -24,14 +24,14 @@ const items = [
 
 const AnnouncementBar = () => {
   return (
-    <div className="bg-black text-white text-xs">
-      <div className="content-container flex items-center justify-center gap-x-2 small:gap-x-4 h-9 overflow-hidden whitespace-nowrap">
+    <div className="bg-black text-white text-[11px] small:text-xs">
+      <div className="content-container flex items-center justify-center gap-x-3 small:gap-x-5 h-8 small:h-9 overflow-hidden whitespace-nowrap">
         {items.map((text, i) => (
-          <span key={text} className="flex items-center gap-x-2 small:gap-x-4">
+          <span key={text} className="flex items-center gap-x-3 small:gap-x-5">
             {i > 0 && (
               <span
                 aria-hidden
-                className="w-1 h-1 rounded-full bg-amber-400/90"
+                className="w-[3px] h-[3px] rounded-full bg-amber-400/90"
               />
             )}
             <span className="tracking-wide">{text}</span>

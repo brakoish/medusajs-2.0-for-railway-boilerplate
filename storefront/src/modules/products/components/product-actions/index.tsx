@@ -63,11 +63,21 @@ export default function ProductActions({
   }, [product.variants, options])
 
   // update the options when a variant is selected
+  // Special-case: when the buyer picks a Color first, auto-select the
+  // 1-Pack so the page resolves to a complete variant immediately
+  // instead of dead-ending on a half-selected option set. Most carts
+  // are 1-packs, and you can still up-size with one tap.
   const setOptionValue = (title: string, value: string) => {
-    setOptions((prev) => ({
-      ...prev,
-      [title]: value,
-    }))
+    setOptions((prev) => {
+      const next: Record<string, string | undefined> = {
+        ...prev,
+        [title]: value,
+      }
+      if (title === "Color" && !next["Pack Size"]) {
+        next["Pack Size"] = "1-Pack"
+      }
+      return next
+    })
   }
 
   // check if the selected variant is in stock
