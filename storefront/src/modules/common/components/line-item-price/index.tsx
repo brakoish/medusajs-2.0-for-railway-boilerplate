@@ -14,13 +14,20 @@ const LineItemPrice = ({ item, style = "default" }: LineItemPriceProps) => {
   const { currency_code, calculated_price_number, original_price_number } =
     getPricesForVariant(item.variant) ?? {}
 
-  const adjustmentsSum = (item.adjustments || []).reduce(
-    (acc, adjustment) => adjustment.amount + acc,
-    0
-  )
+  // Use Medusa's items-only fields when available so the displayed line
+  // price matches what's actually being charged for this item before tax.
+  // `subtotal` is pre-tax pre-discount; `discount_subtotal` is the
+  // items-only portion of any promo (vs `discount_total`, which rolls in
+  // tax-savings and would make the discounted price go negative).
+  const itemAny = item as any
+  const lineSubtotal: number | undefined = itemAny.subtotal
+  const lineDiscountSubtotal: number | undefined = itemAny.discount_subtotal
 
   const originalPrice = original_price_number * item.quantity
-  const currentPrice = calculated_price_number * item.quantity - adjustmentsSum
+  const currentPrice =
+    typeof lineSubtotal === "number"
+      ? Math.max(0, lineSubtotal - (lineDiscountSubtotal ?? 0))
+      : calculated_price_number * item.quantity
   const hasReducedPrice = currentPrice < originalPrice
 
   return (
