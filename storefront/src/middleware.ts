@@ -27,9 +27,24 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(`${origin}${stripped}${search}`, 301)
   }
 
+  // 2. Single-product store: collapse the boilerplate listing surfaces
+  //    onto the homepage. /products/<anything>, /store, /collections/*,
+  //    /categories/* all 301 to /. The home is the canonical PDP.
+  //    Keeping them as 301s instead of just deleting the routes so any
+  //    indexed/shared links land on a real page instead of 404.
+  const SINGLE_PRODUCT_REDIRECT = [
+    /^\/products(?:\/|$)/,
+    /^\/store(?:\/|$)/,
+    /^\/collections(?:\/|$)/,
+    /^\/categories(?:\/|$)/,
+  ]
+  if (SINGLE_PRODUCT_REDIRECT.some((re) => re.test(pathname))) {
+    return NextResponse.redirect(`${origin}/${search}`, 301)
+  }
+
   let response = NextResponse.next()
 
-  // 2. Carry through cart_id from query string into a cookie + send the
+  // 3. Carry through cart_id from query string into a cookie + send the
   //    user to the address step.
   if (cartId && !checkoutStep) {
     const next = new URL(request.nextUrl.href)
@@ -39,7 +54,7 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // 3. Onboarding flag from query string -> cookie.
+  // 4. Onboarding flag from query string -> cookie.
   if (isOnboarding && !onboardingCookie) {
     response.cookies.set("_medusa_onboarding", "true", {
       maxAge: 60 * 60 * 24,

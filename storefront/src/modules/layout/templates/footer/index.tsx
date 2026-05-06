@@ -23,7 +23,7 @@ export default async function Footer() {
             <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
               <li>
                 <LocalizedClientLink
-                  href="/products/dab-pal"
+                  href="/#shop"
                   className="hover:text-ui-fg-base"
                 >
                   Dab Pal

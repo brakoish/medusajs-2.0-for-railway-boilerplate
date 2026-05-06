@@ -2,10 +2,9 @@ import type { MetadataRoute } from "next"
 import { getBaseURL } from "@lib/util/env"
 
 /**
- * Sitemap. Single-product store, so the surface area is tiny:
- *   - / (home, holds the PDP)
- *   - /products/dab-pal (canonical PDP path; redirects to / on this site
- *     but listed for robots that hit the SKU path directly)
+ * Sitemap. Single-product store, so the surface area is just the home
+ * page (which is the canonical PDP). Every other route either redirects
+ * to / or is gated (cart, checkout, account, order confirmations).
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = getBaseURL()
@@ -16,12 +15,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "weekly",
       priority: 1.0,
-    },
-    {
-      url: `${base}/products/dab-pal`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.9,
     },
   ]
 }
