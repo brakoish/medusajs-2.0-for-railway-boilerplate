@@ -13,6 +13,7 @@ import PdpBuyNow from "@modules/checkout/components/express-checkout/pdp-buy-now
 import ProductPrice from "../product-price"
 import { addToCart } from "@lib/data/cart"
 import { dispatchCartChange } from "@lib/util/cart-events"
+import { useSetSelectedVariantId } from "@modules/products/contexts/variant-context"
 import { HttpTypes } from "@medusajs/types"
 
 const COUNTRY = "us"
@@ -61,6 +62,30 @@ export default function ProductActions({
       return isEqual(variantOptions, options)
     })
   }, [product.variants, options])
+
+  // Push the selected variant id up so siblings (the gallery) can react.
+  // We also push when only Color is set (no Pack Size) so the gallery
+  // can swap to the white image even before the buyer locks in size.
+  const setSelectedVariantId = useSetSelectedVariantId()
+  useEffect(() => {
+    if (selectedVariant?.id) {
+      setSelectedVariantId(selectedVariant.id)
+      return
+    }
+    // Color-only fallback: find any variant matching just the Color option.
+    const color = options["Color"]
+    if (color && product.variants?.length) {
+      const colorMatch = product.variants.find((v) => {
+        const m = optionsAsKeymap(v.options) ?? {}
+        return m["Color"] === color
+      })
+      if (colorMatch?.id) {
+        setSelectedVariantId(colorMatch.id)
+        return
+      }
+    }
+    setSelectedVariantId(null)
+  }, [selectedVariant?.id, options, product.variants, setSelectedVariantId])
 
   // update the options when a variant is selected
   // Special-case: when the buyer picks a Color first, auto-select the

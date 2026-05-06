@@ -4,6 +4,7 @@ import { getProductByHandle } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
 import ProductActions from "@modules/products/components/product-actions"
 import ProductActionsWrapper from "@modules/products/templates/product-actions-wrapper"
+import { VariantProvider } from "@modules/products/contexts/variant-context"
 import ProductGallery from "./product-gallery"
 
 const PRODUCT_HANDLE = "dab-pal"
@@ -25,10 +26,16 @@ export default async function BuySection({
       className="bg-white py-12 small:py-24 border-b border-gray-100 scroll-mt-24"
     >
       <div className="content-container">
+        <VariantProvider>
         <div className="grid grid-cols-1 small:grid-cols-2 gap-8 small:gap-16 items-start">
-          {/* Product gallery — first on mobile, left on desktop */}
+          {/* Product gallery — first on mobile, left on desktop.
+              Gallery reads selectedVariantId from VariantProvider so it
+              swaps the hero image when the buyer toggles Color. */}
           <div className="w-full">
-            <ProductGallery images={product.images || []} />
+            <ProductGallery
+              images={product.images || []}
+              variants={product.variants || []}
+            />
           </div>
 
           {/* Title, variant selector, add-to-cart */}
@@ -65,6 +72,7 @@ export default async function BuySection({
             </div>
           </div>
         </div>
+        </VariantProvider>
       </div>
     </section>
   )
