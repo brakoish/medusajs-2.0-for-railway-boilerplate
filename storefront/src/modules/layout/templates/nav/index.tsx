@@ -20,37 +20,47 @@ import NavShell from "@modules/layout/components/nav-shell"
  *     surface is at /account directly, not promoted in nav.
  *   - No "Search": one product, search is noise.
  *   - Cart is icon-only with an amber count badge (see CartDropdown).
- *   - Wordmark is left-aligned, not centered, so the cart button sits
- *     comfortably on the right without competing for centerline focus.
- *   - 2 inline links (Reviews, FAQ) on desktop, hidden on mobile to
- *     keep the bar tight on small screens.
+ *   - Desktop: classic DTC three-column nav. Reviews/FAQ on the left,
+ *     centered wordmark, cart icon on the right. Centered wordmark
+ *     gives the brand a hero moment and balances the bar visually.
+ *   - Mobile: the links column collapses; wordmark anchors left,
+ *     cart anchors right — same component, two visual modes via
+ *     small:absolute on the wordmark.
  */
 export default function Nav() {
   return (
     <div className="sticky top-0 inset-x-0 z-50">
       <AnnouncementBar />
       <NavShell>
-        <nav className="content-container flex items-center justify-between w-full h-full">
-          {/* Wordmark — bumped slightly inward (ml-1) so it optically
-              aligns with the cart icon's centerline on the right, since
-              the icon sits inside a 40px hit area that pushes the glyph
-              visually inward. */}
-          <LocalizedClientLink
-            href="/"
-            data-testid="nav-store-link"
-            className="ml-1 text-base small:text-lg font-semibold tracking-tight text-ui-fg-base hover:text-ui-fg-base"
-          >
-            Dab Pal
-          </LocalizedClientLink>
+        <nav className="content-container relative flex items-center w-full h-full">
+          {/* Three-column layout on desktop:
+              [ links | wordmark (centered) | cart ]
+              On mobile the links column collapses, wordmark anchors left,
+              cart anchors right — same component, two visual modes. */}
 
-          {/* Inline links — desktop only */}
-          <div className="hidden small:flex items-center gap-x-7 absolute left-1/2 -translate-x-1/2">
+          {/* LEFT — desktop links, hidden on mobile */}
+          <div className="hidden small:flex items-center gap-x-8 flex-1 basis-0">
             <NavLink href="/#reviews">Reviews</NavLink>
             <NavLink href="/#faq">FAQ</NavLink>
           </div>
 
-          {/* Cart — pulled outward (-mr-2) so the icon centers in the
-              same right gutter as the wordmark's left edge. */}
+          {/* CENTER — wordmark.
+              On desktop: absolutely centered to the viewport so the
+              wordmark sits exactly mid-bar regardless of link/cart widths.
+              On mobile: anchored left in normal flow so it reads as the
+              primary mark with the cart on the right. */}
+          <LocalizedClientLink
+            href="/"
+            data-testid="nav-store-link"
+            className="ml-1 small:ml-0 text-lg small:text-2xl font-semibold tracking-tight text-ui-fg-base hover:text-ui-fg-base small:absolute small:left-1/2 small:-translate-x-1/2"
+          >
+            Dab Pal
+          </LocalizedClientLink>
+
+          {/* Spacer pushes cart to the right edge on mobile (where the
+              wordmark is in normal flow) and balances the layout on
+              desktop (where the wordmark is absolutely positioned). */}
+          <div className="flex-1 basis-0 flex justify-end">
           <Suspense
             fallback={
               <LocalizedClientLink
@@ -78,6 +88,7 @@ export default function Nav() {
           >
             <CartButton />
           </Suspense>
+          </div>
         </nav>
       </NavShell>
     </div>
