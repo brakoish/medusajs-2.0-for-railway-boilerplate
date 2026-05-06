@@ -36,7 +36,7 @@ const StructuredData = () => {
     image: [
       `${url}/dab-pal/product-front.png`,
       `${url}/dab-pal/lineup.png`,
-      `${url}/dab-pal/detail.png`,
+      `${url}/dab-pal/hero.jpg`,
     ],
     brand: {
       "@type": "Brand",
