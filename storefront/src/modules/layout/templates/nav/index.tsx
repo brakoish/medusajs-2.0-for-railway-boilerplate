@@ -40,6 +40,7 @@ export default function Nav() {
 
           {/* LEFT — desktop links, hidden on mobile */}
           <div className="hidden small:flex items-center gap-x-8 flex-1 basis-0">
+            <NavLink href="/#shop">Shop</NavLink>
             <NavLink href="/#reviews">Reviews</NavLink>
             <NavLink href="/#faq">FAQ</NavLink>
           </div>

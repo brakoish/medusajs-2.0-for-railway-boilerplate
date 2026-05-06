@@ -22,7 +22,7 @@ export default async function BuySection({
   return (
     <section
       id="shop"
-      className="bg-white py-12 small:py-24 border-b border-gray-100 scroll-mt-16"
+      className="bg-white py-12 small:py-24 border-b border-gray-100 scroll-mt-24"
     >
       <div className="content-container">
         <div className="grid grid-cols-1 small:grid-cols-2 gap-8 small:gap-16 items-start">
