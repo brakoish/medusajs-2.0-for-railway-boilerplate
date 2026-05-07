@@ -44,12 +44,23 @@ export default function ProductActions({
   const [isAdding, setIsAdding] = useState(false)
   const countryCode = COUNTRY
 
-  // If there is only 1 variant, preselect the options
+  // Preselect a variant on mount so price + Apple Pay/wallet rates render
+  // immediately. If there is only 1 variant, use it. Otherwise prefer a
+  // configured default SKU (Dab Pal: 1-pack Black), falling back to the
+  // first variant when no match is found.
   useEffect(() => {
-    if (product.variants?.length === 1) {
+    if (!product.variants || product.variants.length === 0) return
+    if (product.variants.length === 1) {
       const variantOptions = optionsAsKeymap(product.variants[0].options)
       setOptions(variantOptions ?? {})
+      return
     }
+    const DEFAULT_SKU = "DABPAL-1-BLK"
+    const preferred =
+      product.variants.find((v) => v.sku === DEFAULT_SKU) ??
+      product.variants[0]
+    const variantOptions = optionsAsKeymap(preferred.options)
+    setOptions(variantOptions ?? {})
   }, [product.variants])
 
   const selectedVariant = useMemo(() => {
