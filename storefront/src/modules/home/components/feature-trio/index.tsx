@@ -12,7 +12,7 @@ const features = [
   {
     title: "Pocket-sized, made for dabbers",
     description:
-      "No magnets to fail, no hinges to snap. Slips into a backpack, dab bag, or glove box.",
+      "Friction-fit hinge lid, no magnets, no clasps. Slips into a backpack, dab bag, or glove box.",
   },
 ]
 

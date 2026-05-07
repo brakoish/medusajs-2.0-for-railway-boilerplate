@@ -2,7 +2,7 @@ import Image from "next/image"
 
 const specs = [
   { label: "Capacity", value: "30 regular Q-tips + 1oz iso bottle" },
-  { label: "Closure", value: "Friction-fit lid (no magnets)" },
+  { label: "Closure", value: "Friction-fit hinge lid (no magnets, no clasps)" },
   { label: "Internal slider", value: "Separates used from unused swabs" },
   { label: "Weight", value: "~4 oz packaged" },
   { label: "Colors", value: "Black Speck or White Speck" },
