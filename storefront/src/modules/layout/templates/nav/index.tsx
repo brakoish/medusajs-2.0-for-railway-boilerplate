@@ -21,12 +21,12 @@ import NavShell from "@modules/layout/components/nav-shell"
  *     surface is at /account directly, not promoted in nav.
  *   - No "Search": one product, search is noise.
  *   - Cart is icon-only with an amber count badge (see CartDropdown).
- *   - Desktop: classic DTC three-column nav. Reviews/FAQ on the left,
- *     centered wordmark, cart icon on the right. Centered wordmark
- *     gives the brand a hero moment and balances the bar visually.
- *   - Mobile: the links column collapses; wordmark anchors left,
- *     cart anchors right — same component, two visual modes via
- *     small:absolute on the wordmark.
+ *   - Desktop: classic DTC three-column nav.
+ *       [ logo (left) | menu Shop/Reviews/FAQ (centered) | cart (right) ]
+ *     Wordmark on the left reads as the brand mark; centered menu balances
+ *     the bar without competing with the logo for attention.
+ *   - Mobile: logo anchors left, Reviews/FAQ inline next to it, cart on
+ *     the right. Same component, breakpoint-driven layout swap.
  */
 export default function Nav() {
   return (
@@ -34,37 +34,30 @@ export default function Nav() {
       <AnnouncementBar />
       <NavShell>
         <nav className="content-container relative flex items-center w-full h-full">
-          {/* Three-column layout on desktop:
-              [ links | wordmark (centered) | cart ]
-              On mobile the links column collapses, wordmark anchors left,
-              cart anchors right — same component, two visual modes. */}
-
-          {/* LEFT — desktop links, hidden on mobile */}
-          <div className="hidden small:flex items-center gap-x-8 flex-1 basis-0">
-            <NavLink href="/#shop">Shop</NavLink>
-            <NavLink href="/#reviews">Reviews</NavLink>
-            <NavLink href="/#faq">FAQ</NavLink>
-          </div>
-
-          {/* CENTER — wordmark.
-              On desktop: absolutely centered to the viewport so the
-              wordmark sits exactly mid-bar regardless of link/cart widths.
-              On mobile: anchored left in normal flow so it reads as the
-              primary mark with the cart on the right. */}
+          {/* LEFT — wordmark.
+              Sits in normal flow on both mobile and desktop. */}
           <LocalizedClientLink
             href="/"
             data-testid="nav-store-link"
             aria-label="Dab Pal"
-            className="ml-1 small:ml-0 text-ui-fg-base hover:text-ui-fg-base small:absolute small:left-1/2 small:-translate-x-1/2 inline-flex items-center"
+            className="ml-1 small:ml-0 text-ui-fg-base hover:text-ui-fg-base inline-flex items-center flex-shrink-0"
           >
             {/* Long wordmark inlined so `currentColor` inherits text color
                 across the translucent-hero and solid-scrolled nav passes. */}
             <DabPalLogoLong className="h-4 small:h-5 w-auto" />
           </LocalizedClientLink>
 
-          {/* Mobile-only inline links so buyers can jump to Reviews/FAQ
-              without scrolling. Hidden on desktop where the LEFT column
-              already shows them. */}
+          {/* CENTER — desktop menu.
+              Absolutely centered to the viewport so the menu sits exactly
+              mid-bar regardless of logo/cart widths. */}
+          <div className="hidden small:flex items-center gap-x-8 absolute left-1/2 -translate-x-1/2">
+            <NavLink href="/#shop">Shop</NavLink>
+            <NavLink href="/#reviews">Reviews</NavLink>
+            <NavLink href="/#faq">FAQ</NavLink>
+          </div>
+
+          {/* MOBILE-ONLY inline Reviews/FAQ links. Hidden on desktop
+              where the centered menu already shows them. */}
           <div className="flex small:hidden items-center gap-x-4 ml-4">
             <LocalizedClientLink
               href="/#reviews"
@@ -80,40 +73,37 @@ export default function Nav() {
             </LocalizedClientLink>
           </div>
 
-          {/* Spacer pushes cart to the right edge on mobile (where the
-              wordmark is in normal flow) and balances the layout on
-              desktop (where the wordmark is absolutely positioned).
-              `items-center` is critical — without it, flex justify-end
-              alone lets the cart button stretch vertically and the icon
-              floats out of line. */}
-          <div className="flex-1 basis-0 flex items-center justify-end">
-          <Suspense
-            fallback={
-              <LocalizedClientLink
-                href="/cart"
-                data-testid="nav-cart-link"
-                aria-label="Cart"
-                className="relative -mr-2 inline-flex items-center justify-center w-10 h-10 rounded-full text-ui-fg-base"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={1.6}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-[22px] h-[22px]"
-                  aria-hidden
+          {/* RIGHT — cart.
+              flex-1 + justify-end pushes the cart to the right edge,
+              `items-center` keeps the icon vertically aligned. */}
+          <div className="flex-1 flex items-center justify-end">
+            <Suspense
+              fallback={
+                <LocalizedClientLink
+                  href="/cart"
+                  data-testid="nav-cart-link"
+                  aria-label="Cart"
+                  className="relative -mr-2 inline-flex items-center justify-center w-10 h-10 rounded-full text-ui-fg-base"
                 >
-                  <path d="M5 7h14l-1.4 11.2a2 2 0 0 1-2 1.8H8.4a2 2 0 0 1-2-1.8L5 7Z" />
-                  <path d="M9 7V5a3 3 0 0 1 6 0v2" />
-                </svg>
-              </LocalizedClientLink>
-            }
-          >
-            <CartButton />
-          </Suspense>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.6}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-[22px] h-[22px]"
+                    aria-hidden
+                  >
+                    <path d="M5 7h14l-1.4 11.2a2 2 0 0 1-2 1.8H8.4a2 2 0 0 1-2-1.8L5 7Z" />
+                    <path d="M9 7V5a3 3 0 0 1 6 0v2" />
+                  </svg>
+                </LocalizedClientLink>
+              }
+            >
+              <CartButton />
+            </Suspense>
           </div>
         </nav>
       </NavShell>
