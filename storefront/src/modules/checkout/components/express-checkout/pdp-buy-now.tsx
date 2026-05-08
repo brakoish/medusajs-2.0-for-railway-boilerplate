@@ -66,8 +66,11 @@ const PdpBuyNow: React.FC<Props> = ({
   // Estimate item total + $7 placeholder shipping so the wallet sheet
   // shows a realistic number before tap. Real total locks in during
   // walletConfirm when shipping method is set on the cart.
+  //
+  // IMPORTANT: Medusa 2.x returns prices as decimal dollars (e.g. 25 for
+  // $25), but Stripe wants cents (2500). Multiply by 100.
   const totalCents = useMemo(() => {
-    return Math.max(50, Math.round(amount * quantity + 700))
+    return Math.max(50, Math.round(amount * 100 * quantity + 700))
   }, [amount, quantity])
 
   return (

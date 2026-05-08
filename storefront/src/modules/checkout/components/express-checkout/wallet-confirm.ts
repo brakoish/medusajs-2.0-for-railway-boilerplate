@@ -40,8 +40,9 @@ type WalletConfirmInput = {
  * we use the Medusa shipping_option id directly so we can look it up
  * after the buyer picks one.
  *
- * Returns an array of `{ id, displayName, amount }` (Stripe expects amount
- * in the cart's smallest currency unit, same as Medusa stores).
+ * Returns an array of `{ id, displayName, amount }`. Stripe expects amount
+ * in cents; Medusa 2.x returns decimal dollars (e.g. 7 for $7), so we
+ * multiply by 100.
  */
 export async function fetchWalletShippingRates(
   cartId: string
@@ -49,16 +50,19 @@ export async function fetchWalletShippingRates(
   const options = await fetchCartShippingMethods(cartId)
   if (!options || !options.length) return []
   return options
-    .map((o: any) => ({
-      id: o.id as string,
-      displayName: (o.name as string) || "Shipping",
-      amount:
+    .map((o: any) => {
+      const dollars =
         typeof o.amount === "number"
           ? o.amount
           : typeof o.calculated_price?.calculated_amount === "number"
           ? o.calculated_price.calculated_amount
-          : 0,
-    }))
+          : 0
+      return {
+        id: o.id as string,
+        displayName: (o.name as string) || "Shipping",
+        amount: Math.round(dollars * 100),
+      }
+    })
     .sort((a, b) => a.amount - b.amount)
 }
 

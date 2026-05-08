@@ -44,17 +44,19 @@ const ExpressCheckout: React.FC<Props> = ({ cart, showDivider = true }) => {
   // Stripe can't create a PaymentIntent for $0 and the buttons would just
   // fail on confirm. Free orders need to flow through a different path
   // (TODO: free-checkout button when total === 0).
-  const itemTotal = cart.item_total ?? cart.subtotal ?? 0
-  if (itemTotal < 50) return null
+  // Medusa 2.x returns totals as decimal dollars (e.g. 65 for $65).
+  // Stripe wants cents — convert before any threshold check or amount.
+  const itemTotalCents = Math.round((cart.item_total ?? cart.subtotal ?? 0) * 100)
+  if (itemTotalCents < 50) return null
 
   // Wallet sheet wants a realistic estimate so the buyer doesn't see
   // "$0.50" before tapping; estimate items + a placeholder $7 standard
   // shipping. Real total locks in during walletConfirm when we set the
   // shipping method and create the payment session.
   const totalCents = useMemo(() => {
-    const estimate = itemTotal + 700 // +$7 placeholder Standard
+    const estimate = itemTotalCents + 700 // +$7 placeholder Standard
     return Math.max(50, Math.round(estimate))
-  }, [itemTotal])
+  }, [itemTotalCents])
 
   return (
     <div className="mb-6">
