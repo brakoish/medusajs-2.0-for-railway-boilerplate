@@ -56,9 +56,11 @@ export default function Nav() {
             <NavLink href="/#faq">FAQ</NavLink>
           </div>
 
-          {/* MOBILE-ONLY inline Shop/Reviews/FAQ links. Hidden on desktop
-              where the centered menu already shows them. */}
-          <div className="flex small:hidden items-center gap-x-4 ml-4">
+          {/* MOBILE-ONLY inline Shop/Reviews/FAQ links. flex-1 makes this
+              group take the slack between the logo and cart, justify-around
+              spaces the three links evenly across that slack. Hidden on
+              desktop where the centered menu already shows them. */}
+          <div className="flex small:hidden flex-1 items-center justify-around">
             <LocalizedClientLink
               href="/#shop"
               className="text-xs text-ui-fg-subtle hover:text-ui-fg-base"
@@ -80,9 +82,10 @@ export default function Nav() {
           </div>
 
           {/* RIGHT — cart.
-              flex-1 + justify-end pushes the cart to the right edge,
-              `items-center` keeps the icon vertically aligned. */}
-          <div className="flex-1 flex items-center justify-end">
+              On desktop flex-1 + justify-end pushes the cart to the right.
+              On mobile the link group above already takes the slack, so
+              the cart sits naturally on the right edge with no extra flex. */}
+          <div className="small:flex-1 flex items-center justify-end">
             <Suspense
               fallback={
                 <LocalizedClientLink
