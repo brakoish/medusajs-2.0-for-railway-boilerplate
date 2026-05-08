@@ -29,7 +29,6 @@ import { useMemo, useRef, useState } from "react"
 import { addToCart, retrieveCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import {
-  buildWalletClickPayload,
   handleShippingAddressChange,
   handleShippingRateChange,
   walletConfirm,
@@ -119,53 +118,74 @@ const PdpBuyNowInner: React.FC<{
   // Track the active cart id so onShippingAddressChange/onShippingRateChange
   // (which fire BEFORE confirm) can preview tax against a real cart.
   const cartIdRef = useRef<string | null>(null)
+  // A pending promise the change handlers can await while the eager
+  // addToCart from handleClick is still in flight. Resolves to the cart
+  // id (or null on failure).
+  const cartReadyRef = useRef<Promise<string | null> | null>(null)
 
-  const handleClick = async (event: any) => {
-    // Eagerly create/use the cart and add the variant so the wallet
-    // sheet's onShippingAddressChange has a real cart to query for tax
-    // and shipping. Ensures the buyer sees real totals before confirming.
-    try {
-      await addToCart({ variantId, quantity, countryCode })
-      const cart = await retrieveCart()
-      cartIdRef.current = cart?.id || null
-    } catch (err) {
-      // If add-to-cart fails we still let the wallet open with the
-      // placeholder; confirm will surface the real error.
-      console.error("[pdp-buy-now] eager addToCart failed:", err)
-    }
-    const payload = await buildWalletClickPayload(
-      cartIdRef.current || undefined
-    )
-    event.resolve(payload)
+  const handleClick = (event: any) => {
+    // CRITICAL: this handler must resolve the wallet click *synchronously*.
+    // iOS Safari kills the wallet sheet if the user-gesture chain is
+    // broken by an awaited Promise. So we resolve with a placeholder rate
+    // immediately, and kick off the addToCart in the background. The
+    // address-change handler awaits cartReadyRef before it talks to
+    // Medusa, so by the time the buyer picks an address the cart is
+    // ready and tax can be previewed correctly.
+    event.resolve({
+      emailRequired: true,
+      phoneNumberRequired: true,
+      shippingAddressRequired: true,
+      billingAddressRequired: true,
+      allowedShippingCountries: ["US"],
+      shippingRates: [
+        { id: "standard", displayName: "Standard Shipping", amount: 700 },
+      ],
+    })
+
+    // Fire-and-track the cart preparation so change handlers can wait.
+    cartReadyRef.current = (async () => {
+      try {
+        await addToCart({ variantId, quantity, countryCode })
+        const cart = await retrieveCart()
+        cartIdRef.current = cart?.id || null
+        return cartIdRef.current
+      } catch (err) {
+        console.error("[pdp-buy-now] eager addToCart failed:", err)
+        return null
+      }
+    })()
+  }
+
+  const ensureCartId = async (): Promise<string | null> => {
+    if (cartIdRef.current) return cartIdRef.current
+    if (cartReadyRef.current) return await cartReadyRef.current
+    return null
   }
 
   const handleAddressChange = async (event: any) => {
-    if (!cartIdRef.current) {
+    const cartId = await ensureCartId()
+    if (!cartId) {
       event.resolve({})
       return
     }
-    await handleShippingAddressChange({
-      event,
-      cartId: cartIdRef.current,
-    })
+    await handleShippingAddressChange({ event, cartId })
   }
 
   const handleRateChange = async (event: any) => {
-    if (!cartIdRef.current) {
+    const cartId = await ensureCartId()
+    if (!cartId) {
       event.resolve({})
       return
     }
-    await handleShippingRateChange({
-      event,
-      cartId: cartIdRef.current,
-    })
+    await handleShippingRateChange({ event, cartId })
   }
 
   const handleConfirm = async (event: any) => {
     setError(null)
     try {
-      // Cart was already created in handleClick; just retrieve it fresh
-      // and run the same wallet -> place-order flow as the checkout page.
+      // Wait for the eager addToCart from handleClick to complete (in
+      // case the buyer is faster than the network), then retrieve fresh.
+      await ensureCartId()
       const cart = await retrieveCart()
       if (!cart) throw new Error("Could not retrieve cart")
 
