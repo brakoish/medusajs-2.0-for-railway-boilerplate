@@ -56,9 +56,15 @@ export default function Nav() {
             <NavLink href="/#faq">FAQ</NavLink>
           </div>
 
-          {/* MOBILE-ONLY inline Reviews/FAQ links. Hidden on desktop
+          {/* MOBILE-ONLY inline Shop/Reviews/FAQ links. Hidden on desktop
               where the centered menu already shows them. */}
           <div className="flex small:hidden items-center gap-x-4 ml-4">
+            <LocalizedClientLink
+              href="/#shop"
+              className="text-xs text-ui-fg-subtle hover:text-ui-fg-base"
+            >
+              Shop
+            </LocalizedClientLink>
             <LocalizedClientLink
               href="/#reviews"
               className="text-xs text-ui-fg-subtle hover:text-ui-fg-base"
