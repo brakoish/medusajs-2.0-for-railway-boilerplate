@@ -24,6 +24,10 @@ const faqs = [
     a: "Yes. We chose 3D printing because it lets us tune the wall strength, the speckle finish, and the slider tolerances to spec. Each kit is hand-finished after printing, so small differences in texture or layer detail are normal and expected.",
   },
   {
+    q: "Is it waterproof?",
+    a: "Water resistant... maybe. Splashes are fine. Submerging it is not.",
+  },
+  {
     q: "Returns?",
     a: "Unopened kits can be returned within 14 days for a full refund. Reach out at hello@dabpal.com if anything's wrong.",
   },
