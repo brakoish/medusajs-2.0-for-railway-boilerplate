@@ -74,11 +74,15 @@ const Item = ({ item, type = "full" }: ItemProps) => {
       </Table.Cell>
 
       <Table.Cell className="text-left">
+        {/* Single-product store: trim the SEO-loaded product_title down
+            to just "Dab Pal" in the cart so the row stops wrapping into
+            a tall stacked block. The full title still lives on the PDP
+            and in product schema. */}
         <Text
           className="txt-medium-plus text-ui-fg-base"
           data-testid="product-title"
         >
-          {item.product_title}
+          Dab Pal
         </Text>
         <LineItemOptions variant={item.variant} data-testid="product-variant" />
       </Table.Cell>

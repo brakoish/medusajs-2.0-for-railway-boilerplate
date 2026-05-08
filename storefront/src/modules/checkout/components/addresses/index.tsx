@@ -95,79 +95,53 @@ const Addresses = ({
         <div>
           <div className="text-small-regular">
             {cart && cart.shipping_address ? (
-              <div className="flex items-start gap-x-8">
-                <div className="flex items-start gap-x-1 w-full">
-                  <div
-                    className="flex flex-col w-1/3"
-                    data-testid="shipping-address-summary"
-                  >
-                    <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                      Shipping Address
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.first_name}{" "}
-                      {cart.shipping_address.last_name}
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.address_1}{" "}
-                      {cart.shipping_address.address_2}
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.postal_code},{" "}
-                      {cart.shipping_address.city}
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.country_code?.toUpperCase()}
-                    </Text>
-                  </div>
+              <div
+                className="grid grid-cols-1 small:grid-cols-3 gap-y-6 small:gap-x-6"
+              >
+                <div
+                  className="flex flex-col"
+                  data-testid="shipping-address-summary"
+                >
+                  <Text className="txt-medium-plus text-ui-fg-base mb-1">
+                    Shipping Address
+                  </Text>
+                  <AddressLines a={cart.shipping_address} />
+                </div>
 
-                  <div
-                    className="flex flex-col w-1/3 "
-                    data-testid="shipping-contact-summary"
-                  >
-                    <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                      Contact
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.phone}
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
+                <div
+                  className="flex flex-col min-w-0"
+                  data-testid="shipping-contact-summary"
+                >
+                  <Text className="txt-medium-plus text-ui-fg-base mb-1">
+                    Contact
+                  </Text>
+                  {cart.email && (
+                    <Text className="txt-medium text-ui-fg-subtle break-all">
                       {cart.email}
                     </Text>
-                  </div>
-
-                  <div
-                    className="flex flex-col w-1/3"
-                    data-testid="billing-address-summary"
-                  >
-                    <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                      Billing Address
+                  )}
+                  {cart.shipping_address.phone && (
+                    <Text className="txt-medium text-ui-fg-subtle">
+                      {formatPhone(cart.shipping_address.phone)}
                     </Text>
+                  )}
+                </div>
 
-                    {sameAsBilling ? (
-                      <Text className="txt-medium text-ui-fg-subtle">
-                        Billing- and delivery address are the same.
-                      </Text>
-                    ) : (
-                      <>
-                        <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.first_name}{" "}
-                          {cart.billing_address?.last_name}
-                        </Text>
-                        <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.address_1}{" "}
-                          {cart.billing_address?.address_2}
-                        </Text>
-                        <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.postal_code},{" "}
-                          {cart.billing_address?.city}
-                        </Text>
-                        <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.country_code?.toUpperCase()}
-                        </Text>
-                      </>
-                    )}
-                  </div>
+                <div
+                  className="flex flex-col"
+                  data-testid="billing-address-summary"
+                >
+                  <Text className="txt-medium-plus text-ui-fg-base mb-1">
+                    Billing Address
+                  </Text>
+
+                  {sameAsBilling ? (
+                    <Text className="txt-medium text-ui-fg-subtle">
+                      Same as shipping address.
+                    </Text>
+                  ) : (
+                    <AddressLines a={cart.billing_address} />
+                  )}
                 </div>
               </div>
             ) : (
@@ -184,3 +158,62 @@ const Addresses = ({
 }
 
 export default Addresses
+
+/**
+ * US-format address block: name / line1 / line2 / city, state ZIP / country.
+ * Skips empty lines so we don't print blank rows.
+ */
+function AddressLines({
+  a,
+}: {
+  a:
+    | HttpTypes.StoreCart["shipping_address"]
+    | HttpTypes.StoreCart["billing_address"]
+    | null
+    | undefined
+}) {
+  if (!a) return null
+  const name = [a.first_name, a.last_name].filter(Boolean).join(" ")
+  const cityLine = [
+    a.city,
+    [a.province, a.postal_code].filter(Boolean).join(" "),
+  ]
+    .filter(Boolean)
+    .join(", ")
+  const country = a.country_code?.toUpperCase() || ""
+
+  return (
+    <>
+      {name && (
+        <Text className="txt-medium text-ui-fg-subtle">{name}</Text>
+      )}
+      {a.address_1 && (
+        <Text className="txt-medium text-ui-fg-subtle">{a.address_1}</Text>
+      )}
+      {a.address_2 && (
+        <Text className="txt-medium text-ui-fg-subtle">{a.address_2}</Text>
+      )}
+      {cityLine && (
+        <Text className="txt-medium text-ui-fg-subtle">{cityLine}</Text>
+      )}
+      {country && (
+        <Text className="txt-medium text-ui-fg-subtle">{country}</Text>
+      )}
+    </>
+  )
+}
+
+/**
+ * Lightweight US phone formatter: 9709034747 -> (970) 903-4747.
+ * Falls back to the raw value for anything that doesn't match.
+ */
+function formatPhone(raw: string): string {
+  const digits = raw.replace(/\D+/g, "")
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
+  }
+  if (digits.length === 11 && digits.startsWith("1")) {
+    return `(${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`
+  }
+  return raw
+}
