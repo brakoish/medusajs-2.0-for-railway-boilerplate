@@ -19,7 +19,7 @@ const Hero = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 min-h-[60vh] small:min-h-[80vh] flex items-end pb-8 small:pb-24">
+      <div className="relative z-10 min-h-[72vh] small:min-h-[80vh] flex items-end pb-8 small:pb-24">
         <div className="content-container w-full">
           <div className="max-w-2xl flex flex-col gap-4 small:gap-6 text-white">
             <span className="uppercase tracking-[0.25em] text-[10px] small:text-xs text-amber-400/90">
