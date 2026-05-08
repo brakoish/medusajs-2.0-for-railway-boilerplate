@@ -56,11 +56,12 @@ export default function Nav() {
             <NavLink href="/#faq">FAQ</NavLink>
           </div>
 
-          {/* MOBILE-ONLY inline Shop/Reviews/FAQ links. flex-1 makes this
-              group take the slack between the logo and cart, justify-around
-              spaces the three links evenly across that slack. Hidden on
-              desktop where the centered menu already shows them. */}
-          <div className="flex small:hidden flex-1 items-center justify-around">
+          {/* MOBILE-ONLY inline Shop/Reviews/FAQ links. The group sits as
+              its own tight cluster, mx-auto + flex-1 centers it between
+              the logo and cart. gap-x-4 keeps the three links close to
+              each other. Hidden on desktop where the centered menu already
+              shows them. */}
+          <div className="flex small:hidden flex-1 items-center justify-center gap-x-4">
             <LocalizedClientLink
               href="/#shop"
               className="text-xs text-ui-fg-subtle hover:text-ui-fg-base"
