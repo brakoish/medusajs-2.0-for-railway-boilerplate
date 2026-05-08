@@ -219,14 +219,18 @@ export default function ProductGallery({
             </button>
           </div>
 
-          {/* Main image area */}
+          {/* Main image area. The wrapper still receives the backdrop
+              click (closes the lightbox); only the image itself and the
+              nav chevrons stop propagation. */}
           <div
             className="relative flex-1 flex items-center justify-center px-4 small:px-16"
-            onClick={(e) => e.stopPropagation()}
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
           >
-            <div className="relative w-full h-full max-w-5xl">
+            <div
+              className="relative w-full h-full max-w-5xl"
+              onClick={(e) => e.stopPropagation()}
+            >
               <Image
                 key={main.url}
                 src={main.url}
