@@ -92,44 +92,68 @@ const CartDropdown = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalItems, itemRef.current])
 
+  // On desktop the icon doubles as a hover-trigger for the dropdown
+  // preview. On mobile (no hover) we want a plain tap-to-navigate link to
+  // /cart — standard mobile pattern, no hidden popover swallowing the tap.
+  const cartIconChildren = (
+    <>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.6}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-[22px] h-[22px]"
+        aria-hidden
+      >
+        <path d="M5 7h14l-1.4 11.2a2 2 0 0 1-2 1.8H8.4a2 2 0 0 1-2-1.8L5 7Z" />
+        <path d="M9 7V5a3 3 0 0 1 6 0v2" />
+      </svg>
+      {totalItems > 0 && (
+        <span
+          className={`absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-500 text-white text-[10px] font-semibold leading-[18px] text-center shadow-sm transition-transform ${
+            bounce ? "animate-cart-pop" : ""
+          }`}
+          aria-hidden
+        >
+          {totalItems}
+        </span>
+      )}
+    </>
+  )
+
+  const cartIconClass =
+    "relative -mr-2 inline-flex items-center justify-center w-10 h-10 rounded-full text-ui-fg-base hover:bg-ui-bg-base-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40"
+
   return (
-    <div
-      className="h-full z-50"
-      onMouseEnter={openAndCancel}
-      onMouseLeave={close}
-    >
+    <div className="h-full z-50">
+      {/* MOBILE: plain link to /cart, no popover. Hidden on desktop. */}
+      <LocalizedClientLink
+        href="/cart"
+        data-testid="nav-cart-link-mobile"
+        aria-label={`Cart, ${totalItems} item${totalItems === 1 ? "" : "s"}`}
+        className={`small:hidden ${cartIconClass}`}
+      >
+        {cartIconChildren}
+      </LocalizedClientLink>
+
+      {/* DESKTOP: hover-trigger popover with cart preview. */}
+      <div
+        className="hidden small:block h-full"
+        onMouseEnter={openAndCancel}
+        onMouseLeave={close}
+      >
       <Popover className="relative h-full">
         <Popover.Button
           as={LocalizedClientLink}
           href="/cart"
           data-testid="nav-cart-link"
           aria-label={`Cart, ${totalItems} item${totalItems === 1 ? "" : "s"}`}
-          className="relative -mr-2 inline-flex items-center justify-center w-10 h-10 rounded-full text-ui-fg-base hover:bg-ui-bg-base-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40"
+          className={cartIconClass}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.6}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="w-[22px] h-[22px]"
-            aria-hidden
-          >
-            <path d="M5 7h14l-1.4 11.2a2 2 0 0 1-2 1.8H8.4a2 2 0 0 1-2-1.8L5 7Z" />
-            <path d="M9 7V5a3 3 0 0 1 6 0v2" />
-          </svg>
-          {totalItems > 0 && (
-            <span
-              className={`absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-500 text-white text-[10px] font-semibold leading-[18px] text-center shadow-sm transition-transform ${
-                bounce ? "animate-cart-pop" : ""
-              }`}
-              aria-hidden
-            >
-              {totalItems}
-            </span>
-          )}
+          {cartIconChildren}
         </Popover.Button>
         <Transition
           show={cartDropdownOpen}
@@ -143,7 +167,7 @@ const CartDropdown = ({
         >
           <Popover.Panel
             static
-            className="hidden small:block absolute top-[calc(100%+1px)] right-0 bg-white border-x border-b border-gray-200 w-[420px] text-ui-fg-base"
+            className="absolute top-[calc(100%+1px)] right-0 bg-white border-x border-b border-gray-200 w-[420px] text-ui-fg-base"
             data-testid="nav-cart-dropdown"
           >
             <div className="p-4 flex items-center justify-center">
@@ -267,6 +291,7 @@ const CartDropdown = ({
           </Popover.Panel>
         </Transition>
       </Popover>
+      </div>
     </div>
   )
 }
