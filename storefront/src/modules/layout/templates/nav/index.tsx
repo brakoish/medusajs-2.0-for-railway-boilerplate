@@ -10,7 +10,7 @@ import NavShell from "@modules/layout/components/nav-shell"
  * Top-of-app navigation.
  *
  * Layout:
- *   1. Announcement bar (free shipping / Brooklyn / lead time) — black
+ *   1. Announcement bar (free shipping / Made in NY / lead time) — black
  *   2. Sticky main nav — translucent over hero, solid on scroll
  *
  * Decisions worth remembering:

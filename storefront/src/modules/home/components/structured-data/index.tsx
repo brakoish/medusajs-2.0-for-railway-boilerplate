@@ -24,7 +24,7 @@ const StructuredData = () => {
     url,
     logo: `${url}/icon-512.png`,
     description:
-      "Dab Pal makes portable cleaning kits for Puffco dab rigs and quartz bangers. Made to order in Brooklyn, NY.",
+      "Dab Pal makes portable cleaning kits for Puffco dab rigs and quartz bangers. Made to order in NY.",
   }
 
   const product = {

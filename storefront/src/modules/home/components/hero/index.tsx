@@ -26,10 +26,10 @@ const Hero = () => {
               Dab cleaning kit · Made in NY
             </span>
             <h1 className="text-3xl small:text-6xl xl:text-7xl font-semibold leading-[1.1] small:leading-[1.05] tracking-tight">
-              The clean banger kit you can actually carry.
+              Your banger cleaning kit. In your pocket.
             </h1>
             <p className="text-base small:text-xl text-white/75 max-w-xl leading-relaxed">
-              30 Q-tips, a 1oz iso bottle, and a built-in slider for used vs. fresh swabs. Fits Puffco Peak, Pro, Proxy, and any quartz banger setup.
+              30 Q-tips, a 1oz iso bottle, a slider that keeps used swabs out of the clean ones. Made in NY for Puffco and quartz setups.
             </p>
             <div className="flex flex-wrap items-center gap-3 small:gap-4 pt-1 small:pt-2">
               <a

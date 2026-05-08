@@ -18,7 +18,7 @@
 
 const items = [
   "Free shipping over $60",
-  "Made in Brooklyn",
+  "Made in NY",
   "Ships in 1–2 days",
 ]
 

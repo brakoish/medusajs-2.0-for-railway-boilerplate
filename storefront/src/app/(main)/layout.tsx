@@ -8,7 +8,7 @@ const SITE_NAME = "Dab Pal"
 const SITE_URL = getBaseURL()
 const TAGLINE = "The clean banger kit you can actually carry."
 const DESCRIPTION =
-  "Portable dab cleaning kit. 30 Q-tips, a 1oz iso bottle, and a built-in slider for used vs. fresh swabs. Fits Puffco Peak, Pro, Proxy, and any quartz banger setup. Made to order in Brooklyn."
+  "Portable dab cleaning kit. 30 Q-tips, a 1oz iso bottle, and a built-in slider for used vs. fresh swabs. Fits Puffco Peak, Pro, Proxy, and any quartz banger setup. Made to order in NY."
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
