@@ -4,7 +4,6 @@ import { HttpTypes } from "@medusajs/types"
 import Addresses from "@modules/checkout/components/addresses"
 import ExpressCheckout from "@modules/checkout/components/express-checkout"
 import Payment from "@modules/checkout/components/payment"
-import Review from "@modules/checkout/components/review"
 import Shipping from "@modules/checkout/components/shipping"
 
 export default async function CheckoutForm({
@@ -40,11 +39,9 @@ export default async function CheckoutForm({
         </div>
 
         <div>
+          {/* Payment step ends with the Place Order button itself — no
+              separate Review step. Cuts a click from the funnel. */}
           <Payment cart={cart} availablePaymentMethods={paymentMethods} />
-        </div>
-
-        <div>
-          <Review cart={cart} />
         </div>
       </div>
     </div>

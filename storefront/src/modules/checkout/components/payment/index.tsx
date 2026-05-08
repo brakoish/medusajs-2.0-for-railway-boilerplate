@@ -10,9 +10,11 @@ import { PaymentElement } from "@stripe/react-stripe-js"
 
 import Divider from "@modules/common/components/divider"
 import PaymentContainer from "@modules/checkout/components/payment-container"
+import PaymentButton from "@modules/checkout/components/payment-button"
 import { isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
 import { initiatePaymentSession } from "@lib/data/cart"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 const Payment = ({
   cart,
@@ -229,21 +231,41 @@ const Payment = ({
             data-testid="payment-method-error-message"
           />
 
-          <Button
-            size="large"
-            className="mt-6"
-            onClick={handleSubmit}
-            isLoading={isLoading}
-            disabled={
-              (isStripe && !paymentReadyToConfirm) ||
-              (!selectedPaymentMethod && !paidByGiftcard)
-            }
-            data-testid="submit-payment-button"
-          >
-            {!activeSession && isStripeFunc(selectedPaymentMethod)
-              ? " Enter payment details"
-              : "Continue to review"}
-          </Button>
+          {/* Combined Place Order CTA. The auto-init effect creates the
+              Stripe session as soon as the step opens, so PaymentButton
+              picks up an `activeSession` and renders "Place order"
+              immediately — no separate "Continue to review" click. */}
+          {activeSession && isStripe ? (
+            <div className="mt-6 flex flex-col gap-3">
+              <PaymentButton cart={cart} data-testid="submit-order-button" />
+              <Text className="txt-small text-ui-fg-subtle">
+                By clicking Place Order, you agree to our{" "}
+                <LocalizedClientLink
+                  href="/terms"
+                  className="underline hover:text-ui-fg-base"
+                >
+                  Terms
+                </LocalizedClientLink>{" "}
+                and acknowledge our return policy.
+              </Text>
+            </div>
+          ) : (
+            <Button
+              size="large"
+              className="mt-6"
+              onClick={handleSubmit}
+              isLoading={isLoading}
+              disabled={
+                (isStripe && !paymentReadyToConfirm) ||
+                (!selectedPaymentMethod && !paidByGiftcard)
+              }
+              data-testid="submit-payment-button"
+            >
+              {!activeSession && isStripeFunc(selectedPaymentMethod)
+                ? " Enter payment details"
+                : "Continue"}
+            </Button>
+          )}
         </div>
 
         <div className={isOpen ? "hidden" : "block"}>
