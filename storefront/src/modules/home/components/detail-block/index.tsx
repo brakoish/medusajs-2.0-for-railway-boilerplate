@@ -6,6 +6,7 @@ const specs = [
   { label: "Internal slider", value: "Separates used from unused swabs" },
   { label: "Weight", value: "~4 oz packaged" },
   { label: "Colors", value: "Black Speck or White Speck" },
+  { label: "Construction", value: "3D printed in a strong speckled polymer, hand-finished" },
   { label: "Made in", value: "Astoria, NY — made to order" },
   { label: "Compatible with", value: "Puffco Peak, Pro, Proxy, traditional quartz bangers" },
 ]
@@ -47,6 +48,9 @@ export default function DetailBlock() {
                 </div>
               ))}
             </dl>
+            <p className="text-xs text-white/40 leading-relaxed">
+              Each Dab Pal is 3D printed and hand-finished, so small variations in texture or layer detail are normal and expected.
+            </p>
           </div>
         </div>
       </div>

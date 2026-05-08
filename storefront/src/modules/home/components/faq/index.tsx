@@ -20,6 +20,10 @@ const faqs = [
     a: "Each Dab Pal is made to order in our Astoria, NY shop. Most orders ship in 2 to 3 business days. You'll get tracking when it goes out.",
   },
   {
+    q: "Is it 3D printed?",
+    a: "Yes. We chose 3D printing because it lets us tune the wall strength, the speckle finish, and the slider tolerances to spec. Each kit is hand-finished after printing, so small differences in texture or layer detail are normal and expected.",
+  },
+  {
     q: "Returns?",
     a: "Unopened kits can be returned within 14 days for a full refund. Reach out at hello@dabpal.com if anything's wrong.",
   },

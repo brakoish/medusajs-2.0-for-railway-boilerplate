@@ -23,7 +23,7 @@ const Hero = () => {
         <div className="content-container w-full">
           <div className="max-w-2xl flex flex-col gap-4 small:gap-6 text-white">
             <span className="uppercase tracking-[0.25em] text-[10px] small:text-xs text-amber-400/90">
-              Dab cleaning kit · Made in NY
+              Dab cleaning kit · Made to order
             </span>
             <h1 className="text-3xl small:text-6xl xl:text-7xl font-semibold leading-[1.1] small:leading-[1.05] tracking-tight">
               Your banger cleaning kit. In your pocket.
