@@ -1,6 +1,7 @@
 import { Suspense } from "react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { DabPalLogoLong } from "@modules/common/components/dab-pal-logo"
 import AnnouncementBar from "@modules/layout/components/announcement-bar"
 import CartButton from "@modules/layout/components/cart-button"
 import NavShell from "@modules/layout/components/nav-shell"
@@ -53,9 +54,12 @@ export default function Nav() {
           <LocalizedClientLink
             href="/"
             data-testid="nav-store-link"
-            className="ml-1 small:ml-0 text-lg small:text-2xl font-semibold tracking-tight text-ui-fg-base hover:text-ui-fg-base small:absolute small:left-1/2 small:-translate-x-1/2"
+            aria-label="Dab Pal"
+            className="ml-1 small:ml-0 text-ui-fg-base hover:text-ui-fg-base small:absolute small:left-1/2 small:-translate-x-1/2 inline-flex items-center"
           >
-            Dab Pal
+            {/* Long wordmark inlined so `currentColor` inherits text color
+                across the translucent-hero and solid-scrolled nav passes. */}
+            <DabPalLogoLong className="h-4 small:h-5 w-auto" />
           </LocalizedClientLink>
 
           {/* Mobile-only inline links so buyers can jump to Reviews/FAQ

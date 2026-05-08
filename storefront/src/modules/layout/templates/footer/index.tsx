@@ -1,6 +1,7 @@
 import { Text } from "@medusajs/ui"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { DabPalLogoStacked } from "@modules/common/components/dab-pal-logo"
 
 export default async function Footer() {
   return (
@@ -10,11 +11,12 @@ export default async function Footer() {
           <div className="flex flex-col gap-y-2 max-w-md">
             <LocalizedClientLink
               href="/"
-              className="txt-compact-xlarge-plus text-ui-fg-base hover:text-ui-fg-base uppercase"
+              aria-label="Dab Pal"
+              className="text-ui-fg-base hover:text-ui-fg-base inline-flex"
             >
-              Dab Pal
+              <DabPalLogoStacked className="h-16 w-auto" />
             </LocalizedClientLink>
-            <Text className="text-ui-fg-subtle txt-small">
+            <Text className="text-ui-fg-subtle txt-small mt-2">
               Portable Q-tip and isopropyl alcohol case for cleaning Puffco and quartz bangers. Made to order in NY.
             </Text>
           </div>
