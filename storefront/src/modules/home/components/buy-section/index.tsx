@@ -23,7 +23,7 @@ export default async function BuySection({
   return (
     <section
       id="shop"
-      className="bg-white py-12 small:py-24 border-b border-gray-100 scroll-mt-24"
+      className="bg-white pt-6 pb-12 small:py-24 border-b border-gray-100 scroll-mt-24"
     >
       <div className="content-container">
         <VariantProvider>
