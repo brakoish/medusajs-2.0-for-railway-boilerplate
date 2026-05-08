@@ -25,7 +25,11 @@ const Item = ({ item, type = "full" }: ItemProps) => {
   const [updating, setUpdating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Single-product store: cart links return to the canonical PDP (home)
+  // and scroll to the buy section. Bypasses the /products/* -> / 301.
+  const productHref = "/#shop"
   const { handle } = item.variant?.product ?? {}
+  void handle
 
   const changeQuantity = async (quantity: number) => {
     setError(null)
@@ -52,7 +56,7 @@ const Item = ({ item, type = "full" }: ItemProps) => {
     <Table.Row className="w-full" data-testid="product-row">
       <Table.Cell className="!pl-0 p-4 w-24">
         <LocalizedClientLink
-          href={`/products/${handle}`}
+          href={productHref}
           className={clx("flex", {
             "w-16": type === "preview",
             "small:w-24 w-12": type === "full",

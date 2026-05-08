@@ -103,6 +103,34 @@ const Payment = ({
     setError(null)
   }, [isOpen])
 
+  // Auto-initiate the Stripe payment session as soon as the payment step
+  // opens, so PaymentElement renders without an extra "Enter payment
+  // details" click. Stripe is the only retail provider for this region.
+  useEffect(() => {
+    if (!isOpen) return
+    if (activeSession) return
+    if (paidByGiftcard) return
+    if (!isStripeFunc(selectedPaymentMethod)) return
+    if (isLoading) return
+    let cancelled = false
+    ;(async () => {
+      setIsLoading(true)
+      try {
+        await initiatePaymentSession(cart, {
+          provider_id: selectedPaymentMethod,
+        })
+      } catch (err: any) {
+        if (!cancelled) setError(err.message)
+      } finally {
+        if (!cancelled) setIsLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, activeSession, paidByGiftcard, selectedPaymentMethod])
+
   return (
     <div className="bg-white">
       <div className="flex flex-row items-center justify-between mb-6">

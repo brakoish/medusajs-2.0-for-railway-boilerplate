@@ -15,6 +15,16 @@ export async function middleware(request: NextRequest) {
   const { pathname, search, origin } = request.nextUrl
   const searchParams = request.nextUrl.searchParams
 
+  // 0. Canonical host: www.thedabpal.com -> thedabpal.com (don't split SEO,
+  //    don't dilute backlinks). 308 keeps the method on POST checkouts.
+  const host = request.headers.get("host") || ""
+  if (host === "www.thedabpal.com") {
+    return NextResponse.redirect(
+      `https://thedabpal.com${pathname}${search}`,
+      308
+    )
+  }
+
   const isOnboarding = searchParams.get("onboarding") === "true"
   const cartId = searchParams.get("cart_id")
   const checkoutStep = searchParams.get("step")

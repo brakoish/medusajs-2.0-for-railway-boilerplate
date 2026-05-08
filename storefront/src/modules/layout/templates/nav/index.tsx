@@ -58,6 +58,24 @@ export default function Nav() {
             Dab Pal
           </LocalizedClientLink>
 
+          {/* Mobile-only inline links so buyers can jump to Reviews/FAQ
+              without scrolling. Hidden on desktop where the LEFT column
+              already shows them. */}
+          <div className="flex small:hidden items-center gap-x-4 ml-4">
+            <LocalizedClientLink
+              href="/#reviews"
+              className="text-xs text-ui-fg-subtle hover:text-ui-fg-base"
+            >
+              Reviews
+            </LocalizedClientLink>
+            <LocalizedClientLink
+              href="/#faq"
+              className="text-xs text-ui-fg-subtle hover:text-ui-fg-base"
+            >
+              FAQ
+            </LocalizedClientLink>
+          </div>
+
           {/* Spacer pushes cart to the right edge on mobile (where the
               wordmark is in normal flow) and balances the layout on
               desktop (where the wordmark is absolutely positioned).

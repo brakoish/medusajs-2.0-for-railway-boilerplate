@@ -59,6 +59,23 @@ const Shipping: React.FC<ShippingProps> = ({
     setError(null)
   }, [isOpen])
 
+  // Auto-preselect the cheapest shipping option when the delivery step
+  // opens and the cart has none set, so the Continue button is enabled
+  // by default and Apple Pay / Google Pay see a real shipping cost
+  // up-front.
+  useEffect(() => {
+    if (!isOpen) return
+    if ((cart.shipping_methods?.length ?? 0) > 0) return
+    if (!availableShippingMethods?.length) return
+    const cheapest = [...availableShippingMethods].sort(
+      (a, b) => (a.amount ?? 0) - (b.amount ?? 0)
+    )[0]
+    if (cheapest?.id) {
+      void set(cheapest.id)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, availableShippingMethods, cart.shipping_methods?.length])
+
   return (
     <div className="bg-white">
       <div className="flex flex-row items-center justify-between mb-6">
