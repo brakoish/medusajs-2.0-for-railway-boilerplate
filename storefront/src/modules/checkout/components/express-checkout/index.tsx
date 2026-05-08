@@ -21,7 +21,12 @@ import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { retrieveCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import { buildWalletClickPayload, walletConfirm } from "./wallet-confirm"
+import {
+  buildWalletClickPayload,
+  handleShippingAddressChange,
+  handleShippingRateChange,
+  walletConfirm,
+} from "./wallet-confirm"
 
 const stripeKey = process.env.NEXT_PUBLIC_STRIPE_KEY
 const stripePromise = stripeKey ? loadStripe(stripeKey) : null
@@ -100,6 +105,14 @@ const ExpressInner: React.FC<{ cart: HttpTypes.StoreCart }> = ({ cart }) => {
     event.resolve(payload)
   }
 
+  const handleAddressChange = async (event: any) => {
+    await handleShippingAddressChange({ event, cartId: cart.id })
+  }
+
+  const handleRateChange = async (event: any) => {
+    await handleShippingRateChange({ event, cartId: cart.id })
+  }
+
   const handleConfirm = async (event: any) => {
     setError(null)
     try {
@@ -123,6 +136,8 @@ const ExpressInner: React.FC<{ cart: HttpTypes.StoreCart }> = ({ cart }) => {
       <ExpressCheckoutElement
         onClick={handleClick as any}
         onConfirm={handleConfirm as any}
+        onShippingAddressChange={handleAddressChange as any}
+        onShippingRateChange={handleRateChange as any}
         options={{
           buttonHeight: 48,
           buttonTheme: { applePay: "black", googlePay: "black" },

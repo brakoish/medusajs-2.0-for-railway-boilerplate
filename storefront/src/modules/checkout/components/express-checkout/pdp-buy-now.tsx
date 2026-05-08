@@ -25,10 +25,15 @@ import {
 } from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
 import { useRouter } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { addToCart, retrieveCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import { buildWalletClickPayload, walletConfirm } from "./wallet-confirm"
+import {
+  buildWalletClickPayload,
+  handleShippingAddressChange,
+  handleShippingRateChange,
+  walletConfirm,
+} from "./wallet-confirm"
 
 const stripeKey = process.env.NEXT_PUBLIC_STRIPE_KEY
 const stripePromise = stripeKey ? loadStripe(stripeKey) : null
@@ -111,22 +116,59 @@ const PdpBuyNowInner: React.FC<{
   const elements = useElements()
   const [error, setError] = useState<string | null>(null)
 
+  // Track the active cart id so onShippingAddressChange/onShippingRateChange
+  // (which fire BEFORE confirm) can preview tax against a real cart.
+  const cartIdRef = useRef<string | null>(null)
+
   const handleClick = async (event: any) => {
-    // Cart doesn't exist yet — show a sensible default rate. The real
-    // rate locks in during walletConfirm after the cart is created.
-    const payload = await buildWalletClickPayload(undefined)
+    // Eagerly create/use the cart and add the variant so the wallet
+    // sheet's onShippingAddressChange has a real cart to query for tax
+    // and shipping. Ensures the buyer sees real totals before confirming.
+    try {
+      await addToCart({ variantId, quantity, countryCode })
+      const cart = await retrieveCart()
+      cartIdRef.current = cart?.id || null
+    } catch (err) {
+      // If add-to-cart fails we still let the wallet open with the
+      // placeholder; confirm will surface the real error.
+      console.error("[pdp-buy-now] eager addToCart failed:", err)
+    }
+    const payload = await buildWalletClickPayload(
+      cartIdRef.current || undefined
+    )
     event.resolve(payload)
+  }
+
+  const handleAddressChange = async (event: any) => {
+    if (!cartIdRef.current) {
+      event.resolve({})
+      return
+    }
+    await handleShippingAddressChange({
+      event,
+      cartId: cartIdRef.current,
+    })
+  }
+
+  const handleRateChange = async (event: any) => {
+    if (!cartIdRef.current) {
+      event.resolve({})
+      return
+    }
+    await handleShippingRateChange({
+      event,
+      cartId: cartIdRef.current,
+    })
   }
 
   const handleConfirm = async (event: any) => {
     setError(null)
     try {
-      // 1. Push variant into cart, then load it back fresh.
-      await addToCart({ variantId, quantity, countryCode })
+      // Cart was already created in handleClick; just retrieve it fresh
+      // and run the same wallet -> place-order flow as the checkout page.
       const cart = await retrieveCart()
       if (!cart) throw new Error("Could not retrieve cart")
 
-      // 2. Same wallet -> place-order flow as the checkout page.
       await walletConfirm({
         cart,
         stripe,
@@ -147,6 +189,8 @@ const PdpBuyNowInner: React.FC<{
       <ExpressCheckoutElement
         onClick={handleClick as any}
         onConfirm={handleConfirm as any}
+        onShippingAddressChange={handleAddressChange as any}
+        onShippingRateChange={handleRateChange as any}
         options={{
           buttonHeight: 44,
           buttonTheme: { applePay: "black", googlePay: "black" },

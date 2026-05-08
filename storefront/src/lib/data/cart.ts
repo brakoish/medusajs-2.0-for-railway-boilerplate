@@ -68,6 +68,99 @@ export async function updateCart(data: HttpTypes.StoreUpdateCart) {
     .catch(medusaError)
 }
 
+/**
+ * Light-weight totals preview for the Apple Pay / Google Pay wallet sheet.
+ *
+ * Stripe's ExpressCheckoutElement fires onShippingAddressChange with a
+ * partial address (postal_code, state, country — enough for tax). We
+ * mirror that into the Medusa cart, optionally lock in a shipping method,
+ * then read tax_total / shipping_total / total from the recomputed cart.
+ *
+ * The cart mutation is intentional: if the buyer cancels the wallet, the
+ * abandoned cart now has better data (real address, real tax). The next
+ * page load recomputes against any new info.
+ *
+ * Returns dollars (Medusa 2.x decimal). Caller multiplies by 100 for
+ * Stripe.
+ */
+export async function previewWalletTotals({
+  cartId: providedCartId,
+  shippingAddress,
+  shippingMethodId,
+}: {
+  cartId?: string
+  shippingAddress: {
+    address_1?: string
+    address_2?: string
+    city?: string
+    province?: string
+    postal_code?: string
+    country_code?: string
+  }
+  shippingMethodId?: string
+}) {
+  const cartId = providedCartId || (await getCartId())
+  if (!cartId) {
+    throw new Error("No existing cart found for wallet preview")
+  }
+
+  // 1. Push the partial address. Medusa accepts a partial shipping_address
+  //    on update; the tax engine only needs country/province/postal_code.
+  await sdk.store.cart
+    .update(
+      cartId,
+      {
+        shipping_address: {
+          first_name: "Wallet",
+          last_name: "Preview",
+          address_1: shippingAddress.address_1 || "",
+          address_2: shippingAddress.address_2 || "",
+          city: shippingAddress.city || "",
+          province: shippingAddress.province || "",
+          postal_code: shippingAddress.postal_code || "",
+          country_code: (shippingAddress.country_code || "us").toLowerCase(),
+        } as any,
+      },
+      {},
+      await getAuthHeaders()
+    )
+    .catch(medusaError)
+
+  // 2. Optional: lock in a shipping method so tax + shipping line up in
+  //    the wallet sheet. Stripe's onShippingRateChange gives us this.
+  if (shippingMethodId) {
+    await sdk.store.cart
+      .addShippingMethod(
+        cartId,
+        { option_id: shippingMethodId },
+        {},
+        await getAuthHeaders()
+      )
+      .catch(medusaError)
+  }
+
+  // 3. Read back. revalidateTag would force a full route refresh; we
+  //    skip it here because the wallet flow is ephemeral and we want
+  //    the freshest cart for the preview only.
+  const { cart } = await sdk.store.cart.retrieve(
+    cartId,
+    {},
+    await getAuthHeaders()
+  )
+
+  // Use *_subtotal fields (which exclude tax) for line-item display, and
+  // total (which includes tax) for the wallet's grand total. Medusa's
+  // shipping_total / item_total mix tax in, so they don't sum cleanly.
+  const c = cart as any
+  return {
+    item_subtotal: (c.item_subtotal as number) ?? (c.subtotal as number) ?? 0,
+    shipping_subtotal: (c.shipping_subtotal as number) ?? 0,
+    tax_total: (c.tax_total as number) ?? 0,
+    total: (c.total as number) ?? 0,
+    currency_code: (c.currency_code as string) || "usd",
+  }
+}
+
 export async function addToCart({
   variantId,
   quantity,

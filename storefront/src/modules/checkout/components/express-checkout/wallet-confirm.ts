@@ -14,6 +14,7 @@
 import {
   initiatePaymentSession,
   placeOrder,
+  previewWalletTotals,
   setShippingMethod,
   updateCart,
 } from "@lib/data/cart"
@@ -203,6 +204,125 @@ export async function walletConfirm({
   ) {
     await placeOrder()
   }
+}
+
+/**
+ * Build a `lineItems` array for the wallet sheet from a cart-totals
+ * preview. The wallet displays:
+ *   Subtotal
+ *   Shipping
+ *   Tax
+ *
+ * Stripe wallets expect lineItems to sum to the implicit total (the
+ * Elements `amount`), so we use Medusa's pre-tax subtotals and pass tax
+ * as its own line. Medusa's shipping_total bakes shipping tax in, which
+ * would double-count if we passed it directly.
+ *
+ * All amounts in cents.
+ */
+function buildLineItems(totals: {
+  item_subtotal: number
+  shipping_subtotal: number
+  tax_total: number
+}): { name: string; amount: number }[] {
+  const itemCents = Math.round((totals.item_subtotal || 0) * 100)
+  const shipCents = Math.round((totals.shipping_subtotal || 0) * 100)
+  const taxCents = Math.round((totals.tax_total || 0) * 100)
+
+  const out: { name: string; amount: number }[] = []
+  if (itemCents > 0) out.push({ name: "Subtotal", amount: itemCents })
+  if (shipCents > 0) out.push({ name: "Shipping", amount: shipCents })
+  if (taxCents > 0) out.push({ name: "Tax", amount: taxCents })
+  return out
+}
+
+/**
+ * Stripe ExpressCheckoutElement onShippingAddressChange handler.
+ *
+ * Fires when the buyer picks an address inside the Apple Pay / Google Pay
+ * sheet. We push the address into the Medusa cart so the tax engine kicks
+ * in, then resolve the event with refreshed shippingRates + lineItems.
+ */
+export async function handleShippingAddressChange({
+  event,
+  cartId,
+}: {
+  event: any
+  cartId: string
+}) {
+  const a = event?.address || {}
+  // Stripe gives us only postal_code + state + country before the
+  // buyer reveals full street — enough for tax.
+  const partial = {
+    city: a.city || "",
+    province: a.region || a.state || "",
+    postal_code: a.postal_code || "",
+    country_code: (a.country || "US").toLowerCase(),
+  }
+
+  let totals
+  try {
+    totals = await previewWalletTotals({
+      cartId,
+      shippingAddress: partial,
+    })
+  } catch (err) {
+    // If preview fails, reject so the wallet sheet shows an error rather
+    // than silently undercharging.
+    event.reject?.()
+    console.error("[wallet] previewWalletTotals failed:", err)
+    return
+  }
+
+  const rates = await fetchWalletShippingRates(cartId)
+  const lineItems = buildLineItems(totals)
+
+  event.resolve({
+    shippingRates: rates.length
+      ? rates
+      : [{ id: "standard", displayName: "Standard Shipping", amount: 700 }],
+    lineItems,
+  })
+}
+
+/**
+ * Stripe ExpressCheckoutElement onShippingRateChange handler.
+ *
+ * Fires when the buyer picks a shipping option in the wallet sheet. We
+ * lock that method in on the cart so tax + total reflect it, then resolve
+ * with refreshed lineItems.
+ */
+export async function handleShippingRateChange({
+  event,
+  cartId,
+}: {
+  event: any
+  cartId: string
+}) {
+  const rateId = event?.shippingRate?.id
+  if (!rateId) {
+    event.resolve({})
+    return
+  }
+
+  let totals
+  try {
+    // Pass the rate id; previewWalletTotals will set the shipping method
+    // on the cart and re-read totals.
+    totals = await previewWalletTotals({
+      cartId,
+      shippingAddress: {}, // already set
+      shippingMethodId: rateId,
+    })
+  } catch (err) {
+    event.reject?.()
+    console.error("[wallet] previewWalletTotals (rate) failed:", err)
+    return
+  }
+
+  event.resolve({
+    lineItems: buildLineItems(totals),
+  })
 }
 
 /**
