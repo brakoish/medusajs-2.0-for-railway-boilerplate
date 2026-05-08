@@ -143,8 +143,8 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               key={v}
               className={clx(
                 "relative border-ui-border-base bg-ui-bg-subtle border rounded-rounded flex-1 transition-shadow ease-in-out duration-150",
-                hint
-                  ? "py-2 px-2 min-h-[64px]"
+                hint && hint.savings
+                  ? "py-2 px-2 min-h-[56px]"
                   : "h-10 p-2 text-small-regular",
                 {
                   "border-ui-border-interactive": v === current,
@@ -154,17 +154,12 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               disabled={disabled}
               data-testid="option-button"
             >
-              {hint ? (
+              {hint && hint.savings ? (
                 <div className="flex flex-col items-center justify-center leading-tight">
                   <span className="text-sm font-medium">{v}</span>
-                  <span className="text-[11px] text-ui-fg-subtle mt-0.5">
-                    {hint.perUnit}/ea
+                  <span className="text-[10px] font-semibold text-amber-600 mt-0.5 uppercase tracking-wide">
+                    {hint.savings}
                   </span>
-                  {hint.savings && (
-                    <span className="text-[10px] font-semibold text-amber-600 mt-0.5 uppercase tracking-wide">
-                      {hint.savings}
-                    </span>
-                  )}
                 </div>
               ) : (
                 v
