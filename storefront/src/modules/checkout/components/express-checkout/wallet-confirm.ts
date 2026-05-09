@@ -17,10 +17,14 @@ import {
   previewWalletTotals,
   setShippingMethod,
   updateCart,
+  retrieveCart,
 } from "@lib/data/cart"
 import { fetchCartShippingMethods } from "@lib/data/fulfillment"
+import { enrichStripePaymentIntent } from "@lib/data/enrich-pi"
+import { buildStripeSessionData } from "@lib/util/build-pi-data"
 import { HttpTypes } from "@medusajs/types"
 import type { Stripe, StripeElements } from "@stripe/stripe-js"
+
 
 type WalletConfirmInput = {
   cart: HttpTypes.StoreCart
@@ -150,12 +154,26 @@ export async function walletConfirm({
   await setShippingMethod({ cartId: cart.id, shippingMethodId: method.id })
 
   // ---------- 4. Create / refresh Stripe payment session ----------
+  // Re-fetch the cart so address/email/totals updates above are reflected
+  // in the metadata + description we attach to the Stripe PI.
+  let cartForPi = cart
+  try {
+    const fresh = await retrieveCart()
+    if (fresh) cartForPi = fresh as HttpTypes.StoreCart
+  } catch {
+    // best-effort
+  }
   let refreshed: any
   try {
-    refreshed = await initiatePaymentSession(cart, {
+    refreshed = await initiatePaymentSession(cartForPi, {
       provider_id: "pp_stripe_stripe",
+      data: buildStripeSessionData(cartForPi),
     })
     console.log("[walletConfirm] payment session created:", refreshed)
+    // Fire-and-forget PI enrichment (receipt_email, descriptor, shipping).
+    enrichStripePaymentIntent(cart.id).catch((e) =>
+      console.warn("[walletConfirm] enrich-pi failed", e)
+    )
   } catch (err: any) {
     console.error("[walletConfirm] initiatePaymentSession failed:", err)
     throw new Error(

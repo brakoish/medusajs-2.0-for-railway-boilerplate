@@ -14,6 +14,8 @@ import PaymentButton from "@modules/checkout/components/payment-button"
 import { isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
 import { initiatePaymentSession } from "@lib/data/cart"
+import { enrichStripePaymentIntent } from "@lib/data/enrich-pi"
+import { buildStripeSessionData } from "@lib/util/build-pi-data"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 const Payment = ({
@@ -81,9 +83,19 @@ const Payment = ({
         isStripeFunc(selectedPaymentMethod) && !activeSession
 
       if (!activeSession) {
+        const piData = isStripeFunc(selectedPaymentMethod)
+          ? buildStripeSessionData(cart)
+          : undefined
         await initiatePaymentSession(cart, {
           provider_id: selectedPaymentMethod,
+          data: piData,
         })
+        if (isStripeFunc(selectedPaymentMethod)) {
+          // Fire-and-forget enrichment (receipt_email, descriptor, shipping).
+          enrichStripePaymentIntent(cart.id).catch((e) =>
+            console.warn("[payment] enrich-pi failed", e)
+          )
+        }
       }
 
       if (!shouldInputCard) {
@@ -118,9 +130,18 @@ const Payment = ({
     ;(async () => {
       setIsLoading(true)
       try {
+        const piData = isStripeFunc(selectedPaymentMethod)
+          ? buildStripeSessionData(cart)
+          : undefined
         await initiatePaymentSession(cart, {
           provider_id: selectedPaymentMethod,
+          data: piData,
         })
+        if (isStripeFunc(selectedPaymentMethod)) {
+          enrichStripePaymentIntent(cart.id).catch((e) =>
+            console.warn("[payment] enrich-pi failed", e)
+          )
+        }
       } catch (err: any) {
         if (!cancelled) setError(err.message)
       } finally {
