@@ -64,8 +64,7 @@ const Item = ({ item, type = "full" }: ItemProps) => {
         >
           <Thumbnail
             thumbnail={
-              ((item.variant?.metadata as any)?.image_url as string) ||
-              item.variant?.product?.thumbnail
+              item.variant?.thumbnail || item.variant?.product?.thumbnail
             }
             images={item.variant?.product?.images}
             size="square"

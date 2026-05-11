@@ -41,9 +41,7 @@ export default function ProductGallery({
   const variantImageUrl = useMemo(() => {
     if (!selectedVariantId) return null
     const v = variants.find((x) => x.id === selectedVariantId)
-    const meta = (v?.metadata ?? {}) as Record<string, unknown>
-    const url = meta["image_url"]
-    return typeof url === "string" && url.length > 0 ? url : null
+    return v?.thumbnail || null
   }, [selectedVariantId, variants])
 
   // Build the gallery list. If the variant points at an image that's
