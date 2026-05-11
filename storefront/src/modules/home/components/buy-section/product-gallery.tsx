@@ -10,6 +10,9 @@ type ProductGalleryProps = {
   variants?: HttpTypes.StoreProductVariant[]
 }
 
+const VIDEO_URL =
+  "https://bucket-production-a39d.up.railway.app/medusa-media/dabpal_video-01KRBQAN081CB5FHH4QC6G6PKN.mp4"
+
 /**
  * PDP image gallery.
  *
@@ -45,27 +48,36 @@ export default function ProductGallery({
 
   // Build the gallery list. If the variant points at an image that's
   // already in product.images, reorder it to the front. Otherwise prepend.
+  // Video is always first when present.
   const gallery = useMemo(() => {
     const base = images ?? []
-    if (!variantImageUrl) return base
+    const videoItem = [
+      { id: "product-video", url: VIDEO_URL } as HttpTypes.StoreProductImage,
+    ]
+
+    if (!variantImageUrl) return [...videoItem, ...base]
 
     const idx = base.findIndex((img) => img.url === variantImageUrl)
     if (idx >= 0) {
       const reordered = [base[idx], ...base.filter((_, i) => i !== idx)]
-      return reordered
+      return [...videoItem, ...reordered]
     }
     return [
+      ...videoItem,
       { id: `variant-${selectedVariantId}`, url: variantImageUrl } as HttpTypes.StoreProductImage,
       ...base,
     ]
   }, [images, variantImageUrl, selectedVariantId])
 
+  const isVideo = (url: string) =>
+    url.endsWith(".mp4") || url.endsWith(".webm") || url.endsWith(".mov")
+
   const [active, setActive] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
 
-  // Whenever the variant changes, snap back to the variant image (index 0).
+  // Whenever the variant changes, snap back to the variant image (index 1, after video).
   useEffect(() => {
-    if (variantImageUrl) setActive(0)
+    if (variantImageUrl) setActive(1)
   }, [variantImageUrl])
 
   const total = gallery.length
@@ -113,46 +125,63 @@ export default function ProductGallery({
   }
 
   const main = gallery[active] ?? gallery[0]
+  const mainIsVideo = isVideo(main?.url ?? "")
 
   return (
     <>
       <div className="flex flex-col gap-3">
         <button
           type="button"
-          onClick={() => setLightboxOpen(true)}
-          aria-label="Open image gallery"
-          className="relative aspect-square w-full bg-zinc-50 rounded-lg overflow-hidden group cursor-zoom-in"
+          onClick={() => !mainIsVideo && setLightboxOpen(true)}
+          aria-label={mainIsVideo ? "Product video" : "Open image gallery"}
+          className={`relative aspect-square w-full bg-zinc-50 rounded-lg overflow-hidden group ${
+            mainIsVideo ? "cursor-default" : "cursor-zoom-in"
+          }`}
         >
-          <Image
-            key={main.url}
-            src={main.url}
-            alt="Dab Pal product photo"
-            fill
-            sizes="(max-width: 800px) 100vw, 50vw"
-            className="object-contain p-6 small:p-10 transition-transform duration-300 group-hover:scale-[1.02]"
-            priority
-          />
-          {/* Subtle expand affordance */}
-          <span
-            aria-hidden
-            className="absolute top-3 right-3 inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.6}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-4 h-4 text-black"
+          {mainIsVideo ? (
+            <video
+              key={main.url}
+              src={main.url}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 w-full h-full object-contain p-2"
+            />
+          ) : (
+            <Image
+              key={main.url}
+              src={main.url}
+              alt="Dab Pal product photo"
+              fill
+              sizes="(max-width: 800px) 100vw, 50vw"
+              className="object-contain p-6 small:p-10 transition-transform duration-300 group-hover:scale-[1.02]"
+              priority
+            />
+          )}
+          {/* Subtle expand affordance (hidden for video) */}
+          {!mainIsVideo && (
+            <span
+              aria-hidden
+              className="absolute top-3 right-3 inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <path d="M15 3h6v6" />
-              <path d="M9 21H3v-6" />
-              <path d="M21 3l-7 7" />
-              <path d="M3 21l7-7" />
-            </svg>
-          </span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.6}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4 text-black"
+              >
+                <path d="M15 3h6v6" />
+                <path d="M9 21H3v-6" />
+                <path d="M21 3l-7 7" />
+                <path d="M3 21l7-7" />
+              </svg>
+            </span>
+          )}
         </button>
         {gallery.length > 1 && (
           <div className="grid grid-cols-4 gap-2">
@@ -168,13 +197,32 @@ export default function ProductGallery({
                 }`}
                 aria-label={`View image ${i + 1}`}
               >
-                <Image
-                  src={img.url}
-                  alt=""
-                  fill
-                  sizes="120px"
-                  className="object-contain p-2"
-                />
+                {isVideo(img.url) ? (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <video
+                      src={img.url}
+                      className="w-full h-full object-contain p-1"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="w-6 h-6 text-white drop-shadow-md"
+                      >
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                ) : (
+                  <Image
+                    src={img.url}
+                    alt=""
+                    fill
+                    sizes="120px"
+                    className="object-contain p-2"
+                  />
+                )}
               </button>
             ))}
           </div>
@@ -231,15 +279,25 @@ export default function ProductGallery({
               className="relative w-full h-full max-w-5xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <Image
-                key={main.url}
-                src={main.url}
-                alt={`Product image ${active + 1}`}
-                fill
-                sizes="(max-width: 1024px) 100vw, 1024px"
-                className="object-contain"
-                priority
-              />
+              {isVideo(main.url) ? (
+                <video
+                  key={main.url}
+                  src={main.url}
+                  controls
+                  autoPlay
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <Image
+                  key={main.url}
+                  src={main.url}
+                  alt={`Product image ${active + 1}`}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 1024px"
+                  className="object-contain"
+                  priority
+                />
+              )}
             </div>
 
             {total > 1 && (
@@ -312,13 +370,32 @@ export default function ProductGallery({
                         : "border-transparent hover:border-white/30"
                     }`}
                   >
-                    <Image
-                      src={img.url}
-                      alt=""
-                      fill
-                      sizes="80px"
-                      className="object-contain p-1"
-                    />
+                    {isVideo(img.url) ? (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <video
+                          src={img.url}
+                          className="w-full h-full object-contain p-1"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            className="w-5 h-5 text-white drop-shadow-md"
+                          >
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </div>
+                      </div>
+                    ) : (
+                      <Image
+                        src={img.url}
+                        alt=""
+                        fill
+                        sizes="80px"
+                        className="object-contain p-1"
+                      />
+                    )}
                   </button>
                 ))}
               </div>
