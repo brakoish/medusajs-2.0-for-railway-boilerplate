@@ -155,6 +155,7 @@ const medusaConfig = {
             options: {
               api_token: SHIPPO_API_TOKEN,
               api_url: SHIPPO_API_URL,
+              from_email: 'hello@thedabpal.com',
               // Fallback map for orders placed before shipping options used shippo_shippo.
               // Maps Medusa shipping_option_id -> Shippo service group.
               shipping_option_data_map: {

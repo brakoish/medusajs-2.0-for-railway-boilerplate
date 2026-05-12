@@ -32,6 +32,8 @@ export type ShippoOptions = ShippoClientOptions & {
   default_parcel?: Partial<ShippoParcel>
   /** Pad the parcel weight (oz) to account for box + filler. */
   packaging_weight_oz?: number
+  /** From-address email sent to Shippo (required by their API). */
+  from_email?: string
   /**
    * Fallback map from Medusa shipping_option_id → Shippo service group data.
    * Used in createFulfillment when the shipping method data has no service_group_id
@@ -165,6 +167,9 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
       zip: (a.postal_code as string) || "",
       country: ((a.country_code as string) || "US").toUpperCase(),
       phone: (a.phone as string) || undefined,
+      email:
+        (a.email as string) ||
+        (fromOrTo === "from" ? this.options_.from_email || "hello@thedabpal.com" : undefined),
     }
   }
 
