@@ -368,13 +368,23 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
   ): Promise<CreateFulfillmentResult> {
     const md = data as ShippingMethodData & { service_group_id?: string }
 
+    // service_group_id may be missing on orders placed before the Shippo provider
+    // was wired to the shipping option (they were manual_manual at order time).
+    // Fall back to the shipping option's own data field.
+    const serviceGroupId =
+      md.service_group_id ??
+      // @ts-ignore fulfillment.shipping_option exists at runtime
+      (fulfillment?.shipping_option as Record<string, unknown> | undefined)?.data
+        // @ts-ignore
+        ?.service_group_id as string | undefined
+
     // Look up the Service Group's underlying service token (e.g. usps_ground_advantage).
     const groups = await this.client.listServiceGroups()
-    const group = groups.find((g) => g.object_id === md.service_group_id)
+    const group = groups.find((g) => g.object_id === serviceGroupId)
     if (!group?.service_levels?.length) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
-        `Cannot purchase Shippo label: service group ${md.service_group_id} has no service levels`
+        `Cannot purchase Shippo label: service group ${serviceGroupId} has no service levels`
       )
     }
     const wantedTokens = new Set(
@@ -466,7 +476,7 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
         transaction_id: tx.object_id,
         shipment_id: shipment.object_id,
         rate_id: rate.object_id,
-        service_group_id: md.service_group_id,
+        service_group_id: serviceGroupId,
         carrier: rate.provider,
         service: rate.servicelevel?.name,
         label_url: tx.label_url,
