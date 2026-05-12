@@ -162,8 +162,8 @@ const medusaConfig = {
               // Per-variant dims (length/width/height) are read from Medusa
               // variants and override this when present.
               default_parcel: {
-                length: '6',
-                width: '9',
+                length: '4',
+                width: '6',
                 height: '1',
                 distance_unit: 'in',
                 mass_unit: 'oz',

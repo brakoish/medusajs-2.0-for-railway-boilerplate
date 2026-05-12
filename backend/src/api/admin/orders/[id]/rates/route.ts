@@ -65,7 +65,7 @@ export async function GET(
   const skus = items.map((i) => (i.variant_sku as string | undefined) ?? "")
   const has6 = skus.some((s) => s.includes("-6-"))
   const has3 = skus.some((s) => s.includes("-3-"))
-  const [pLen, pWid, pHgt] = has6 ? ["8","9","3"] : has3 ? ["8","8","2"] : ["6","9","1"]
+  const [pLen, pWid, pHgt] = has6 ? ["8","9","3"] : has3 ? ["8","8","2"] : ["4","6","1"]
 
   const toCity = shippingAddr.city as string
   const toState = shippingAddr.province as string
