@@ -156,6 +156,16 @@ const medusaConfig = {
               api_token: SHIPPO_API_TOKEN,
               api_url: SHIPPO_API_URL,
               from_email: 'hello@thedabpal.com',
+              // Uses item variant weights to compute parcel weight per order.
+              // Dab Pal poly mailer dimensions; weight is computed dynamically.
+              default_parcel: {
+                length: '9',
+                width: '6',
+                height: '2',
+                distance_unit: 'in',
+                mass_unit: 'oz',
+              },
+              packaging_weight_oz: 0,
               default_from: {
                 name: 'Dab Pal',
                 company: 'Dab Pal',

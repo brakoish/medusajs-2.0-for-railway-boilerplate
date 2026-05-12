@@ -56,7 +56,8 @@ export async function GET(
     const perUnit = (variant?.weight as number | undefined) ?? 0
     return sum + perUnit * Number(item.quantity || 1)
   }, 0)
-  const totalOz = Math.max(1, Math.round((totalGrams / 28.3495 + 1) * 100) / 100)
+  // Variant weights are actual packaged weights — no extra padding needed
+  const totalOz = Math.max(1, Math.round((totalGrams / 28.3495) * 100) / 100)
 
   const toCity = shippingAddr.city as string
   const toState = shippingAddr.province as string
