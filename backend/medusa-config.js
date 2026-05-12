@@ -156,6 +156,15 @@ const medusaConfig = {
               api_token: SHIPPO_API_TOKEN,
               api_url: SHIPPO_API_URL,
               from_email: 'hello@thedabpal.com',
+              default_from: {
+                name: 'Dab Pal',
+                company: 'Dab Pal',
+                street1: '361 Stagg St #201',
+                city: 'Brooklyn',
+                state: 'NY',
+                zip: '11206',
+                country: 'US',
+              },
               // Fallback map for orders placed before shipping options used shippo_shippo.
               // Maps Medusa shipping_option_id -> Shippo service group.
               shipping_option_data_map: {

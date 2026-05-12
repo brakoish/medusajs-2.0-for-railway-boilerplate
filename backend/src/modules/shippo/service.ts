@@ -34,6 +34,18 @@ export type ShippoOptions = ShippoClientOptions & {
   packaging_weight_oz?: number
   /** From-address email sent to Shippo (required by their API). */
   from_email?: string
+  /** Default ship-from address. Used when the fulfillment workflow doesn't surface the stock location address. */
+  default_from?: {
+    name?: string
+    company?: string
+    street1: string
+    street2?: string
+    city: string
+    state: string
+    zip: string
+    country?: string
+    phone?: string
+  }
   /**
    * Fallback map from Medusa shipping_option_id → Shippo service group data.
    * Used in createFulfillment when the shipping method data has no service_group_id
@@ -417,33 +429,48 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
       )
     )
 
-    const fromAddress = (order as Record<string, unknown>)?.shipping_address
     const toAddress = (order as Record<string, unknown>)?.shipping_address
-    if (!fromAddress || !toAddress) {
+    if (!toAddress) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "Order shipping address missing for Shippo label purchase"
       )
     }
 
-    // The from_address actually needs to be the stock location, but the
-    // fulfillment workflow doesn't always pass it down to createFulfillment.
-    // Use the cart's shipping_address.from_location if surfaced, otherwise
-    // fall back to whatever Shippo has as the default_address (set in /addresses).
-    // We also stash from_location_address on shipping method data when
-    // available so we can re-use it here.
     const items = ((order as Record<string, unknown>)?.items ||
       []) as (CartLineItemDTO | OrderLineItemDTO)[]
 
+    // Resolve from-address in priority order:
+    //   1. from_location stashed on method data by validateFulfillmentData (when Medusa surfaces it)
+    //   2. default_from configured in provider options
+    //   3. throw — we refuse to send a label with the customer's address as origin
+    const fromSrc: Record<string, unknown> | null =
+      (md as { from_location?: unknown })?.from_location
+        ? // @ts-ignore
+          { ...(md as any).from_location.address, name: (md as any).from_location.name }
+        : this.options_.default_from
+          ? {
+              address_1: this.options_.default_from.street1,
+              address_2: this.options_.default_from.street2,
+              city: this.options_.default_from.city,
+              province: this.options_.default_from.state,
+              postal_code: this.options_.default_from.zip,
+              country_code: (this.options_.default_from.country || "US").toLowerCase(),
+              phone: this.options_.default_from.phone,
+              name: this.options_.default_from.name || "Dab Pal",
+              company: this.options_.default_from.company,
+            }
+          : null
+
+    if (!fromSrc) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Shippo: no from-address available. Set default_from in provider options."
+      )
+    }
+
     const shipment = await this.client.createShipment({
-      address_from: this.toShippoAddress(
-        "from",
-        // @ts-ignore: from_location pulled in by validate; falls back to Shippo default if missing
-        (md as { from_location?: unknown })?.from_location
-          ? // @ts-ignore
-            { ...(md as any).from_location.address, name: (md as any).from_location.name }
-          : { ...(toAddress as Record<string, unknown>) }
-      ),
+      address_from: this.toShippoAddress("from", fromSrc as never),
       address_to: this.toShippoAddress(
         "to",
         toAddress as Record<string, unknown> as never
