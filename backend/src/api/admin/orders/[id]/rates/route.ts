@@ -92,7 +92,7 @@ export async function GET(
         zip: "11206",
         country: "US",
         email: "hello@thedabpal.com",
-        phone: process.env.SHIPPO_FROM_PHONE || "7186669999",
+        phone: process.env.SHIPPO_FROM_PHONE || "9709034749",
       },
       address_to: {
         name: [shippingAddr.first_name, shippingAddr.last_name].filter(Boolean).join(" ") || "Customer",
