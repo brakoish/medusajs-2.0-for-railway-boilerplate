@@ -15,6 +15,7 @@ import {
   StockLocationAddressDTO,
 } from "@medusajs/framework/types"
 import { ShippoClient, ShippoClientOptions } from "./client"
+import { preSelectedRates } from "./pre-selected-rates"
 import {
   ShippoAddress,
   ShippoAddressWithValidation,
@@ -393,6 +394,40 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
     fulfillment: Record<string, unknown>
   ): Promise<CreateFulfillmentResult> {
     const md = data as ShippingMethodData & { service_group_id?: string }
+
+    // Fast path: operator pre-selected a rate in the admin widget.
+    // Skip shipment creation + service-group matching; buy the exact rate.
+    const orderId = (order as Record<string, unknown> | undefined)?.id as string | undefined
+    const preSelectedRateId = orderId ? preSelectedRates.get(orderId) : undefined
+    if (preSelectedRateId) {
+      preSelectedRates.delete(orderId!)
+      const tx = await this.client.createTransaction({ rate: preSelectedRateId })
+      if (tx.status === "ERROR") {
+        const msg = (tx.messages || []).map((m) => m.text).join("; ")
+        throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, `Shippo label purchase failed: ${msg || "no message"}`)
+      }
+      if (tx.tracking_number && tx.provider) {
+        await this.registerTracking({
+          carrier: tx.provider.toLowerCase(),
+          tracking_number: tx.tracking_number,
+          fulfillment_id: (fulfillment.id as string | undefined) ?? undefined,
+        })
+      }
+      return {
+        data: {
+          ...((fulfillment.data as object) || {}),
+          transaction_id: tx.object_id,
+          label_url: tx.label_url,
+          tracking_number: tx.tracking_number,
+          tracking_url: tx.tracking_url_provider,
+          carrier: tx.provider,
+          service: tx.servicelevel?.name,
+        },
+        labels: tx.label_url
+          ? [{ tracking_number: tx.tracking_number || "", tracking_url: tx.tracking_url_provider || "", label_url: tx.label_url }]
+          : [],
+      }
+    }
 
     // service_group_id may be missing on orders placed before the Shippo provider
     // was wired to the shipping option (they were manual_manual at order time).

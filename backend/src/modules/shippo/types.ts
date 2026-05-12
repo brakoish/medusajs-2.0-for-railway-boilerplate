@@ -70,6 +70,8 @@ export type ShippoTransaction = {
   label_url?: string
   commercial_invoice_url?: string
   messages?: { code?: string; text: string }[]
+  provider?: string
+  servicelevel?: { name?: string; token?: string }
 }
 
 export type ShippoRefund = {

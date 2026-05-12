@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { defineWidgetConfig } from "@medusajs/admin-sdk"
 
 type Rate = {
@@ -11,213 +11,216 @@ type Rate = {
   estimated_days: number | null
 }
 
-type RatesResponse = {
+type RatesResp = {
   to: string
   weight_oz: number
   rates: Rate[]
   error?: string
 }
 
-// Which service tokens map to our Medusa shipping options
-const MEDUSA_OPTIONS: Record<string, string> = {
-  usps_ground_advantage: "Standard Shipping",
-  usps_priority: "Priority Shipping",
+type FulfillResp = {
+  fulfillment_id?: string
+  label_url?: string
+  tracking_number?: string
+  tracking_url?: string
+  carrier?: string
+  service?: string
+  error?: string
 }
 
-// Carrier logo colors (just a dot accent)
-const CARRIER_COLOR: Record<string, string> = {
+const CARRIER_DOT: Record<string, string> = {
   USPS: "#004B87",
-  UPS: "#FFB500",
-  FedEx: "#4D148C",
+  UPS:  "#FFB500",
+  FedEx:"#4D148C",
 }
 
-export const config = defineWidgetConfig({
-  zone: "order.details.before",
-})
+const S = {
+  wrap: {
+    background: "#18181b",
+    border: "1px solid #27272a",
+    borderRadius: 12,
+    overflow: "hidden",
+    marginBottom: 16,
+    fontFamily: "Inter, sans-serif",
+  } as React.CSSProperties,
+  header: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "14px 20px",
+    borderBottom: "1px solid #27272a",
+  } as React.CSSProperties,
+  title: { fontSize: 15, fontWeight: 600, color: "#fafafa" } as React.CSSProperties,
+  pill: {
+    fontSize: 11, color: "#71717a", background: "#27272a",
+    borderRadius: 6, padding: "2px 8px", marginLeft: 8,
+  } as React.CSSProperties,
+  btn: (active: boolean, disabled: boolean) => ({
+    fontSize: 12, fontWeight: 500,
+    color: disabled ? "#52525b" : active ? "#000" : "#d4a22a",
+    background: active ? "#d4a22a" : "transparent",
+    border: "1px solid " + (disabled ? "#3f3f46" : "#d4a22a44"),
+    borderRadius: 6, padding: "5px 14px",
+    cursor: disabled ? "not-allowed" : "pointer",
+    transition: "all 0.15s",
+  } as React.CSSProperties),
+  row: (selected: boolean, last: boolean) => ({
+    display: "flex", alignItems: "center",
+    padding: "11px 20px",
+    borderBottom: last ? "none" : "1px solid #27272a",
+    background: selected ? "#1f1f1f" : "transparent",
+    cursor: "pointer",
+    transition: "background 0.1s",
+  } as React.CSSProperties),
+  dot: (color: string) => ({
+    width: 8, height: 8, borderRadius: "50%",
+    background: color, marginRight: 12, flexShrink: 0,
+  } as React.CSSProperties),
+  radio: (selected: boolean) => ({
+    width: 16, height: 16, borderRadius: "50%", flexShrink: 0,
+    border: "2px solid " + (selected ? "#d4a22a" : "#52525b"),
+    background: selected ? "#d4a22a" : "transparent",
+    marginLeft: 12, transition: "all 0.15s",
+  } as React.CSSProperties),
+  badge: {
+    fontSize: 11, fontWeight: 500,
+    color: "#d4a22a", background: "#d4a22a18",
+    border: "1px solid #d4a22a33",
+    borderRadius: 5, padding: "2px 7px", whiteSpace: "nowrap",
+  } as React.CSSProperties,
+  success: {
+    display: "flex", flexDirection: "column", gap: 6,
+    padding: "14px 20px", borderTop: "1px solid #27272a",
+  } as React.CSSProperties,
+}
 
-const OrderRatesWidget = () => {
-  const orderId = (() => {
-    const m = window.location.pathname.match(/\/orders\/(order_[^/]+)/)
-    return m ? m[1] : null
-  })()
+export const config = defineWidgetConfig({ zone: "order.details.before" })
 
-  const [data, setData] = useState<RatesResponse | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+export default function OrderRatesWidget() {
+  const orderId = window.location.pathname.match(/\/orders\/(order_[^/]+)/)?.[1] ?? null
 
-  const fetchRates = () => {
+  const [rates,     setRates]     = useState<Rate[] | null>(null)
+  const [meta,      setMeta]      = useState<{ to: string; weight_oz: number } | null>(null)
+  const [selected,  setSelected]  = useState<string | null>(null)
+  const [loading,   setLoading]   = useState(false)
+  const [fulfilling,setFulfilling] = useState(false)
+  const [done,      setDone]      = useState<FulfillResp | null>(null)
+  const [err,       setErr]       = useState<string | null>(null)
+
+  const fetchRates = async () => {
     if (!orderId || loading) return
-    setLoading(true)
-    setError(null)
-    fetch(`/admin/orders/${orderId}/rates`, { credentials: "include" })
-      .then((r) => r.json())
-      .then((d: RatesResponse) => {
-        if (d.error) setError(d.error)
-        else setData(d)
-        setLoading(false)
-      })
-      .catch((e: Error) => {
-        setError(e.message)
-        setLoading(false)
-      })
+    setLoading(true); setErr(null); setDone(null); setSelected(null)
+    const r = await fetch(`/admin/orders/${orderId}/rates`, { credentials: "include" })
+    const d: RatesResp = await r.json()
+    if (d.error) { setErr(d.error) }
+    else { setRates(d.rates); setMeta({ to: d.to, weight_oz: d.weight_oz }) }
+    setLoading(false)
   }
 
+  const fulfill = async () => {
+    if (!orderId || !selected || fulfilling) return
+    setFulfilling(true); setErr(null)
+    const r = await fetch(`/admin/orders/${orderId}/fulfill`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rate_object_id: selected }),
+    })
+    const d: FulfillResp = await r.json()
+    if (d.error) setErr(d.error)
+    else setDone(d)
+    setFulfilling(false)
+  }
+
+  const showRates = rates && rates.length > 0
+
   return (
-    <div
-      style={{
-        background: "#18181b",
-        border: "1px solid #27272a",
-        borderRadius: 12,
-        overflow: "hidden",
-        marginBottom: 16,
-        fontFamily: "Inter, sans-serif",
-      }}
-    >
+    <div style={S.wrap}>
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "14px 20px",
-          borderBottom: data || error ? "1px solid #27272a" : "none",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 15, fontWeight: 600, color: "#fafafa" }}>
-            Shipping Rates
-          </span>
-          {data && (
-            <span
-              style={{
-                fontSize: 11,
-                color: "#71717a",
-                background: "#27272a",
-                borderRadius: 6,
-                padding: "2px 8px",
-              }}
-            >
-              {data.to} · {data.weight_oz} oz
-            </span>
-          )}
+      <div style={S.header}>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <span style={S.title}>Shipping Rates</span>
+          {meta && <span style={S.pill}>{meta.to} · {meta.weight_oz} oz</span>}
         </div>
-        <button
-          onClick={fetchRates}
-          disabled={loading}
-          style={{
-            fontSize: 12,
-            fontWeight: 500,
-            color: loading ? "#52525b" : "#d4a22a",
-            background: "transparent",
-            border: "1px solid " + (loading ? "#3f3f46" : "#d4a22a44"),
-            borderRadius: 6,
-            padding: "5px 12px",
-            cursor: loading ? "not-allowed" : "pointer",
-            transition: "all 0.15s",
-          }}
-        >
-          {loading ? "Fetching…" : data ? "Refresh" : "Get Rates"}
-        </button>
+        <div style={{ display: "flex", gap: 8 }}>
+          {selected && !done && (
+            <button onClick={fulfill} disabled={fulfilling} style={S.btn(true, fulfilling)}>
+              {fulfilling ? "Buying label…" : "Fulfill →"}
+            </button>
+          )}
+          <button onClick={fetchRates} disabled={loading} style={S.btn(false, loading)}>
+            {loading ? "Fetching…" : rates ? "Refresh" : "Get Rates"}
+          </button>
+        </div>
       </div>
 
       {/* Error */}
-      {error && (
+      {err && (
         <div style={{ padding: "12px 20px", color: "#f87171", fontSize: 13 }}>
-          {error}
+          {err}
         </div>
       )}
 
-      {/* Rates table */}
-      {data && !error && (
-        <div>
-          {data.rates.map((r, i) => {
-            const medusaLabel = MEDUSA_OPTIONS[r.service_token]
-            const dot = CARRIER_COLOR[r.carrier] ?? "#52525b"
-            const isLast = i === data.rates.length - 1
-            return (
-              <div
-                key={r.object_id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "11px 20px",
-                  borderBottom: isLast ? "none" : "1px solid #27272a",
-                  background: medusaLabel ? "#1c1a0e" : "transparent",
-                }}
-              >
-                {/* Carrier dot */}
-                <div
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
-                    background: dot,
-                    marginRight: 12,
-                    flexShrink: 0,
-                  }}
-                />
+      {/* Done */}
+      {done && (
+        <div style={S.success}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 13, color: "#4ade80", fontWeight: 600 }}>✓ Fulfilled</span>
+            <span style={{ fontSize: 12, color: "#71717a" }}>{done.carrier} · {done.service}</span>
+          </div>
+          {done.tracking_number && (
+            <div style={{ fontSize: 12, color: "#a1a1aa" }}>
+              Tracking:{" "}
+              {done.tracking_url
+                ? <a href={done.tracking_url} target="_blank" rel="noreferrer" style={{ color: "#d4a22a" }}>{done.tracking_number}</a>
+                : <span style={{ color: "#fafafa" }}>{done.tracking_number}</span>
+              }
+            </div>
+          )}
+          {done.label_url && (
+            <div>
+              <a href={done.label_url} target="_blank" rel="noreferrer"
+                style={{ fontSize: 12, color: "#d4a22a", textDecoration: "underline" }}>
+                Print Label ↗
+              </a>
+            </div>
+          )}
+        </div>
+      )}
 
-                {/* Carrier + service */}
-                <div style={{ flex: 1 }}>
-                  <span style={{ fontSize: 13, color: "#fafafa", fontWeight: 500 }}>
-                    {r.carrier}
-                  </span>
-                  <span style={{ fontSize: 13, color: "#71717a", marginLeft: 6 }}>
-                    {r.service}
-                  </span>
-                </div>
+      {/* Rates */}
+      {showRates && !done && rates.map((r, i) => {
+        const dot   = CARRIER_DOT[r.carrier] ?? "#52525b"
+        const isSel = selected === r.object_id
+        const last  = i === rates.length - 1
 
-                {/* Est. days */}
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: "#52525b",
-                    marginRight: 20,
-                    minWidth: 40,
-                    textAlign: "right",
-                  }}
-                >
-                  {r.estimated_days != null ? `${r.estimated_days}d` : ""}
-                </div>
+        return (
+          <div key={r.object_id} style={S.row(isSel, last)} onClick={() => setSelected(r.object_id)}>
+            <div style={S.dot(dot)} />
 
-                {/* Price */}
-                <div
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 600,
-                    color: "#fafafa",
-                    minWidth: 52,
-                    textAlign: "right",
-                    marginRight: medusaLabel ? 12 : 0,
-                  }}
-                >
-                  ${r.amount.toFixed(2)}
-                </div>
+            <div style={{ flex: 1 }}>
+              <span style={{ fontSize: 13, color: "#fafafa", fontWeight: 500 }}>{r.carrier}</span>
+              <span style={{ fontSize: 13, color: "#71717a", marginLeft: 6 }}>{r.service}</span>
+            </div>
 
-                {/* Medusa option badge */}
-                {medusaLabel && (
-                  <div
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 500,
-                      color: "#d4a22a",
-                      background: "#d4a22a18",
-                      border: "1px solid #d4a22a33",
-                      borderRadius: 5,
-                      padding: "2px 8px",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {medusaLabel}
-                  </div>
-                )}
+            {r.estimated_days != null && (
+              <div style={{ fontSize: 12, color: "#52525b", marginRight: 16, minWidth: 28, textAlign: "right" }}>
+                {r.estimated_days}d
               </div>
-            )
-          })}
-        </div>
-      )}
+            )}
+
+            <div style={{ fontSize: 14, fontWeight: 600, color: "#fafafa", minWidth: 52, textAlign: "right" }}>
+              ${r.amount.toFixed(2)}
+            </div>
+
+            <div style={{ marginLeft: 12, minWidth: 100, display: "flex", justifyContent: "flex-end" }}>
+              {/* spacer so prices align when no badge */}
+            </div>
+
+            <div style={S.radio(isSel)} />
+          </div>
+        )
+      })}
     </div>
   )
 }
-
-export default OrderRatesWidget
