@@ -39,6 +39,7 @@
     "medusajs-launch-utils": "0.0.18",
     "next": "^15.5.15",
     "pg": "^8.11.3",
+    "posthog-js": "^1.373.3",
     "qs": "^6.15.1",
     "react": "19.0.4",
     "react-country-flag": "^3.0.2",
