@@ -222,13 +222,34 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
       const perUnit = (item.variant?.weight as number | undefined) ?? 0
       return sum + perUnit * Number(item.quantity || 0)
     }, 0)
-    const padOz = this.options_.packaging_weight_oz ?? 1
+    const padOz = this.options_.packaging_weight_oz ?? 0
     const totalOz = totalGrams / 28.3495 + padOz
 
+    // Use per-variant dimensions when set (length/width/height on the variant)
+    // so 3-pack and 6-pack use their actual mailer sizes.
+    // Pick the largest variant's dims when multiple items are present.
+    let bestL = dp.length ?? "6"
+    let bestW = dp.width ?? "4"
+    let bestH = dp.height ?? "1"
+    for (const item of items) {
+      // @ts-ignore variant.length etc. exist at runtime when set in Medusa
+      const vl = (item.variant?.length as number | undefined)
+      // @ts-ignore
+      const vw = (item.variant?.width as number | undefined)
+      // @ts-ignore
+      const vh = (item.variant?.height as number | undefined)
+      if (vl && vw && vh) {
+        const vol = vl * vw * vh
+        if (vol > Number(bestL) * Number(bestW) * Number(bestH)) {
+          bestL = String(vl); bestW = String(vw); bestH = String(vh)
+        }
+      }
+    }
+
     return {
-      length: dp.length ?? "6",
-      width: dp.width ?? "4",
-      height: dp.height ?? "1",
+      length: bestL,
+      width: bestW,
+      height: bestH,
       distance_unit: dp.distance_unit ?? "in",
       weight: Math.max(1, Math.round(totalOz * 100) / 100).toFixed(2),
       mass_unit: dp.mass_unit ?? "oz",

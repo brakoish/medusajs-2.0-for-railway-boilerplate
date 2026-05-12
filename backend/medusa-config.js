@@ -158,10 +158,13 @@ const medusaConfig = {
               from_email: 'hello@thedabpal.com',
               // Uses item variant weights to compute parcel weight per order.
               // Dab Pal poly mailer dimensions; weight is computed dynamically.
+              // Fallback parcel dimensions (1-pack poly mailer).
+              // Per-variant dims (length/width/height) are read from Medusa
+              // variants and override this when present.
               default_parcel: {
-                length: '9',
-                width: '6',
-                height: '2',
+                length: '6',
+                width: '9',
+                height: '1',
                 distance_unit: 'in',
                 mass_unit: 'oz',
               },

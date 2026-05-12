@@ -59,6 +59,14 @@ export async function GET(
   // Variant weights are actual packaged weights — no extra padding needed
   const totalOz = Math.max(1, Math.round((totalGrams / 28.3495) * 100) / 100)
 
+  // Pick parcel dimensions based on what's in the order.
+  // 1-pack: 6x9 poly mailer; 3-pack: 8x8; 6-pack: 8x9.
+  // If an order mixes pack sizes, use the largest.
+  const skus = items.map((i) => (i.variant_sku as string | undefined) ?? "")
+  const has6 = skus.some((s) => s.includes("-6-"))
+  const has3 = skus.some((s) => s.includes("-3-"))
+  const [pLen, pWid, pHgt] = has6 ? ["8","9","3"] : has3 ? ["8","8","2"] : ["6","9","1"]
+
   const toCity = shippingAddr.city as string
   const toState = shippingAddr.province as string
   const toZip = shippingAddr.postal_code as string
@@ -96,9 +104,9 @@ export async function GET(
       },
       parcels: [
         {
-          length: "9",
-          width: "6",
-          height: "2",
+          length: pLen,
+          width: pWid,
+          height: pHgt,
           distance_unit: "in",
           weight: String(totalOz),
           mass_unit: "oz",
