@@ -177,6 +177,7 @@ const medusaConfig = {
                 state: 'NY',
                 zip: '11206',
                 country: 'US',
+                phone: process.env.SHIPPO_FROM_PHONE || '7186669999',
               },
               // Fallback map for orders placed before shipping options used shippo_shippo.
               // Maps Medusa shipping_option_id -> Shippo service group.
