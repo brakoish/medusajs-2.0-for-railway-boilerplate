@@ -56,18 +56,10 @@ export default function Nav() {
             <NavLink href="/#faq">FAQ</NavLink>
           </div>
 
-          {/* MOBILE-ONLY inline Shop/Reviews/FAQ links. The group sits as
-              its own tight cluster, mx-auto + flex-1 centers it between
-              the logo and cart. gap-x-4 keeps the three links close to
-              each other. Hidden on desktop where the centered menu already
-              shows them. */}
-          <div className="flex small:hidden flex-1 items-center justify-center gap-x-4">
-            <LocalizedClientLink
-              href="/#shop"
-              className="text-xs text-ui-fg-subtle hover:text-ui-fg-base"
-            >
-              Shop
-            </LocalizedClientLink>
+          {/* MOBILE-ONLY: Reviews + FAQ only. No Shop link — the hero CTA
+              already handles that and a "Shop" nav link on a 1-product
+              store confuses users (implies a catalog). */}
+          <div className="flex small:hidden flex-1 items-center justify-center gap-x-5">
             <LocalizedClientLink
               href="/#reviews"
               className="text-xs text-ui-fg-subtle hover:text-ui-fg-base"
