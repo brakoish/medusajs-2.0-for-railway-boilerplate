@@ -155,6 +155,18 @@ const medusaConfig = {
             options: {
               api_token: SHIPPO_API_TOKEN,
               api_url: SHIPPO_API_URL,
+              // Fallback map for orders placed before shipping options used shippo_shippo.
+              // Maps Medusa shipping_option_id -> Shippo service group.
+              shipping_option_data_map: {
+                'so_01KQX07HMV29YVB18YEF7EF0WT': {
+                  service_group_id: '3a9ac843864f4b8a806c96c1be9f5d58',
+                  service_group_name: 'Standard Shipping',
+                },
+                'so_01KQX07J0G31QZ6175JDESG7MW': {
+                  service_group_id: '91cd6ba8d21b43039f394c97bec71c0b',
+                  service_group_name: 'Priority Shipping',
+                },
+              },
             },
           },
         ],

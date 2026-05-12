@@ -32,6 +32,15 @@ export type ShippoOptions = ShippoClientOptions & {
   default_parcel?: Partial<ShippoParcel>
   /** Pad the parcel weight (oz) to account for box + filler. */
   packaging_weight_oz?: number
+  /**
+   * Fallback map from Medusa shipping_option_id → Shippo service group data.
+   * Used in createFulfillment when the shipping method data has no service_group_id
+   * (e.g. orders placed before the Shippo provider was wired to the options).
+   */
+  shipping_option_data_map?: Record<
+    string,
+    { service_group_id: string; service_group_name: string }
+  >
 }
 
 type InjectedDependencies = {
@@ -370,13 +379,22 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
 
     // service_group_id may be missing on orders placed before the Shippo provider
     // was wired to the shipping option (they were manual_manual at order time).
-    // Fall back to the shipping option's own data field.
-    const serviceGroupId =
+    // Fall back chain:
+    //   1. method data (set by validateFulfillmentData for new orders)
+    //   2. shipping_option.data if hydrated on the fulfillment object
+    //   3. shipping_option_data_map in provider options (keyed by shipping_option_id)
+    const shippingOptionId = (fulfillment?.shipping_option_id as string | undefined)
+      ?? (fulfillment?.shipping_option as Record<string, unknown> | undefined)?.id as string | undefined
+    const mapEntry = shippingOptionId
+      ? this.options_.shipping_option_data_map?.[shippingOptionId]
+      : undefined
+    const serviceGroupId: string | undefined =
       md.service_group_id ??
-      // @ts-ignore fulfillment.shipping_option exists at runtime
-      (fulfillment?.shipping_option as Record<string, unknown> | undefined)?.data
-        // @ts-ignore
-        ?.service_group_id as string | undefined
+      // @ts-ignore fulfillment.shipping_option may be hydrated
+      ((fulfillment?.shipping_option as Record<string, unknown> | undefined)
+        ?.data as Record<string, unknown> | undefined
+      )?.service_group_id as string | undefined ??
+      mapEntry?.service_group_id
 
     // Look up the Service Group's underlying service token (e.g. usps_ground_advantage).
     const groups = await this.client.listServiceGroups()
