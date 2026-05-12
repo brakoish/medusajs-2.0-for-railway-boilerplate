@@ -30,9 +30,11 @@ export async function POST(
     filters: { id: orderId },
     fields: [
       "id",
+      "status",
       "items.id",
       "items.quantity",
       "items.detail.fulfilled_quantity",
+      "items.detail.quantity",
     ],
   })
 
@@ -42,19 +44,22 @@ export async function POST(
     return
   }
 
-  // Only include items that still have unfulfilled quantity
-  const items = ((order.items as Record<string, unknown>[]) || [])
+  // Build items list — pass all items with full quantity and let the workflow
+  // figure out what's already fulfilled. The detail.fulfilled_quantity path
+  // may not resolve in all graph contexts so we don't filter on it.
+  const rawItems = (order.items as Record<string, unknown>[]) || []
+  const items = rawItems
     .map((item) => {
       const detail = item.detail as Record<string, unknown> | undefined
       const fulfilled = Number(detail?.fulfilled_quantity ?? 0)
       const total = Number(item.quantity ?? 0)
-      const remaining = total - fulfilled
-      return { id: item.id as string, quantity: remaining }
+      const remaining = Math.max(0, total - fulfilled)
+      return { id: item.id as string, quantity: remaining > 0 ? remaining : total }
     })
     .filter((i) => i.quantity > 0)
 
   if (!items.length) {
-    res.status(400).json({ error: "No unfulfilled items on this order" })
+    res.status(400).json({ error: "No items found on this order" })
     return
   }
 

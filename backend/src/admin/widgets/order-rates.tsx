@@ -109,7 +109,7 @@ export default function OrderRatesWidget() {
 
   const fetchRates = async () => {
     if (!orderId || loading) return
-    setLoading(true); setErr(null); setDone(null); setSelected(null)
+    setLoading(true); setErr(null); setDone(null); setSelected(null); setRates(null)
     const r = await fetch(`/admin/orders/${orderId}/rates`, { credentials: "include" })
     const d: RatesResp = await r.json()
     if (d.error) { setErr(d.error) }
