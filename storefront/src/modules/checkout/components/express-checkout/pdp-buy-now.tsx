@@ -161,16 +161,26 @@ const PdpBuyNowInner: React.FC<{
     })()
   }
 
-  const ensureCartId = async (): Promise<string | null> => {
+  // Wait for the eager addToCart to finish, but give up after timeoutMs and
+  // return null so the wallet callback can resolve with a fallback instead
+  // of hanging until Google/Apple Pay kills the sheet with REQUEST_TIMEOUT.
+  const ensureCartId = async (timeoutMs = 6000): Promise<string | null> => {
     if (cartIdRef.current) return cartIdRef.current
-    if (cartReadyRef.current) return await cartReadyRef.current
-    return null
+    if (!cartReadyRef.current) return null
+    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs))
+    return await Promise.race([cartReadyRef.current, timeout])
   }
+
+  const FALLBACK_RATES = [
+    { id: "standard", displayName: "Standard Shipping", amount: 700 },
+  ]
 
   const handleAddressChange = async (event: any) => {
     const cartId = await ensureCartId()
     if (!cartId) {
-      event.resolve({})
+      // Cart not ready — resolve with flat-rate fallback so the sheet
+      // doesn't hit its deadline. Real total locks in on confirm.
+      event.resolve({ shippingRates: FALLBACK_RATES })
       return
     }
     await handleShippingAddressChange({ event, cartId })
@@ -188,9 +198,9 @@ const PdpBuyNowInner: React.FC<{
   const handleConfirm = async (event: any) => {
     setError(null)
     try {
-      // Wait for the eager addToCart from handleClick to complete (in
-      // case the buyer is faster than the network), then retrieve fresh.
-      await ensureCartId()
+      // Wait for the eager addToCart from handleClick to complete, with a
+      // generous timeout — confirm has more headroom than address-change.
+      await ensureCartId(12000)
       const cart = await retrieveCart()
       if (!cart) throw new Error("Could not retrieve cart")
 
