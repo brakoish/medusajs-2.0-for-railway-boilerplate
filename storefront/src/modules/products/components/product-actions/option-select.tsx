@@ -96,6 +96,13 @@ function buildPackHints(
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           }),
+          // Total price for this pack, no decimal (e.g. "$25", "$65", "$120")
+          totalPrice: convertToLocale({
+            amount: r.amount,
+            currency_code: r.currency,
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          }),
           savings:
             savings > 0.5
               ? `Save ${convertToLocale({
@@ -111,7 +118,7 @@ function buildPackHints(
     })
   ) as Record<
     string,
-    { perUnit: string; savings: string | null; isCheapestUnit: boolean }
+    { perUnit: string; totalPrice: string; savings: string | null; isCheapestUnit: boolean }
   >
 }
 
@@ -143,7 +150,7 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               key={v}
               className={clx(
                 "relative border-ui-border-base bg-ui-bg-subtle border rounded-rounded flex-1 transition-shadow ease-in-out duration-150",
-                hint && hint.savings
+                hint
                   ? "py-2 px-2 min-h-[56px]"
                   : "h-10 p-2 text-small-regular",
                 {
@@ -154,11 +161,14 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               disabled={disabled}
               data-testid="option-button"
             >
-              {hint && hint.savings ? (
+              {hint ? (
                 <div className="flex flex-col items-center justify-center leading-tight">
                   <span className="text-sm font-medium">{v}</span>
-                  <span className="text-[10px] font-semibold text-amber-600 mt-0.5 uppercase tracking-wide">
-                    {hint.savings}
+                  <span className={clx(
+                    "text-[10px] font-semibold mt-0.5 uppercase tracking-wide",
+                    hint.savings ? "text-amber-600" : "text-gray-400"
+                  )}>
+                    {hint.savings ?? hint.totalPrice}
                   </span>
                 </div>
               ) : (
