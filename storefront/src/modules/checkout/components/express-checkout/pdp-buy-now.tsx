@@ -73,9 +73,17 @@ const PdpBuyNow: React.FC<Props> = ({
   //
   // IMPORTANT: Medusa 2.x returns prices as decimal dollars (e.g. 25 for
   // $25), but Stripe wants cents (2500). Multiply by 100.
-  const totalCents = useMemo(() => {
-    return Math.max(50, Math.round(amount * 100 * quantity + 700))
-  }, [amount, quantity])
+  const itemCents = useMemo(() => Math.round(amount * 100 * quantity), [amount, quantity])
+  const totalCents = useMemo(() => Math.max(50, itemCents + 700), [itemCents])
+
+  // Human-readable label for the wallet sheet line item.
+  // variant.title is Medusa's combined option string e.g. "1-Pack / Black Speck".
+  const variantLabel = useMemo(() => {
+    const base = "Dab Pal"
+    const title = (variant as any)?.title as string | undefined
+    if (title) return `${base} – ${title.replace(" / ", " · ")}`
+    return base
+  }, [(variant as any)?.title])
 
   return (
     <div className="mt-3 animate-fade-slide-up">
@@ -104,6 +112,8 @@ const PdpBuyNow: React.FC<Props> = ({
           variantId={variant.id!}
           countryCode={countryCode}
           quantity={quantity}
+          variantLabel={variantLabel}
+          itemCents={itemCents}
         />
       </Elements>
     </div>
@@ -114,7 +124,9 @@ const PdpBuyNowInner: React.FC<{
   variantId: string
   countryCode: string
   quantity: number
-}> = ({ variantId, countryCode, quantity }) => {
+  variantLabel: string
+  itemCents: number
+}> = ({ variantId, countryCode, quantity, variantLabel, itemCents }) => {
   const router = useRouter()
   const stripe = useStripe()
   const elements = useElements()
@@ -142,6 +154,13 @@ const PdpBuyNowInner: React.FC<{
       shippingAddressRequired: true,
       billingAddressRequired: true,
       allowedShippingCountries: ["US"],
+      // Show what the buyer is purchasing before they enter their address.
+      // After address-change fires, buildLineItems replaces this with the
+      // real subtotal/shipping/tax breakdown.
+      lineItems: [
+        { name: variantLabel, amount: itemCents },
+        { name: "Shipping", amount: 700 },
+      ],
       shippingRates: [
         { id: "standard", displayName: "Standard Shipping", amount: 700 },
       ],
