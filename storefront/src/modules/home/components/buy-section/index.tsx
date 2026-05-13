@@ -41,10 +41,7 @@ export default async function BuySection({
           {/* Title, variant selector, add-to-cart */}
           <div className="w-full small:sticky small:top-24 flex flex-col gap-6">
             <div>
-              <span className="uppercase tracking-[0.25em] text-xs text-gray-500">
-                Made to order in NY
-              </span>
-              <h2 className="text-2xl small:text-4xl font-semibold tracking-tight mt-3 leading-tight">
+              <h2 className="text-2xl small:text-4xl font-semibold tracking-tight leading-tight">
                 Dab Pal — portable Q-tip & iso case
               </h2>
               <p className="text-gray-600 mt-3 leading-relaxed text-sm small:text-base">

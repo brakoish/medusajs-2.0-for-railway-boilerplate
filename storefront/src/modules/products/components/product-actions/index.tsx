@@ -158,6 +158,14 @@ export default function ProductActions({
 
   const inView = useIntersection(actionsRef, "0px")
 
+  const eyebrow = useMemo(() => {
+    const size = options["Pack Size"]
+    const color = options["Color"]
+    if (size && color) return `${size} \u00b7 ${color}`
+    if (color) return `${color} \u00b7 pick a size`
+    return "Pick your Dab Pal"
+  }, [options])
+
   // add the selected variant to the cart
   const handleAddToCart = async () => {
     if (!selectedVariant?.id) return null
@@ -177,6 +185,9 @@ export default function ProductActions({
   return (
     <>
       <div className="flex flex-col gap-y-2" ref={actionsRef}>
+        <span className="uppercase tracking-[0.25em] text-xs text-gray-500 transition-all duration-300">
+          {eyebrow}
+        </span>
         <div>
           {(product.variants?.length ?? 0) > 1 && (
             <div className="flex flex-col gap-y-4">
