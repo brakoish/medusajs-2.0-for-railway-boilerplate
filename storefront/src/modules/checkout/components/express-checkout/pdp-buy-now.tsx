@@ -78,7 +78,12 @@ const PdpBuyNow: React.FC<Props> = ({
   }, [amount, quantity])
 
   return (
-    <div className="mt-2">
+    <div className="mt-3 animate-fade-slide-up">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="flex-1 h-px bg-gray-200" />
+        <span className="text-[11px] text-gray-400 uppercase tracking-widest select-none">or</span>
+        <div className="flex-1 h-px bg-gray-200" />
+      </div>
       <Elements
         stripe={stripePromise}
         options={{

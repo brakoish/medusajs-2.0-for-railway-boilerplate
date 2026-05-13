@@ -140,6 +140,15 @@ module.exports = {
           "0%": { transform: "translateY(-100%)" },
           "100%": { transform: "translateY(0)" },
         },
+        "fade-slide-up": {
+          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "btn-ready": {
+          "0%": { boxShadow: "0 0 0 0 rgba(245,158,11,0)" },
+          "40%": { boxShadow: "0 0 0 5px rgba(245,158,11,0.28)" },
+          "100%": { boxShadow: "0 0 0 0 rgba(245,158,11,0)" },
+        },
       },
       animation: {
         ring: "ring 2.2s cubic-bezier(0.5, 0, 0.5, 1) infinite",
@@ -155,6 +164,8 @@ module.exports = {
         enter: "enter 200ms ease-out",
         "slide-in": "slide-in 1.2s cubic-bezier(.41,.73,.51,1.02)",
         leave: "leave 150ms ease-in forwards",
+        "fade-slide-up": "fade-slide-up 0.45s cubic-bezier(0.16,1,0.3,1) forwards",
+        "btn-ready": "btn-ready 0.9s ease-out forwards",
       },
     },
   },

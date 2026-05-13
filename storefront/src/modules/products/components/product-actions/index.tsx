@@ -42,6 +42,8 @@ export default function ProductActions({
 }: ProductActionsProps) {
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
+  const [btnReady, setBtnReady] = useState(false)
+  const prevVariantIdRef = useRef<string | undefined>(undefined)
   const countryCode = COUNTRY
 
   // Preselect a variant on mount so price + Apple Pay/wallet rates render
@@ -73,6 +75,18 @@ export default function ProductActions({
       return isEqual(variantOptions, options)
     })
   }, [product.variants, options])
+
+  // Pulse the Add to Cart button once when the variant first resolves.
+  useEffect(() => {
+    const wasEmpty = !prevVariantIdRef.current
+    const nowFilled = !!selectedVariant?.id
+    if (wasEmpty && nowFilled) {
+      setBtnReady(true)
+      const t = setTimeout(() => setBtnReady(false), 950)
+      return () => clearTimeout(t)
+    }
+    prevVariantIdRef.current = selectedVariant?.id
+  }, [selectedVariant?.id])
 
   // Push the selected variant id up so siblings (the gallery) can react.
   // We also push when only Color is set (no Pack Size) so the gallery
@@ -192,7 +206,7 @@ export default function ProductActions({
           onClick={handleAddToCart}
           disabled={!inStock || !selectedVariant || !!disabled || isAdding}
           variant="primary"
-          className="w-full h-10"
+          className={`w-full h-10 rounded-lg transition-shadow${btnReady ? " animate-btn-ready" : ""}`}
           isLoading={isAdding}
           data-testid="add-product-button"
         >
