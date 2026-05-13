@@ -146,15 +146,16 @@ const CartDropdown = ({
         onMouseLeave={close}
       >
       <Popover className="relative h-full">
-        <Popover.Button
-          as={LocalizedClientLink}
+        {/* Plain link — hover on the parent div handles popover open/close,
+            so we don't need Popover.Button toggling on click. */}
+        <LocalizedClientLink
           href="/cart"
           data-testid="nav-cart-link"
           aria-label={`Cart, ${totalItems} item${totalItems === 1 ? "" : "s"}`}
           className={cartIconClass}
         >
           {cartIconChildren}
-        </Popover.Button>
+        </LocalizedClientLink>
         <Transition
           show={cartDropdownOpen}
           as={Fragment}
