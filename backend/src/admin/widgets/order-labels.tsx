@@ -1,62 +1,6 @@
 import { useEffect, useState } from "react"
 import { defineWidgetConfig } from "@medusajs/admin-sdk"
 
-/**
- * Order Labels Widget
- * Injected into the order detail page after the main content.
- * Fetches label data from our custom /admin/orders/:id/labels API
- * and shows "Print Label" buttons for each fulfillment.
- */
-
-// Minimal type-safe UI primitives (Medusa UI may not be resolvable in backend
-// build context, so we use plain JSX with Tailwind classes the admin already
-// ships.)
-const Card = ({ children }: { children: React.ReactNode }) => (
-  <div className="bg-white border rounded-lg overflow-hidden">{children}</div>
-)
-const CardHeader = ({ children }: { children: React.ReactNode }) => (
-  <div className="px-6 py-4 border-b flex items-center justify-between">
-    {children}
-  </div>
-)
-const CardBody = ({ children }: { children: React.ReactNode }) => (
-  <div className="px-6 py-4">{children}</div>
-)
-const Title = ({ children }: { children: React.ReactNode }) => (
-  <h2 className="text-lg font-semibold">{children}</h2>
-)
-const Badge = ({
-  children,
-  color = "green",
-}: {
-  children: React.ReactNode
-  color?: "green" | "gray"
-}) => {
-  const colorClass =
-    color === "green"
-      ? "bg-green-100 text-green-800"
-      : "bg-gray-100 text-gray-800"
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${colorClass}`}>
-      {children}
-    </span>
-  )
-}
-const Button = ({
-  children,
-  onClick,
-}: {
-  children: React.ReactNode
-  onClick?: () => void
-}) => (
-  <button
-    onClick={onClick}
-    className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-  >
-    {children}
-  </button>
-)
-
 type LabelInfo = {
   fulfillment_id: string
   tracking_number: string | null
@@ -67,18 +11,55 @@ type LabelInfo = {
   created_at: string
 }
 
-// Widget injected into the order detail page
+const S = {
+  wrap: {
+    background: "#18181b",
+    border: "1px solid #27272a",
+    borderRadius: 12,
+    overflow: "hidden",
+    marginBottom: 16,
+    fontFamily: "Inter, sans-serif",
+  } as React.CSSProperties,
+  header: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "14px 20px",
+    borderBottom: "1px solid #27272a",
+  } as React.CSSProperties,
+  title: { fontSize: 15, fontWeight: 600, color: "#fafafa" } as React.CSSProperties,
+  body: { padding: "14px 20px" } as React.CSSProperties,
+  muted: { fontSize: 13, color: "#71717a" } as React.CSSProperties,
+  row: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "10px 16px",
+    border: "1px solid #27272a",
+    borderRadius: 8,
+    marginBottom: 8,
+  } as React.CSSProperties,
+  badge: {
+    fontSize: 11, fontWeight: 500,
+    color: "#4ade80", background: "#4ade8018",
+    border: "1px solid #4ade8033",
+    borderRadius: 5, padding: "2px 7px",
+  } as React.CSSProperties,
+  service: { fontSize: 12, color: "#71717a", marginLeft: 8 } as React.CSSProperties,
+  tracking: { fontSize: 12, color: "#a1a1aa", marginTop: 4 } as React.CSSProperties,
+  trackLink: { color: "#d4a22a" } as React.CSSProperties,
+  btn: {
+    fontSize: 12, fontWeight: 500,
+    color: "#000",
+    background: "#d4a22a",
+    border: "none",
+    borderRadius: 6, padding: "5px 14px",
+    cursor: "pointer",
+  } as React.CSSProperties,
+}
+
 const OrderLabelsWidget = () => {
-  // Medusa admin injects the order into a data attribute on a wrapper div
-  // We can grab it from the DOM context if available, or fetch by URL
-  const orderId = (() => {
-    // Try to extract order ID from the URL path: /orders/order_xxx
-    const m = window.location.pathname.match(/\/orders\/(order_[^/]+)/)
-    if (m) return m[1]
-    // Fallback: look for a data attribute set by the admin
-    const el = document.querySelector('[data-order-id]')
-    return el?.getAttribute('data-order-id') || null
-  })()
+  const orderId = window.location.pathname.match(/\/orders\/(order_[^/]+)/)?.[1] ?? null
 
   const [labels, setLabels] = useState<LabelInfo[]>([])
   const [loading, setLoading] = useState(false)
@@ -88,115 +69,50 @@ const OrderLabelsWidget = () => {
     if (!orderId) return
     setLoading(true)
     fetch(`/admin/orders/${orderId}/labels`, { credentials: "include" })
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`)
-        return r.json()
-      })
-      .then((data: { labels?: LabelInfo[] }) => {
-        setLabels(data.labels || [])
-        setLoading(false)
-      })
-      .catch((e: Error) => {
-        setError(e.message)
-        setLoading(false)
-      })
+      .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() })
+      .then((data: { labels?: LabelInfo[] }) => { setLabels(data.labels || []); setLoading(false) })
+      .catch((e: Error) => { setError(e.message); setLoading(false) })
   }, [orderId])
 
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <Title>Shipping Labels</Title>
-        </CardHeader>
-        <CardBody>
-          <p className="text-sm text-gray-500">Loading labels...</p>
-        </CardBody>
-      </Card>
-    )
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <Title>Shipping Labels</Title>
-        </CardHeader>
-        <CardBody>
-          <p className="text-sm text-red-600">Error: {error}</p>
-        </CardBody>
-      </Card>
-    )
-  }
-
-  if (labels.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <Title>Shipping Labels</Title>
-        </CardHeader>
-        <CardBody>
-          <p className="text-sm text-gray-500">
-            No labels found. Fulfill the order to generate a shipping label.
-          </p>
-        </CardBody>
-      </Card>
-    )
-  }
-
   return (
-    <Card>
-      <CardHeader>
-        <Title>Shipping Labels</Title>
-      </CardHeader>
-      <CardBody>
-        <div className="space-y-3">
-          {labels.map((label) => (
-            <div
-              key={label.fulfillment_id}
-              className="flex items-center justify-between border rounded-lg p-3"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <Badge color="green">{label.carrier || "Carrier"}</Badge>
-                  {label.service && (
-                    <span className="text-xs text-gray-500">{label.service}</span>
-                  )}
+    <div style={S.wrap}>
+      <div style={S.header}>
+        <span style={S.title}>Shipping Labels</span>
+      </div>
+      <div style={S.body}>
+        {loading && <p style={S.muted}>Loading...</p>}
+        {error && <p style={{ ...S.muted, color: "#f87171" }}>Error: {error}</p>}
+        {!loading && !error && labels.length === 0 && (
+          <p style={S.muted}>No labels found. Fulfill the order to generate a shipping label.</p>
+        )}
+        {labels.map((label) => (
+          <div key={label.fulfillment_id} style={S.row}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <span style={S.badge}>{label.carrier || "Carrier"}</span>
+                {label.service && <span style={S.service}>{label.service}</span>}
+              </div>
+              {label.tracking_number && (
+                <div style={S.tracking}>
+                  Tracking:{" "}
+                  {label.tracking_url
+                    ? <a href={label.tracking_url} target="_blank" rel="noreferrer" style={S.trackLink}>{label.tracking_number}</a>
+                    : <span style={{ color: "#fafafa" }}>{label.tracking_number}</span>
+                  }
                 </div>
-                {label.tracking_number && (
-                  <p className="text-sm">
-                    Tracking:{" "}
-                    {label.tracking_url ? (
-                      <a
-                        href={label.tracking_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
-                      >
-                        {label.tracking_number}
-                      </a>
-                    ) : (
-                      <span className="text-gray-700">{label.tracking_number}</span>
-                    )}
-                  </p>
-                )}
-              </div>
-              <div>
-                {label.label_url && (
-                  <Button onClick={() => window.open(label.label_url!, "_blank")}>
-                    Print Label
-                  </Button>
-                )}
-              </div>
+              )}
             </div>
-          ))}
-        </div>
-      </CardBody>
-    </Card>
+            {label.label_url && (
+              <button style={S.btn} onClick={() => window.open(label.label_url!, "_blank")}>
+                Print Label ↗
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 
-export const config = defineWidgetConfig({
-  zone: "order.details.after",
-})
-
+export const config = defineWidgetConfig({ zone: "order.details.after" })
 export default OrderLabelsWidget

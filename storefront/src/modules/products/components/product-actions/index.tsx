@@ -124,7 +124,7 @@ export default function ProductActions({
         [title]: value,
       }
       if (title === "Color" && !next["Pack Size"]) {
-        next["Pack Size"] = "1-Pack"
+        next["Pack Size"] = "Single"
       }
       return next
     })
