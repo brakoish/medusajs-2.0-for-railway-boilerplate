@@ -107,7 +107,10 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
 
           {/* Footer */}
           <Section style={S.footer}>
-            <Text style={S.footerText}>Questions? Reply to this email or visit</Text>
+            <Text style={S.footerText}>Questions? DM us on Instagram</Text>
+            <Text style={{ ...S.footerText, margin: '0 0 8px' }}>
+              <Link href="https://instagram.com/nslabs_" style={S.link}>@nslabs_</Link>
+            </Text>
             <Text style={{ ...S.footerText, margin: '0' }}>
               <Link href="https://thedabpal.com" style={S.link}>thedabpal.com</Link>
             </Text>
