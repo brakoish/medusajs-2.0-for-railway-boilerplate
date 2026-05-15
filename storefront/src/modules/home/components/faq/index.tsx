@@ -29,7 +29,7 @@ const faqs = [
   },
   {
     q: "Returns?",
-    a: "Unopened kits can be returned within 14 days for a full refund. Reach out at hello@dabpal.com if anything's wrong.",
+    a: "Unopened kits can be returned within 14 days for a full refund. Reach out on Instagram (@nslabs_) if anything's wrong.",
   },
 ]
 
