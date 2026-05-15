@@ -100,7 +100,7 @@ export const OrderShippedTemplate: React.FC<OrderShippedTemplateProps> = ({
           <Section style={S.footer}>
             <Text style={S.footerText}>Questions? DM us on Instagram</Text>
             <Text style={{ ...S.footerText, margin: '0 0 8px' }}>
-              <Link href="https://instagram.com/thedabpal" style={S.link}>@thedabpal</Link>
+              <Link href="https://instagram.com/nslabs_" style={S.link}>@nslabs_</Link>
             </Text>
             <Text style={{ ...S.footerText, margin: '0' }}>
               <Link href="https://thedabpal.com" style={S.link}>thedabpal.com</Link>
