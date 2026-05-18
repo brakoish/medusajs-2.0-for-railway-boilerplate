@@ -131,7 +131,18 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
   "data-testid": dataTestId,
   disabled,
 }) => {
-  const filteredOptions = option.values?.map((v) => v.value)
+  // Sort Pack Size options: Single first (no digits → 0), then by pack count.
+  // Color options are unaffected (no digits → stable order).
+  const filteredOptions = option.values
+    ?.map((v) => v.value)
+    .sort((a, b) => {
+      const order = (s?: string) => {
+        if (!s) return 999
+        const m = s.match(/(\d+)/)
+        return m ? parseInt(m[1], 10) : 0
+      }
+      return order(a) - order(b)
+    })
 
   const hints = variants?.length ? buildPackHints(option, variants) : null
 
@@ -164,12 +175,14 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               {hint ? (
                 <div className="flex flex-col items-center justify-center leading-tight">
                   <span className="text-sm font-medium">{v}</span>
-                  <span className={clx(
-                    "text-[10px] font-semibold mt-0.5 uppercase tracking-wide",
-                    hint.savings ? "text-amber-600" : "text-gray-400"
-                  )}>
-                    {hint.savings ?? hint.totalPrice}
+                  <span className="text-[10px] font-medium mt-0.5 text-gray-500">
+                    {hint.totalPrice}
                   </span>
+                  {hint.savings && (
+                    <span className="text-[9px] font-semibold text-amber-600 uppercase tracking-wide leading-none mt-0.5">
+                      {hint.savings}
+                    </span>
+                  )}
                 </div>
               ) : (
                 v

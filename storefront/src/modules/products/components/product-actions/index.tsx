@@ -40,29 +40,33 @@ export default function ProductActions({
   disabled,
   hideMobileActions,
 }: ProductActionsProps) {
-  const [options, setOptions] = useState<Record<string, string | undefined>>({})
+  const [options, setOptions] = useState<Record<string, string | undefined>>(() => {
+    // Pre-compute defaults so there's no "Select variant" flash on first render.
+    if (!product.variants?.length) return {}
+    const DEFAULT_SKU = "DABPAL-1-BLK"
+    const preferred =
+      product.variants.find((v) => v.sku === DEFAULT_SKU) ??
+      product.variants[0]
+    return optionsAsKeymap(preferred.options) ?? {}
+  })
   const [isAdding, setIsAdding] = useState(false)
   const [btnReady, setBtnReady] = useState(false)
   const prevVariantIdRef = useRef<string | undefined>(undefined)
   const countryCode = COUNTRY
 
-  // Preselect a variant on mount so price + Apple Pay/wallet rates render
-  // immediately. If there is only 1 variant, use it. Otherwise prefer a
-  // configured default SKU (Dab Pal: 1-pack Black), falling back to the
-  // first variant when no match is found.
+  // State is pre-initialized with defaults above. This effect only runs if
+  // the product prop changes identity (practically never on a single-product
+  // storefront), keeping the selection in sync if it does.
   useEffect(() => {
-    if (!product.variants || product.variants.length === 0) return
-    if (product.variants.length === 1) {
-      const variantOptions = optionsAsKeymap(product.variants[0].options)
-      setOptions(variantOptions ?? {})
-      return
-    }
-    const DEFAULT_SKU = "DABPAL-1-BLK"
-    const preferred =
-      product.variants.find((v) => v.sku === DEFAULT_SKU) ??
-      product.variants[0]
-    const variantOptions = optionsAsKeymap(preferred.options)
-    setOptions(variantOptions ?? {})
+    if (!product.variants?.length) return
+    setOptions((prev) => {
+      if (Object.keys(prev).length > 0) return prev // already initialized
+      const DEFAULT_SKU = "DABPAL-1-BLK"
+      const preferred =
+        product.variants!.find((v) => v.sku === DEFAULT_SKU) ??
+        product.variants![0]
+      return optionsAsKeymap(preferred.options) ?? {}
+    })
   }, [product.variants])
 
   const selectedVariant = useMemo(() => {
