@@ -65,7 +65,7 @@ export default async function BuySection({
               />
             </Suspense>
             <div className="text-xs text-gray-500 leading-relaxed border-t border-gray-100 pt-4 mt-2">
-              Ships in 2–3 business days from Astoria, NY · Free shipping over $50 · 14-day returns
+              Ships in 2–3 business days from Astoria, NY · 14-day returns
             </div>
           </div>
         </div>

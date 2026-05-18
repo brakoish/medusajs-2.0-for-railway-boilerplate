@@ -17,9 +17,9 @@
  */
 
 const items = [
-  "Free shipping over $60",
   "Made in NY",
   "Ships in 1–2 days",
+  "14-day returns",
 ]
 
 const AnnouncementBar = () => {
