@@ -272,10 +272,16 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
     title?: string
     description?: string
   }> {
-    if (!context?.from_location?.address) {
+    // Fall back to the configured default_from when the fulfillment context
+    // doesn't include a stock location (e.g. store/shipping-options calls).
+    const fromLocation = context?.from_location?.address
+      ? { ...context.from_location.address, name: context.from_location.name }
+      : this.options_.default_from
+
+    if (!fromLocation) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
-        "Stock location address required for Shippo live rates"
+        "No from-address available for Shippo live rates (set default_from in module options)"
       )
     }
     if (!context?.shipping_address) {
@@ -285,10 +291,7 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
       )
     }
 
-    const address_from = this.toShippoAddress("from", {
-      ...context.from_location.address,
-      name: context.from_location.name,
-    })
+    const address_from = this.toShippoAddress("from", fromLocation)
     const address_to = this.toShippoAddress("to", context.shipping_address)
     const items = context.items || []
 
