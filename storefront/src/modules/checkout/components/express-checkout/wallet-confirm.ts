@@ -18,6 +18,7 @@ import {
   setShippingMethod,
   updateCart,
   retrieveCart,
+  retrieveCartById,
 } from "@lib/data/cart"
 import { fetchCartShippingMethods } from "@lib/data/fulfillment"
 import { enrichStripePaymentIntent } from "@lib/data/enrich-pi"
@@ -37,6 +38,12 @@ type WalletConfirmInput = {
   event: any
   /** Used to build the success return URL. Default: cart shipping country, then "us". */
   defaultCountry?: string
+  /**
+   * When set, all cart mutations target this id instead of the session
+   * cookie cart. Used by the PDP Buy Now flow so the user's real cart
+   * is never touched.
+   */
+  buyNowCartId?: string
 }
 
 /**
@@ -77,6 +84,7 @@ export async function walletConfirm({
   elements,
   event,
   defaultCountry = "us",
+  buyNowCartId,
 }: WalletConfirmInput): Promise<void> {
   if (!stripe || !elements) throw new Error("Stripe not ready")
 
@@ -128,7 +136,7 @@ export async function walletConfirm({
       email: event.payerEmail || billing?.email || "",
       shipping_address: shipAddress as any,
       billing_address: billAddress as any,
-    })
+    }, buyNowCartId)
   } catch (err: any) {
     console.error("[walletConfirm] updateCart failed:", err)
     throw new Error(
@@ -158,7 +166,9 @@ export async function walletConfirm({
   // in the metadata + description we attach to the Stripe PI.
   let cartForPi = cart
   try {
-    const fresh = await retrieveCart()
+    const fresh = buyNowCartId
+      ? await retrieveCartById(buyNowCartId)
+      : await retrieveCart()
     if (fresh) cartForPi = fresh as HttpTypes.StoreCart
   } catch {
     // best-effort
@@ -209,7 +219,7 @@ export async function walletConfirm({
       confirmError.payment_intent?.status === "succeeded" ||
       confirmError.payment_intent?.status === "requires_capture"
     ) {
-      await placeOrder()
+      await placeOrder(buyNowCartId)
       return
     }
     throw new Error(confirmError.message || "Payment failed")
@@ -220,7 +230,7 @@ export async function walletConfirm({
     (paymentIntent.status === "succeeded" ||
       paymentIntent.status === "requires_capture")
   ) {
-    await placeOrder()
+    await placeOrder(buyNowCartId)
   }
 }
 

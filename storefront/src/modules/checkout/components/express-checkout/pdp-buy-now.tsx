@@ -26,7 +26,7 @@ import {
 import { loadStripe } from "@stripe/stripe-js"
 import { useRouter } from "next/navigation"
 import { useMemo, useRef, useState } from "react"
-import { addToCart, retrieveCart } from "@lib/data/cart"
+import { createBuyNowCart, retrieveCartById } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import {
   handleShippingAddressChange,
@@ -141,22 +141,16 @@ const PdpBuyNowInner: React.FC<{
   const cartReadyRef = useRef<Promise<string | null> | null>(null)
 
   const handleClick = (event: any) => {
-    // CRITICAL: this handler must resolve the wallet click *synchronously*.
-    // iOS Safari kills the wallet sheet if the user-gesture chain is
-    // broken by an awaited Promise. So we resolve with a placeholder rate
-    // immediately, and kick off the addToCart in the background. The
-    // address-change handler awaits cartReadyRef before it talks to
-    // Medusa, so by the time the buyer picks an address the cart is
-    // ready and tax can be previewed correctly.
+    // CRITICAL: resolve synchronously — iOS Safari kills the wallet sheet
+    // if the user-gesture chain is broken by an awaited Promise.
+    // We create a fresh isolated cart in the background (never touches
+    // the user's real session cart), then change handlers await it.
     event.resolve({
       emailRequired: true,
       phoneNumberRequired: true,
       shippingAddressRequired: true,
       billingAddressRequired: true,
       allowedShippingCountries: ["US"],
-      // Show what the buyer is purchasing before they enter their address.
-      // After address-change fires, buildLineItems replaces this with the
-      // real subtotal/shipping/tax breakdown.
       lineItems: [
         { name: variantLabel, amount: itemCents },
         { name: "Shipping", amount: 700 },
@@ -166,15 +160,14 @@ const PdpBuyNowInner: React.FC<{
       ],
     })
 
-    // Fire-and-track the cart preparation so change handlers can wait.
+    // Kick off isolated cart creation; change handlers will await this.
     cartReadyRef.current = (async () => {
       try {
-        await addToCart({ variantId, quantity, countryCode })
-        const cart = await retrieveCart()
-        cartIdRef.current = cart?.id || null
-        return cartIdRef.current
+        const id = await createBuyNowCart({ variantId, quantity, countryCode })
+        cartIdRef.current = id
+        return id
       } catch (err) {
-        console.error("[pdp-buy-now] eager addToCart failed:", err)
+        console.error("[pdp-buy-now] createBuyNowCart failed:", err)
         return null
       }
     })()
@@ -220,8 +213,10 @@ const PdpBuyNowInner: React.FC<{
       // Wait for the eager addToCart from handleClick to complete, with a
       // generous timeout — confirm has more headroom than address-change.
       await ensureCartId(12000)
-      const cart = await retrieveCart()
-      if (!cart) throw new Error("Could not retrieve cart")
+      const cartId = await ensureCartId(12000)
+      if (!cartId) throw new Error("Could not create buy-now cart")
+      const cart = await retrieveCartById(cartId)
+      if (!cart) throw new Error("Could not retrieve buy-now cart")
 
       await walletConfirm({
         cart,
@@ -229,6 +224,7 @@ const PdpBuyNowInner: React.FC<{
         elements,
         event,
         defaultCountry: countryCode,
+        buyNowCartId: cartId,
       })
     } catch (e: any) {
       setError(e?.message || "Buy now failed")

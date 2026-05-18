@@ -10,6 +10,13 @@ import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
 import { getProductsById } from "./products"
 import { getRegion } from "./regions"
 
+export async function retrieveCartById(cartId: string) {
+  return await sdk.store.cart
+    .retrieve(cartId, {}, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
+    .then(({ cart }) => cart)
+    .catch(() => null)
+}
+
 export async function retrieveCart() {
   const cartId = await getCartId()
 
@@ -53,14 +60,17 @@ export async function getOrSetCart(countryCode: string) {
   return cart
 }
 
-export async function updateCart(data: HttpTypes.StoreUpdateCart) {
-  const cartId = await getCartId()
-  if (!cartId) {
+export async function updateCart(
+  data: HttpTypes.StoreUpdateCart,
+  cartId?: string
+) {
+  const id = cartId || (await getCartId())
+  if (!id) {
     throw new Error("No existing cart found, please create one before updating")
   }
 
   return sdk.store.cart
-    .update(cartId, data, {}, await getAuthHeaders())
+    .update(id, data, {}, await getAuthHeaders())
     .then(({ cart }) => {
       revalidateTag("cart")
       return cart
@@ -159,6 +169,41 @@ export async function previewWalletTotals({
     total: (c.total as number) ?? 0,
     currency_code: (c.currency_code as string) || "usd",
   }
+}
+
+/**
+ * Create a throw-away cart for the PDP "Buy Now" wallet flow.
+ *
+ * Deliberately does NOT set the session cart cookie — the user's real
+ * cart is left untouched. Returns just the cart id so the wallet
+ * handlers can operate against it directly.
+ */
+export async function createBuyNowCart({
+  variantId,
+  quantity,
+  countryCode,
+}: {
+  variantId: string
+  quantity: number
+  countryCode: string
+}): Promise<string> {
+  const region = await getRegion(countryCode)
+  if (!region) throw new Error(`Region not found for country code: ${countryCode}`)
+
+  const { cart } = await sdk.store.cart.create(
+    { region_id: region.id },
+    {},
+    await getAuthHeaders()
+  )
+
+  await sdk.store.cart.createLineItem(
+    cart.id,
+    { variant_id: variantId, quantity },
+    {},
+    await getAuthHeaders()
+  )
+
+  return cart.id
 }
 
 export async function addToCart({
@@ -443,14 +488,14 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
   )
 }
 
-export async function placeOrder() {
-  const cartId = await getCartId()
-  if (!cartId) {
+export async function placeOrder(cartId?: string) {
+  const id = cartId || (await getCartId())
+  if (!id) {
     throw new Error("No existing cart found when placing an order")
   }
 
   const cartRes = await sdk.store.cart
-    .complete(cartId, {}, await getAuthHeaders())
+    .complete(id, {}, await getAuthHeaders())
     .then((cartRes) => {
       revalidateTag("cart")
       return cartRes
@@ -460,7 +505,8 @@ export async function placeOrder() {
   if (cartRes?.type === "order") {
     const countryCode =
       cartRes.order.shipping_address?.country_code?.toLowerCase()
-    await removeCartId()
+    // Only clear the session cart cookie if this was the session cart.
+    if (!cartId) await removeCartId()
     redirect(`/order/confirmed/${cartRes?.order.id}`)
   }
 
