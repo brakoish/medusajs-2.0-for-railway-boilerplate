@@ -268,7 +268,7 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
     optionData: OptionData
     context: CalculateShippingOptionPriceDTO["context"]
   }): Promise<{
-    amount_cents: number
+    amount: number
     title?: string
     description?: string
   }> {
@@ -309,7 +309,7 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
 
     if (match) {
       return {
-        amount_cents: Math.round(Number(match.amount) * 100),
+        amount: Number(match.amount),
         title: match.title,
         description: match.description,
       }
@@ -334,7 +334,7 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
       `Shippo: no live rate for "${optionData.service_group_name}", falling back to flat_rate $${fallback}`
     )
     return {
-      amount_cents: Math.round(fallback * 100),
+      amount: fallback,
       title: group.name,
       description: group.description,
     }
@@ -363,13 +363,13 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
       )
     }
 
-    const { amount_cents } = await this.getLiveRateForGroup({
+    const { amount } = await this.getLiveRateForGroup({
       optionData: od,
       context,
     })
 
     return {
-      calculated_amount: amount_cents,
+      calculated_amount: amount,
       is_calculated_price_tax_inclusive: false,
     }
   }
@@ -388,14 +388,14 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
     }
 
     // @ts-ignore framework provides full context shape
-    const { amount_cents, title, description } = await this.getLiveRateForGroup(
+    const { amount, title, description } = await this.getLiveRateForGroup(
       // @ts-ignore
       { optionData: od, context }
     )
 
     return {
       ...data,
-      amount: amount_cents,
+      amount,
       service_group_id: od.service_group_id,
       service_group_name: od.service_group_name,
       service_title: title,
