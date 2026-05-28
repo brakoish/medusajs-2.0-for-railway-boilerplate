@@ -1,32 +1,39 @@
-import { loadEnv, Modules, defineConfig } from '@medusajs/utils';
-import {
-  ADMIN_CORS,
-  AUTH_CORS,
-  BACKEND_URL,
-  COOKIE_SECRET,
-  DATABASE_URL,
-  JWT_SECRET,
-  REDIS_URL,
-  RESEND_API_KEY,
-  RESEND_FROM_EMAIL,
-  SENDGRID_API_KEY,
-  SENDGRID_FROM_EMAIL,
-  SHOULD_DISABLE_ADMIN,
-  STORE_CORS,
-  STRIPE_API_KEY,
-  STRIPE_WEBHOOK_SECRET,
-  WORKER_MODE,
-  MINIO_ENDPOINT,
-  MINIO_ACCESS_KEY,
-  MINIO_SECRET_KEY,
-  MINIO_BUCKET,
-  MEILISEARCH_HOST,
-  MEILISEARCH_ADMIN_KEY,
-  SHIPPO_API_TOKEN,
-  SHIPPO_API_URL
-} from 'lib/constants';
+import { loadEnv, Modules, defineConfig } from '@medusajs/framework/utils';
 
 loadEnv(process.env.NODE_ENV, process.cwd());
+
+function assertValue(value, message) {
+  if (value === undefined) {
+    throw new Error(message);
+  }
+
+  return value;
+}
+
+const ADMIN_CORS = process.env.ADMIN_CORS;
+const AUTH_CORS = process.env.AUTH_CORS;
+const BACKEND_URL = process.env.BACKEND_PUBLIC_URL ?? process.env.RAILWAY_PUBLIC_DOMAIN_VALUE ?? 'http://localhost:9000';
+const COOKIE_SECRET = assertValue(process.env.COOKIE_SECRET, 'Environment variable for COOKIE_SECRET is not set');
+const DATABASE_URL = assertValue(process.env.DATABASE_URL, 'Environment variable for DATABASE_URL is not set');
+const JWT_SECRET = assertValue(process.env.JWT_SECRET, 'Environment variable for JWT_SECRET is not set');
+const REDIS_URL = process.env.REDIS_URL;
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const RESEND_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || process.env.RESEND_FROM;
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
+const SENDGRID_FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || process.env.SENDGRID_FROM;
+const SHOULD_DISABLE_ADMIN = process.env.MEDUSA_DISABLE_ADMIN === 'true';
+const STORE_CORS = process.env.STORE_CORS;
+const STRIPE_API_KEY = process.env.STRIPE_API_KEY;
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+const WORKER_MODE = process.env.MEDUSA_WORKER_MODE ?? 'shared';
+const MINIO_ENDPOINT = process.env.MINIO_ENDPOINT;
+const MINIO_ACCESS_KEY = process.env.MINIO_ACCESS_KEY;
+const MINIO_SECRET_KEY = process.env.MINIO_SECRET_KEY;
+const MINIO_BUCKET = process.env.MINIO_BUCKET;
+const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST;
+const MEILISEARCH_ADMIN_KEY = process.env.MEILISEARCH_ADMIN_KEY;
+const SHIPPO_API_TOKEN = process.env.SHIPPO_API_TOKEN;
+const SHIPPO_API_URL = process.env.SHIPPO_API_URL;
 
 const medusaConfig = {
   projectConfig: {

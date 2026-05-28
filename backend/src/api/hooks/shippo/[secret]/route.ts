@@ -1,5 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
 import { Modules } from "@medusajs/framework/utils"
+import { IFulfillmentModuleService } from "@medusajs/framework/types"
 import { markFulfillmentAsDeliveredWorkflow } from "@medusajs/medusa/core-flows"
 
 /**
@@ -29,12 +30,31 @@ type ShippoTrackUpdatedPayload = {
         | "UNKNOWN"
         | "PRE_TRANSIT"
         | "TRANSIT"
+        | "OUT_FOR_DELIVERY"
         | "DELIVERED"
         | "RETURNED"
         | "FAILURE"
+        | string
       status_details?: string
       status_date?: string
+      location?: {
+        city?: string
+        state?: string
+        zip?: string
+        country?: string
+      }
     }
+    tracking_history?: {
+      status?: string
+      status_details?: string
+      status_date?: string
+      location?: {
+        city?: string
+        state?: string
+        zip?: string
+        country?: string
+      }
+    }[]
     metadata?: string // we set this to the Medusa fulfillment id in /tracks
   }
 }
@@ -86,11 +106,41 @@ export async function POST(
 
   switch (payload.event) {
     case "track_updated": {
-      const { carrier, tracking_number, tracking_status, metadata } = payload.data
+      const { carrier, tracking_number, tracking_status, tracking_history, metadata } = payload.data
       const status = tracking_status?.status
       logger.info(
         `[shippo webhook] track_updated carrier=${carrier} tracking=${tracking_number} status=${status}`
       )
+
+      if (metadata) {
+        try {
+          const fulfillmentModuleService: IFulfillmentModuleService = req.scope.resolve(Modules.FULFILLMENT)
+          const fulfillment = await fulfillmentModuleService.retrieveFulfillment(metadata)
+          const currentData = ((fulfillment as { data?: Record<string, unknown> }).data || {}) as Record<string, unknown>
+
+          await fulfillmentModuleService.updateFulfillment(metadata, {
+            data: {
+              ...currentData,
+              tracking_status: {
+                carrier,
+                tracking_number,
+                status,
+                status_details: tracking_status?.status_details,
+                status_date: tracking_status?.status_date,
+                location: tracking_status?.location,
+                updated_at: new Date().toISOString(),
+              },
+              tracking_history: (tracking_history || []).slice(0, 20),
+            },
+          })
+        } catch (e) {
+          logger.warn(
+            `[shippo webhook] failed to update tracking status for fulfillment ${metadata}: ${
+              (e as Error).message
+            }`
+          )
+        }
+      }
 
       if (status === "DELIVERED" && metadata) {
         // metadata is the Medusa fulfillment id we passed at /tracks register time.

@@ -50,6 +50,8 @@ export async function GET(
         carrier: data.carrier || null,
         service: data.service || null,
         transaction_id: data.transaction_id || null,
+        tracking_status: data.tracking_status || null,
+        tracking_history: data.tracking_history || [],
         created_at: f.created_at,
         shipped_at: f.shipped_at,
         delivered_at: f.delivered_at,

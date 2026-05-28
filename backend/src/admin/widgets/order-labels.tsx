@@ -8,7 +8,55 @@ type LabelInfo = {
   label_url: string | null
   carrier: string | null
   service: string | null
+  tracking_status: TrackingStatus | null
+  delivered_at?: string | null
   created_at: string
+}
+
+type TrackingStatus = {
+  carrier?: string
+  tracking_number?: string
+  status?: string
+  status_details?: string
+  status_date?: string
+  location?: {
+    city?: string
+    state?: string
+    zip?: string
+    country?: string
+  }
+  updated_at?: string
+}
+
+const trackingCopy = (label: LabelInfo) => {
+  if (label.delivered_at) return "Delivered"
+
+  const status = label.tracking_status?.status || ""
+  const details = label.tracking_status?.status_details || ""
+  const combined = `${status} ${details}`.toLowerCase()
+
+  if (combined.includes("out for delivery")) return "Out for delivery"
+  if (status === "DELIVERED") return "Delivered"
+  if (status === "TRANSIT") return "In transit"
+  if (status === "PRE_TRANSIT") return "Pre-transit"
+  if (status === "FAILURE") return "Delivery issue"
+  if (status === "RETURNED") return "Returned"
+  if (status === "UNKNOWN") return "Unknown"
+  return status ? status.replace(/_/g, " ").toLowerCase().replace(/^\w/, (c) => c.toUpperCase()) : "Label created"
+}
+
+const trackingColor = (label: LabelInfo) => {
+  const copy = trackingCopy(label)
+  if (copy === "Delivered") return "#4ade80"
+  if (copy === "Delivery issue" || copy === "Returned") return "#f87171"
+  if (copy === "Out for delivery") return "#d4a22a"
+  return "#60a5fa"
+}
+
+const trackingLocation = (status: TrackingStatus | null) => {
+  const loc = status?.location
+  if (!loc) return null
+  return [loc.city, loc.state, loc.zip].filter(Boolean).join(", ")
 }
 
 const S = {
@@ -48,6 +96,17 @@ const S = {
   service: { fontSize: 12, color: "#71717a", marginLeft: 8 } as React.CSSProperties,
   tracking: { fontSize: 12, color: "#a1a1aa", marginTop: 4 } as React.CSSProperties,
   trackLink: { color: "#d4a22a" } as React.CSSProperties,
+  status: (color: string) => ({
+    fontSize: 11,
+    fontWeight: 600,
+    color,
+    background: `${color}18`,
+    border: `1px solid ${color}33`,
+    borderRadius: 5,
+    padding: "2px 7px",
+    marginLeft: 8,
+  } as React.CSSProperties),
+  scan: { fontSize: 12, color: "#a1a1aa", marginTop: 4, maxWidth: 440 } as React.CSSProperties,
   btn: {
     fontSize: 12, fontWeight: 500,
     color: "#000",
@@ -90,6 +149,7 @@ const OrderLabelsWidget = () => {
             <div>
               <div style={{ display: "flex", alignItems: "center" }}>
                 <span style={S.badge}>{label.carrier || "Carrier"}</span>
+                <span style={S.status(trackingColor(label))}>{trackingCopy(label)}</span>
                 {label.service && <span style={S.service}>{label.service}</span>}
               </div>
               {label.tracking_number && (
@@ -99,6 +159,12 @@ const OrderLabelsWidget = () => {
                     ? <a href={label.tracking_url} target="_blank" rel="noreferrer" style={S.trackLink}>{label.tracking_number}</a>
                     : <span style={{ color: "#fafafa" }}>{label.tracking_number}</span>
                   }
+                </div>
+              )}
+              {label.tracking_status?.status_details && (
+                <div style={S.scan}>
+                  {label.tracking_status.status_details}
+                  {trackingLocation(label.tracking_status) && ` · ${trackingLocation(label.tracking_status)}`}
                 </div>
               )}
             </div>

@@ -1,8 +1,17 @@
 import { loadEnv } from '@medusajs/framework/utils'
 
-import { assertValue } from 'utils/assert-value'
-
 loadEnv(process.env.NODE_ENV || 'development', process.cwd())
+
+function assertValue<T extends string | undefined>(
+  v: T | undefined,
+  errorMessage: string,
+): T {
+  if (v === undefined) {
+    throw new Error(errorMessage)
+  }
+
+  return v
+}
 
 /**
  * Is development environment
