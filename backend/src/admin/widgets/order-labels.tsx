@@ -8,9 +8,17 @@ type LabelInfo = {
   label_url: string | null
   carrier: string | null
   service: string | null
+  batch_status?: BatchStatus | null
   tracking_status: TrackingStatus | null
   delivered_at?: string | null
   created_at: string
+}
+
+type BatchStatus = {
+  status?: string
+  error?: string
+  messages?: { code?: string; text: string }[]
+  updated_at?: string
 }
 
 type TrackingStatus = {
@@ -31,6 +39,14 @@ type TrackingStatus = {
 const trackingCopy = (label: LabelInfo) => {
   if (label.delivered_at) return "Delivered"
 
+  if (label.batch_status?.status && !label.label_url) {
+    const status = label.batch_status.status
+    if (status === "PURCHASING") return "Batch purchasing"
+    if (status === "VALIDATING") return "Batch validating"
+    if (status === "INVALID") return "Batch issue"
+    return status.replace(/_/g, " ").toLowerCase().replace(/^\w/, (c) => c.toUpperCase())
+  }
+
   const status = label.tracking_status?.status || ""
   const details = label.tracking_status?.status_details || ""
   const combined = `${status} ${details}`.toLowerCase()
@@ -48,7 +64,7 @@ const trackingCopy = (label: LabelInfo) => {
 const trackingColor = (label: LabelInfo) => {
   const copy = trackingCopy(label)
   if (copy === "Delivered") return "#4ade80"
-  if (copy === "Delivery issue" || copy === "Returned") return "#f87171"
+  if (copy === "Delivery issue" || copy === "Returned" || copy === "Batch issue") return "#f87171"
   if (copy === "Out for delivery") return "#d4a22a"
   return "#60a5fa"
 }
@@ -166,6 +182,9 @@ const OrderLabelsWidget = () => {
                   {label.tracking_status.status_details}
                   {trackingLocation(label.tracking_status) && ` · ${trackingLocation(label.tracking_status)}`}
                 </div>
+              )}
+              {!label.tracking_status?.status_details && label.batch_status?.error && (
+                <div style={S.scan}>{label.batch_status.error}</div>
               )}
             </div>
             {label.label_url && (

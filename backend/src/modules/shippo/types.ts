@@ -75,6 +75,44 @@ export type ShippoTransaction = {
   servicelevel?: { name?: string; token?: string }
 }
 
+export type ShippoBatchShipment = {
+  object_id: string
+  status:
+    | "VALID"
+    | "INVALID"
+    | "TRANSACTION_FAILED"
+    | "TRANSACTION_SUCCESS"
+    | string
+  metadata?: string
+  carrier_account?: string | null
+  servicelevel_token?: string
+  shipment?: string
+  transaction?: string | ShippoTransaction | null
+  messages?: { code?: string; text: string }[]
+}
+
+export type ShippoBatch = {
+  object_id: string
+  status: "VALIDATING" | "VALID" | "INVALID" | "PURCHASING" | "PURCHASED" | string
+  metadata?: string
+  default_carrier_account: string
+  default_servicelevel_token: string
+  label_filetype?: string
+  label_url?: string[]
+  object_results: {
+    creation_failed: number
+    creation_succeeded: number
+    purchase_failed: number
+    purchase_succeeded: number
+  }
+  batch_shipments?: {
+    count?: number
+    next?: string | null
+    previous?: string | null
+    results?: ShippoBatchShipment[]
+  }
+}
+
 export type ShippoRefund = {
   object_id: string
   status: "QUEUED" | "PENDING" | "SUCCESS" | "ERROR"

@@ -38,6 +38,8 @@ type Rate = {
   object_id: string
   carrier: string
   service: string
+  service_token?: string
+  carrier_account?: string
   amount: number
   currency: string
   estimated_days: number | null
@@ -59,6 +61,8 @@ type FulfillResult = {
   success: boolean
   tracking?: string
   label_url?: string
+  batch_id?: string
+  status?: string
   error?: string
 }
 
@@ -158,7 +162,17 @@ export default function BulkFulfillPage() {
     try {
       const items = rateResults
         .filter((r) => selectedRates[r.order_id])
-        .map((r) => ({ order_id: r.order_id, rate_object_id: selectedRates[r.order_id] }))
+        .map((r) => {
+          const rate = r.rates.find((candidate) => candidate.object_id === selectedRates[r.order_id])
+          return {
+            order_id: r.order_id,
+            rate_object_id: selectedRates[r.order_id],
+            carrier_account: rate?.carrier_account,
+            servicelevel_token: rate?.service_token,
+            carrier: rate?.carrier,
+            service: rate?.service,
+          }
+        })
 
       const res = await fetch("/admin/bulk-fulfill/execute", {
         method: "POST",
@@ -391,7 +405,7 @@ export default function BulkFulfillPage() {
         <div style={S.card}>
           <div style={S.cardHead}>
             <span style={{ fontSize: 14, fontWeight: 600 }}>
-              Labels purchased
+              Batch submitted
             </span>
             <button style={{ ...S.btn, ...S.btnAmber }} onClick={reset}>Fulfill more orders</button>
           </div>
@@ -410,7 +424,7 @@ export default function BulkFulfillPage() {
                   <td style={S.td}>#{r.display_id}</td>
                   <td style={S.td}>
                     <span style={{ ...S.badge, ...(r.success ? S.green : S.red) }}>
-                      {r.success ? "Fulfilled" : "Failed"}
+                      {r.success ? (r.status || "Submitted") : "Failed"}
                     </span>
                   </td>
                   <td style={S.td}>{r.tracking || (r.error ? <span style={{ color: "#dc2626", fontSize: 12 }}>{r.error}</span> : "—")}</td>
@@ -427,7 +441,7 @@ export default function BulkFulfillPage() {
           </table>
           {fulfillResults.some((r) => r.success) && (
             <div style={{ padding: "12px 20px", fontSize: 13, color: "#6b7280", borderTop: "1px solid #f3f4f6" }}>
-              PDF downloaded automatically. If the download didn't start, print individual labels above.
+              Shippo is purchasing the batch. Labels will attach to each order as webhook updates arrive.
             </div>
           )}
         </div>

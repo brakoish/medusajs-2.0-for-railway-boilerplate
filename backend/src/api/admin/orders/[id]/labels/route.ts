@@ -50,6 +50,8 @@ export async function GET(
         carrier: data.carrier || null,
         service: data.service || null,
         transaction_id: data.transaction_id || null,
+        batch_id: data.batch_id || null,
+        batch_status: data.batch_status || null,
         tracking_status: data.tracking_status || null,
         tracking_history: data.tracking_history || [],
         created_at: f.created_at,
@@ -57,7 +59,7 @@ export async function GET(
         delivered_at: f.delivered_at,
       }
     })
-    .filter((l: { label_url: unknown }) => l.label_url)
+    .filter((l: { label_url: unknown; batch_status?: unknown }) => l.label_url || l.batch_status)
 
   res.status(200).json({
     order_id: order.id,

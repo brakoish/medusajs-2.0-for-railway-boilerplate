@@ -422,9 +422,28 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
     // Fast path: operator pre-selected a rate in the admin widget.
     // Skip shipment creation + service-group matching; buy the exact rate.
     const orderId = (order as Record<string, unknown> | undefined)?.id as string | undefined
-    const preSelectedRateId = orderId ? preSelectedRates.get(orderId) : undefined
-    if (preSelectedRateId) {
+    const preSelectedRate = orderId ? preSelectedRates.get(orderId) : undefined
+    if (preSelectedRate) {
       preSelectedRates.delete(orderId!)
+      if (typeof preSelectedRate !== "string" && preSelectedRate.mode === "batch_pending") {
+        return {
+          data: {
+            ...((fulfillment.data as object) || {}),
+            batch_status: {
+              status: "PENDING",
+              updated_at: new Date().toISOString(),
+            },
+            rate_id: preSelectedRate.rate_object_id,
+            carrier_account: preSelectedRate.carrier_account,
+            servicelevel_token: preSelectedRate.servicelevel_token,
+            carrier: preSelectedRate.carrier,
+            service: preSelectedRate.service,
+          },
+          labels: [],
+        }
+      }
+
+      const preSelectedRateId = preSelectedRate as string
       const tx = await this.client.createTransaction({
         rate: preSelectedRateId,
         metadata: fulfillment.id as string | undefined,

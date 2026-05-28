@@ -85,6 +85,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           carrier: r.provider,
           service: r.servicelevel?.name,
           service_token: r.servicelevel?.token,
+          carrier_account: r.carrier_account,
           amount: Number(r.amount),
           currency: r.currency,
           estimated_days: r.estimated_days ?? null,

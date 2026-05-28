@@ -2,6 +2,8 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
 import { Modules } from "@medusajs/framework/utils"
 import { IFulfillmentModuleService } from "@medusajs/framework/types"
 import { markFulfillmentAsDeliveredWorkflow } from "@medusajs/medusa/core-flows"
+import { ShippoClient } from "../../../../modules/shippo/client"
+import { ShippoBatchShipment, ShippoTransaction } from "../../../../modules/shippo/types"
 
 /**
  * Shippo webhook receiver.
@@ -77,17 +79,19 @@ type ShippoTxUpdatedPayload = {
 
 type ShippoBatchPayload = {
   event: "batch_created" | "batch_purchased"
-  data: {
-    object_id?: string
-    status?: string
-    metadata?: string
-    object_results?: {
-      purchase_succeeded?: ShippoTxUpdatedPayload["data"][]
-      purchase_failed?: ShippoTxUpdatedPayload["data"][]
-      creation_succeeded?: Record<string, unknown>[]
-      creation_failed?: Record<string, unknown>[]
-    }
-  }
+  data:
+    | string
+    | {
+        object_id?: string
+        status?: string
+        metadata?: string
+        object_results?: {
+          purchase_succeeded?: ShippoTxUpdatedPayload["data"][]
+          purchase_failed?: ShippoTxUpdatedPayload["data"][]
+          creation_succeeded?: Record<string, unknown>[]
+          creation_failed?: Record<string, unknown>[]
+        }
+      }
 }
 
 type AnyShippoWebhook =
@@ -153,6 +157,79 @@ async function updateFulfillmentFromTransaction(
   })
 
   return true
+}
+
+function batchIdFromPayload(payload: ShippoBatchPayload): string | undefined {
+  if (typeof payload.data !== "string") return payload.data.object_id
+  return payload.data.match(/[a-f0-9]{32}/i)?.[0]
+}
+
+async function updateFulfillmentBatchStatus(
+  req: MedusaRequest,
+  fulfillmentId: string,
+  batchId: string,
+  status: string,
+  messages?: { code?: string; text: string }[]
+): Promise<void> {
+  const fulfillmentModuleService: IFulfillmentModuleService = req.scope.resolve(
+    Modules.FULFILLMENT
+  )
+  const fulfillment = await fulfillmentModuleService.retrieveFulfillment(
+    fulfillmentId
+  )
+  const currentData = ((fulfillment as { data?: Record<string, unknown> })
+    .data || {}) as Record<string, unknown>
+
+  await fulfillmentModuleService.updateFulfillment(fulfillmentId, {
+    data: {
+      ...currentData,
+      batch_id: batchId,
+      batch_status: {
+        status,
+        messages: messages || [],
+        updated_at: new Date().toISOString(),
+      },
+    },
+  })
+}
+
+async function updateFromBatchShipment(
+  req: MedusaRequest,
+  client: ShippoClient,
+  batchId: string,
+  shipment: ShippoBatchShipment
+): Promise<void> {
+  const fulfillmentId = isFulfillmentId(shipment.metadata)
+    ? shipment.metadata
+    : undefined
+  if (!fulfillmentId) return
+
+  await updateFulfillmentBatchStatus(
+    req,
+    fulfillmentId,
+    batchId,
+    shipment.status,
+    shipment.messages
+  )
+
+  if (!shipment.transaction) return
+
+  const tx =
+    typeof shipment.transaction === "string"
+      ? await client.getTransaction(shipment.transaction)
+      : (shipment.transaction as ShippoTransaction)
+
+  await updateFulfillmentFromTransaction(req, {
+    object_id: tx.object_id,
+    status: tx.status,
+    metadata: fulfillmentId,
+    provider: tx.provider,
+    tracking_number: tx.tracking_number,
+    tracking_url_provider: tx.tracking_url_provider,
+    label_url: tx.label_url,
+    messages: tx.messages,
+    servicelevel: tx.servicelevel,
+  })
 }
 
 export async function POST(
@@ -265,26 +342,39 @@ export async function POST(
     }
     case "batch_created":
     case "batch_purchased": {
-      const succeeded =
-        payload.data.object_results?.purchase_succeeded?.length ??
-        payload.data.object_results?.creation_succeeded?.length ??
-        0
-      const failed =
-        payload.data.object_results?.purchase_failed?.length ??
-        payload.data.object_results?.creation_failed?.length ??
-        0
+      const batchId = batchIdFromPayload(payload)
+      logger.info(`[shippo webhook] ${payload.event} batch_id=${batchId || "unknown"}`)
 
-      logger.info(
-        `[shippo webhook] ${payload.event} object_id=${payload.data.object_id} status=${payload.data.status} succeeded=${succeeded} failed=${failed}`
-      )
+      if (!batchId) break
 
-      const txs = payload.data.object_results?.purchase_succeeded || []
-      for (const tx of txs) {
+      const apiToken = process.env.SHIPPO_API_TOKEN
+      if (!apiToken) {
+        logger.warn("[shippo webhook] SHIPPO_API_TOKEN missing; cannot hydrate batch")
+        break
+      }
+
+      const client = new ShippoClient({ api_token: apiToken })
+      const filters =
+        payload.event === "batch_purchased"
+          ? ["purchase_succeeded", "purchase_failed"]
+          : ["creation_succeeded", "creation_failed"]
+
+      for (const filter of filters) {
         try {
-          await updateFulfillmentFromTransaction(req, tx)
+          const batch = await client.getBatch(batchId, {
+            object_results: filter,
+            results: 100,
+          })
+          logger.info(
+            `[shippo webhook] ${payload.event} batch_id=${batch.object_id} status=${batch.status} ${filter}=${batch.batch_shipments?.results?.length || 0}`
+          )
+
+          for (const shipment of batch.batch_shipments?.results || []) {
+            await updateFromBatchShipment(req, client, batch.object_id, shipment)
+          }
         } catch (e) {
           logger.warn(
-            `[shippo webhook] failed to update batch transaction ${tx.object_id}: ${
+            `[shippo webhook] failed to hydrate batch ${batchId} ${filter}: ${
               (e as Error).message
             }`
           )

@@ -1,117 +1,379 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { IFulfillmentModuleService } from "@medusajs/framework/types"
+import { Modules } from "@medusajs/framework/utils"
 import { createOrderFulfillmentWorkflow } from "@medusajs/medusa/core-flows"
-import { PDFDocument } from "pdf-lib"
+import { ShippoClient } from "../../../../modules/shippo/client"
 import { preSelectedRates } from "../../../../modules/shippo/pre-selected-rates"
+import { ShippoAddress, ShippoBatch, ShippoParcel } from "../../../../modules/shippo/types"
 
 interface FulfillItem {
   order_id: string
   rate_object_id: string
+  carrier_account?: string
+  servicelevel_token?: string
+  carrier?: string
+  service?: string
+}
+
+type OrderItem = {
+  id: string
+  quantity: number
+  variant_sku?: string
+  detail?: { fulfilled_quantity?: number }
+  variant?: { weight?: number }
+}
+
+type BulkOrder = {
+  id: string
+  display_id?: number
+  email?: string
+  shipping_address?: {
+    first_name?: string
+    last_name?: string
+    address_1?: string
+    address_2?: string
+    city?: string
+    province?: string
+    postal_code?: string
+    country_code?: string
+    phone?: string
+  }
+  items?: OrderItem[]
+}
+
+type FulfillResult = {
+  order_id: string
+  display_id?: number
+  success: boolean
+  fulfillment_id?: string
+  batch_id?: string
+  status?: string
+  error?: string
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const fromAddress = (): ShippoAddress => ({
+  name: "Dab Pal",
+  company: "Dab Pal",
+  street1: "361 Stagg St #201",
+  city: "Brooklyn",
+  state: "NY",
+  zip: "11206",
+  country: "US",
+  email: "hello@thedabpal.com",
+  phone: process.env.SHIPPO_FROM_PHONE || "9709034749",
+})
+
+const parcelForOrder = (items: OrderItem[]): ShippoParcel => {
+  const totalGrams = items.reduce((sum, item) => {
+    const weight = item.variant?.weight ?? 0
+    return sum + weight * Number(item.quantity || 1)
+  }, 0)
+  const totalOz = Math.max(1, Math.round((totalGrams / 28.3495) * 100) / 100)
+  const skus = items.map((item) => item.variant_sku ?? "")
+  const has6 = skus.some((sku) => sku.includes("-6-"))
+  const has3 = skus.some((sku) => sku.includes("-3-"))
+  const [length, width, height] = has6
+    ? ["8", "9", "3"]
+    : has3
+      ? ["8", "8", "2"]
+      : ["4", "6", "1"]
+
+  return {
+    length,
+    width,
+    height,
+    distance_unit: "in",
+    weight: String(totalOz),
+    mass_unit: "oz",
+  }
+}
+
+const toAddress = (order: BulkOrder): ShippoAddress => {
+  const address = order.shipping_address
+  if (!address?.address_1 || !address.city || !address.province || !address.postal_code) {
+    throw new Error("Order is missing a complete shipping address")
+  }
+
+  return {
+    name:
+      [address.first_name, address.last_name].filter(Boolean).join(" ") ||
+      "Customer",
+    street1: address.address_1,
+    street2: address.address_2 || undefined,
+    city: address.city,
+    state: address.province,
+    zip: address.postal_code,
+    country: (address.country_code || "US").toUpperCase(),
+    phone: address.phone || undefined,
+    email: order.email || undefined,
+  }
+}
+
+const remainingItems = (order: BulkOrder) =>
+  (order.items || [])
+    .map((item) => {
+      const fulfilled = Number(item.detail?.fulfilled_quantity ?? 0)
+      const total = Number(item.quantity ?? 0)
+      const remaining = Math.max(0, total - fulfilled)
+      return { id: item.id, quantity: remaining > 0 ? remaining : total }
+    })
+    .filter((item) => item.quantity > 0)
+
+async function waitForValidBatch(client: ShippoClient, batchId: string): Promise<ShippoBatch> {
+  for (let attempt = 0; attempt < 12; attempt++) {
+    const batch = await client.getBatch(batchId, { results: 100 })
+    if (batch.status === "VALID" || batch.status === "INVALID") return batch
+    await sleep(1500)
+  }
+
+  return client.getBatch(batchId, { results: 100 })
+}
+
+async function markBatchStatus(
+  fulfillmentModuleService: IFulfillmentModuleService,
+  fulfillmentId: string,
+  batchId: string,
+  status: string,
+  error?: string
+) {
+  const fulfillment = await fulfillmentModuleService.retrieveFulfillment(fulfillmentId)
+  const currentData = ((fulfillment as { data?: Record<string, unknown> }).data ||
+    {}) as Record<string, unknown>
+
+  await fulfillmentModuleService.updateFulfillment(fulfillmentId, {
+    data: {
+      ...currentData,
+      batch_id: batchId,
+      batch_status: {
+        status,
+        error,
+        updated_at: new Date().toISOString(),
+      },
+    },
+  })
 }
 
 /**
  * POST /admin/bulk-fulfill/execute
- * Body: { items: [{ order_id, rate_object_id }] }
+ * Body: { items: [{ order_id, rate_object_id, carrier_account, servicelevel_token }] }
  *
- * Fulfills all orders, fetches label PDFs, merges into a single PDF.
- * Returns application/pdf so the browser downloads it directly.
+ * Creates Medusa fulfillments in a pending-batch state, submits one real Shippo
+ * batch using those fulfillment ids as metadata, then purchases the batch once
+ * Shippo validates it. Shippo webhooks attach label URLs/tracking as they arrive.
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const { items } = req.body as { items: FulfillItem[] }
   if (!items?.length) return res.status(400).json({ error: "items required" })
 
-  const query = req.scope.resolve("query")
-  const results: { order_id: string; display_id?: number; success: boolean; tracking?: string; label_url?: string; error?: string }[] = []
+  const apiToken = process.env.SHIPPO_API_TOKEN
+  if (!apiToken) return res.status(503).json({ error: "SHIPPO_API_TOKEN not configured" })
 
-  // Fulfill sequentially to avoid Shippo rate limiting
-  for (const { order_id, rate_object_id } of items) {
+  const invalid = items.find(
+    (item) => !item.carrier_account || !item.servicelevel_token
+  )
+  if (invalid) {
+    return res.status(400).json({
+      error: "Each selected rate must include carrier_account and servicelevel_token",
+      order_id: invalid.order_id,
+    })
+  }
+
+  const query = req.scope.resolve("query")
+  const client = new ShippoClient({ api_token: apiToken })
+  const fulfillmentModuleService: IFulfillmentModuleService = req.scope.resolve(
+    Modules.FULFILLMENT
+  )
+  const results: FulfillResult[] = []
+  const batchShipments: Parameters<ShippoClient["createBatch"]>[0]["batch_shipments"] = []
+
+  for (const item of items) {
     try {
       const { data: orders } = await query.graph({
         entity: "order",
-        filters: { id: order_id },
-        fields: ["id", "display_id", "items.id", "items.quantity", "items.detail.fulfilled_quantity"],
+        filters: { id: item.order_id },
+        fields: [
+          "id",
+          "display_id",
+          "email",
+          "shipping_address.first_name",
+          "shipping_address.last_name",
+          "shipping_address.address_1",
+          "shipping_address.address_2",
+          "shipping_address.city",
+          "shipping_address.province",
+          "shipping_address.postal_code",
+          "shipping_address.country_code",
+          "shipping_address.phone",
+          "items.id",
+          "items.quantity",
+          "items.variant_sku",
+          "items.detail.fulfilled_quantity",
+          "items.variant.weight",
+        ],
       })
 
-      const order = orders?.[0] as any
-      if (!order) { results.push({ order_id, success: false, error: "Order not found" }); continue }
-
-      const rawItems = (order.items || []) as any[]
-      const fulfillItems = rawItems
-        .map((i: any) => {
-          const fulfilled = Number(i.detail?.fulfilled_quantity ?? 0)
-          const remaining = Math.max(0, Number(i.quantity) - fulfilled)
-          return { id: i.id, quantity: remaining > 0 ? remaining : Number(i.quantity) }
-        })
-        .filter((i) => i.quantity > 0)
-
-      if (!fulfillItems.length) { results.push({ order_id, display_id: order.display_id, success: false, error: "No items to fulfill" }); continue }
-
-      preSelectedRates.set(order_id, rate_object_id)
-
-      try {
-        await createOrderFulfillmentWorkflow(req.scope).run({
-          input: { order_id, items: fulfillItems, no_notification: false },
-        })
-      } catch (e) {
-        preSelectedRates.delete(order_id)
-        results.push({ order_id, display_id: order.display_id, success: false, error: (e as Error).message })
+      const order = orders?.[0] as BulkOrder | undefined
+      if (!order) {
+        results.push({ order_id: item.order_id, success: false, error: "Order not found" })
         continue
       }
 
-      // Pull label data from the newly created fulfillment
+      const fulfillItems = remainingItems(order)
+      if (!fulfillItems.length) {
+        results.push({
+          order_id: item.order_id,
+          display_id: order.display_id,
+          success: false,
+          error: "No items to fulfill",
+        })
+        continue
+      }
+
+      preSelectedRates.set(item.order_id, {
+        mode: "batch_pending",
+        rate_object_id: item.rate_object_id,
+        carrier_account: item.carrier_account as string,
+        servicelevel_token: item.servicelevel_token as string,
+        carrier: item.carrier,
+        service: item.service,
+      })
+
+      try {
+        await createOrderFulfillmentWorkflow(req.scope).run({
+          input: { order_id: item.order_id, items: fulfillItems, no_notification: true },
+        })
+      } catch (e) {
+        preSelectedRates.delete(item.order_id)
+        results.push({
+          order_id: item.order_id,
+          display_id: order.display_id,
+          success: false,
+          error: (e as Error).message,
+        })
+        continue
+      }
+
       const { data: fulfillments } = await query.graph({
         entity: "fulfillment",
-        filters: { order_id },
-        fields: ["id", "data", "tracking_numbers", "created_at"],
+        filters: { order_id: item.order_id },
+        fields: ["id", "created_at"],
       })
 
       const latest = (fulfillments || [])
         .slice()
-        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0] as any
+        .sort(
+          (a: { created_at?: string }, b: { created_at?: string }) =>
+            Date.parse(String(b.created_at)) - Date.parse(String(a.created_at))
+        )[0] as { id?: string } | undefined
 
-      const fdata = (latest?.data || {}) as Record<string, unknown>
-      const trackingNums = (latest?.tracking_numbers || []) as any[]
-      const tracking = trackingNums[0]?.tracking_number || (fdata.tracking_number as string) || ""
-      const label_url = trackingNums[0]?.label_url || (fdata.label_url as string) || ""
+      if (!latest?.id) {
+        results.push({
+          order_id: item.order_id,
+          display_id: order.display_id,
+          success: false,
+          error: "Fulfillment was created but could not be retrieved",
+        })
+        continue
+      }
 
-      results.push({ order_id, display_id: order.display_id, success: true, tracking, label_url })
+      batchShipments.push({
+        carrier_account: item.carrier_account,
+        servicelevel_token: item.servicelevel_token,
+        metadata: latest.id,
+        shipment: {
+          address_from: fromAddress(),
+          address_to: toAddress(order),
+          parcels: [parcelForOrder(order.items || [])],
+        },
+      })
+
+      results.push({
+        order_id: item.order_id,
+        display_id: order.display_id,
+        fulfillment_id: latest.id,
+        success: true,
+        status: "Pending batch",
+      })
     } catch (e) {
-      results.push({ order_id, success: false, error: (e as Error).message })
+      results.push({
+        order_id: item.order_id,
+        success: false,
+        error: (e as Error).message,
+      })
     }
   }
 
-  // Collect label PDFs and merge
-  const labelUrls = results.filter((r) => r.success && r.label_url).map((r) => r.label_url!)
-
-  if (!labelUrls.length) {
-    // All failed — return JSON error list
-    return res.status(422).json({ error: "No labels generated", results })
+  if (!batchShipments.length) {
+    return res.status(422).json({ error: "No fulfillments prepared", results })
   }
 
-  try {
-    const merged = await PDFDocument.create()
+  const first = batchShipments[0]
+  const batch = await client.createBatch({
+    default_carrier_account: first.carrier_account as string,
+    default_servicelevel_token: first.servicelevel_token as string,
+    label_filetype: "PDF_4x6",
+    metadata: `Dab Pal ${new Date().toISOString().slice(0, 16)}`,
+    batch_shipments: batchShipments,
+  })
 
-    for (const url of labelUrls) {
-      try {
-        const response = await fetch(url)
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        const buffer = await response.arrayBuffer()
-        const srcDoc = await PDFDocument.load(buffer)
-        const pages = await merged.copyPages(srcDoc, srcDoc.getPageIndices())
-        pages.forEach((page) => merged.addPage(page))
-      } catch (e) {
-        console.warn(`[bulk-fulfill] Failed to fetch label PDF ${url}:`, e)
-        // Skip this label — operator can reprint individually
+  for (const result of results) {
+    if (result.success && result.fulfillment_id) {
+      await markBatchStatus(
+        fulfillmentModuleService,
+        result.fulfillment_id,
+        batch.object_id,
+        batch.status
+      )
+      result.batch_id = batch.object_id
+      result.status = batch.status
+    }
+  }
+
+  const validated = await waitForValidBatch(client, batch.object_id)
+  if (validated.status !== "VALID") {
+    for (const result of results) {
+      if (result.success && result.fulfillment_id) {
+        await markBatchStatus(
+          fulfillmentModuleService,
+          result.fulfillment_id,
+          batch.object_id,
+          validated.status,
+          "Shippo batch validation failed"
+        )
+        result.status = validated.status
+        result.error = "Shippo batch validation failed"
       }
     }
 
-    const pdfBytes = await merged.save()
-
-    res.setHeader("Content-Type", "application/pdf")
-    res.setHeader("Content-Disposition", `attachment; filename="dab-pal-labels-${Date.now()}.pdf"`)
-    res.setHeader("X-Fulfill-Results", JSON.stringify(results))
-    res.send(Buffer.from(pdfBytes))
-  } catch (e) {
-    // PDF merge failed — return results with label URLs so operator can download individually
-    res.status(200).json({ pdf_error: (e as Error).message, results })
+    return res.status(422).json({
+      error: "Shippo batch validation failed",
+      batch_id: batch.object_id,
+      status: validated.status,
+      object_results: validated.object_results,
+      results,
+    })
   }
+
+  const purchased = await client.purchaseBatch(batch.object_id)
+  for (const result of results) {
+    if (result.success && result.fulfillment_id) {
+      await markBatchStatus(
+        fulfillmentModuleService,
+        result.fulfillment_id,
+        batch.object_id,
+        purchased.status
+      )
+      result.status = purchased.status
+    }
+  }
+
+  res.status(202).json({
+    batch_id: batch.object_id,
+    status: purchased.status,
+    object_results: purchased.object_results,
+    label_urls: purchased.label_url || [],
+    results,
+  })
 }

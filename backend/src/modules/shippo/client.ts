@@ -2,6 +2,7 @@ import { MedusaError } from "@medusajs/framework/utils"
 import {
   ShippoAddress,
   ShippoAddressWithValidation,
+  ShippoBatch,
   ShippoLiveRateRequest,
   ShippoLiveRateResponse,
   ShippoParcel,
@@ -150,6 +151,50 @@ export class ShippoClient {
 
   async getTransaction(id: string): Promise<ShippoTransaction> {
     return this.request<ShippoTransaction>(`/transactions/${id}`)
+  }
+
+  async createBatch(input: {
+    default_carrier_account: string
+    default_servicelevel_token: string
+    label_filetype?: "PDF" | "PDF_4x6" | "PNG" | "ZPLII"
+    metadata?: string
+    batch_shipments: {
+      carrier_account?: string
+      servicelevel_token?: string
+      metadata?: string
+      shipment: {
+        address_from: ShippoAddress
+        address_to: ShippoAddress
+        parcels: ShippoParcel[]
+      }
+    }[]
+  }): Promise<ShippoBatch> {
+    return this.request<ShippoBatch>("/batches", {
+      method: "POST",
+      body: JSON.stringify({
+        ...input,
+        label_filetype: input.label_filetype || "PDF_4x6",
+      }),
+    })
+  }
+
+  async getBatch(
+    id: string,
+    params: { object_results?: string; results?: number; page?: number } = {}
+  ): Promise<ShippoBatch> {
+    const search = new URLSearchParams()
+    if (params.object_results) search.set("object_results", params.object_results)
+    if (params.results) search.set("results", String(params.results))
+    if (params.page) search.set("page", String(params.page))
+    const qs = search.toString()
+    return this.request<ShippoBatch>(`/batches/${id}${qs ? `?${qs}` : ""}`)
+  }
+
+  async purchaseBatch(id: string): Promise<ShippoBatch> {
+    return this.request<ShippoBatch>(`/batches/${id}/purchase`, {
+      method: "POST",
+      body: JSON.stringify({}),
+    })
   }
 
   /**
