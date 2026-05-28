@@ -52,6 +52,7 @@ export async function GET(
         transaction_id: data.transaction_id || null,
         batch_id: data.batch_id || null,
         batch_status: data.batch_status || null,
+        tracking_email_sent_at: data.tracking_email_sent_at || null,
         tracking_status: data.tracking_status || null,
         tracking_history: data.tracking_history || [],
         created_at: f.created_at,

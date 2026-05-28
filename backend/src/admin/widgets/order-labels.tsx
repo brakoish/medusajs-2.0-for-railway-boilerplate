@@ -9,6 +9,7 @@ type LabelInfo = {
   carrier: string | null
   service: string | null
   batch_status?: BatchStatus | null
+  tracking_email_sent_at?: string | null
   tracking_status: TrackingStatus | null
   delivered_at?: string | null
   created_at: string
@@ -139,15 +140,42 @@ const OrderLabelsWidget = () => {
   const [labels, setLabels] = useState<LabelInfo[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [sendingId, setSendingId] = useState<string | null>(null)
+  const [sendError, setSendError] = useState<string | null>(null)
 
-  useEffect(() => {
+  const loadLabels = () => {
     if (!orderId) return
     setLoading(true)
     fetch(`/admin/orders/${orderId}/labels`, { credentials: "include" })
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() })
       .then((data: { labels?: LabelInfo[] }) => { setLabels(data.labels || []); setLoading(false) })
       .catch((e: Error) => { setError(e.message); setLoading(false) })
+  }
+
+  useEffect(() => {
+    loadLabels()
   }, [orderId])
+
+  const sendTrackingEmail = async (fulfillmentId: string) => {
+    if (!orderId) return
+    setSendingId(fulfillmentId)
+    setSendError(null)
+    try {
+      const res = await fetch(`/admin/orders/${orderId}/send-tracking`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fulfillment_id: fulfillmentId }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+      loadLabels()
+    } catch (e) {
+      setSendError((e as Error).message)
+    } finally {
+      setSendingId(null)
+    }
+  }
 
   return (
     <div style={S.wrap}>
@@ -157,6 +185,7 @@ const OrderLabelsWidget = () => {
       <div style={S.body}>
         {loading && <p style={S.muted}>Loading...</p>}
         {error && <p style={{ ...S.muted, color: "#f87171" }}>Error: {error}</p>}
+        {sendError && <p style={{ ...S.muted, color: "#f87171" }}>Email error: {sendError}</p>}
         {!loading && !error && labels.length === 0 && (
           <p style={S.muted}>No labels found. Fulfill the order to generate a shipping label.</p>
         )}
@@ -186,12 +215,36 @@ const OrderLabelsWidget = () => {
               {!label.tracking_status?.status_details && label.batch_status?.error && (
                 <div style={S.scan}>{label.batch_status.error}</div>
               )}
+              {label.tracking_email_sent_at && (
+                <div style={S.scan}>
+                  Tracking email sent {new Date(label.tracking_email_sent_at).toLocaleString()}
+                </div>
+              )}
             </div>
-            {label.label_url && (
-              <button style={S.btn} onClick={() => window.open(label.label_url!, "_blank")}>
-                Print Label ↗
-              </button>
-            )}
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              {label.tracking_number && (
+                <button
+                  style={{
+                    ...S.btn,
+                    background: label.tracking_email_sent_at ? "#27272a" : "#d4a22a",
+                    color: label.tracking_email_sent_at ? "#fafafa" : "#000",
+                  }}
+                  disabled={sendingId === label.fulfillment_id}
+                  onClick={() => sendTrackingEmail(label.fulfillment_id)}
+                >
+                  {sendingId === label.fulfillment_id
+                    ? "Sending..."
+                    : label.tracking_email_sent_at
+                      ? "Resend Tracking"
+                      : "Send Tracking"}
+                </button>
+              )}
+              {label.label_url && (
+                <button style={S.btn} onClick={() => window.open(label.label_url!, "_blank")}>
+                  Print Label ↗
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>
