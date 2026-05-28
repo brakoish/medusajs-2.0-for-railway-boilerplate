@@ -59,7 +59,13 @@ const trackingNumberFrom = (fulfillment: FulfillmentRow): string => {
 
 const carrierFrom = (fulfillment: FulfillmentRow): string => {
   const carrier = (fulfillment.data?.carrier as string | undefined) || ""
-  return carrier.toLowerCase().trim()
+  const normalized = carrier.toLowerCase().trim()
+  if (normalized) return normalized
+
+  const trackingNumber = trackingNumberFrom(fulfillment)
+  if (/^9\d{19,25}$/.test(trackingNumber)) return "usps"
+
+  return ""
 }
 
 const shippoRequest = async <T>(
