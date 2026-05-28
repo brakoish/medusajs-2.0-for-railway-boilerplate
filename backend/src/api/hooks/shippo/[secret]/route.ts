@@ -71,6 +71,13 @@ type ShippoTxUpdatedPayload = {
 
 type AnyShippoWebhook = ShippoTrackUpdatedPayload | ShippoTxUpdatedPayload
 
+const carrierHasPossession = (status?: string): boolean =>
+  status === "TRANSIT" ||
+  status === "OUT_FOR_DELIVERY" ||
+  status === "DELIVERED" ||
+  status === "FAILURE" ||
+  status === "RETURNED"
+
 export async function POST(
   req: MedusaRequest,
   res: MedusaResponse
@@ -117,8 +124,10 @@ export async function POST(
           const fulfillmentModuleService: IFulfillmentModuleService = req.scope.resolve(Modules.FULFILLMENT)
           const fulfillment = await fulfillmentModuleService.retrieveFulfillment(metadata)
           const currentData = ((fulfillment as { data?: Record<string, unknown> }).data || {}) as Record<string, unknown>
+          const shippedAt = (fulfillment as { shipped_at?: Date | string | null }).shipped_at
 
           await fulfillmentModuleService.updateFulfillment(metadata, {
+            ...(carrierHasPossession(status) && !shippedAt ? { shipped_at: new Date() } : {}),
             data: {
               ...currentData,
               tracking_status: {

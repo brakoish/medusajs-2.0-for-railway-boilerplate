@@ -1,4 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { IFulfillmentModuleService } from "@medusajs/framework/types"
+import { Modules } from "@medusajs/framework/utils"
 import { createOrderFulfillmentWorkflow } from "@medusajs/medusa/core-flows"
 import { preSelectedRates } from "../../../../../modules/shippo/pre-selected-rates"
 
@@ -85,7 +87,7 @@ export async function POST(
   const { data: fulfillments } = await query.graph({
     entity: "fulfillment",
     filters: { order_id: orderId },
-    fields: ["id", "data", "tracking_numbers", "shipped_at"],
+    fields: ["id", "data", "tracking_numbers", "created_at", "shipped_at"],
   })
 
   const latest = fulfillments
@@ -93,10 +95,24 @@ export async function POST(
     .sort((a, b) => {
       const ad = (a as Record<string, unknown>)
       const bd = (b as Record<string, unknown>)
-      return String(bd.id) > String(ad.id) ? 1 : -1
+      return Date.parse(String(bd.created_at)) - Date.parse(String(ad.created_at))
     })[0] as Record<string, unknown> | undefined
 
   const fdata = (latest?.data || {}) as Record<string, unknown>
+  const trackingNumber =
+    (fdata.tracking_number as string | undefined) ||
+    ((latest?.tracking_numbers as string[] | undefined)?.[0])
+
+  if (latest?.id && trackingNumber && !latest.shipped_at) {
+    const fulfillmentModuleService: IFulfillmentModuleService = req.scope.resolve(
+      Modules.FULFILLMENT
+    )
+
+    await fulfillmentModuleService.updateFulfillment(latest.id as string, {
+      shipped_at: new Date(),
+    })
+  }
+
   res.status(200).json({
     fulfillment_id: latest?.id,
     label_url: fdata.label_url,
