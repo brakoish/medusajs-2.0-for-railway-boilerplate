@@ -65,6 +65,7 @@ export type ShippoTransaction = {
   object_id: string
   status: "QUEUED" | "WAITING" | "SUCCESS" | "ERROR" | "REFUNDED" | "REFUNDPENDING" | "REFUNDREJECTED"
   rate: string
+  metadata?: string
   tracking_number?: string
   tracking_url_provider?: string
   label_url?: string

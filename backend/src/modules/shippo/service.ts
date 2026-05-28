@@ -425,7 +425,10 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
     const preSelectedRateId = orderId ? preSelectedRates.get(orderId) : undefined
     if (preSelectedRateId) {
       preSelectedRates.delete(orderId!)
-      const tx = await this.client.createTransaction({ rate: preSelectedRateId })
+      const tx = await this.client.createTransaction({
+        rate: preSelectedRateId,
+        metadata: fulfillment.id as string | undefined,
+      })
       if (tx.status === "ERROR") {
         const msg = (tx.messages || []).map((m) => m.text).join("; ")
         throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, `Shippo label purchase failed: ${msg || "no message"}`)
@@ -559,7 +562,10 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
       )
     }
 
-    const tx = await this.client.createTransaction({ rate: rate.object_id })
+    const tx = await this.client.createTransaction({
+      rate: rate.object_id,
+      metadata: fulfillment.id as string | undefined,
+    })
     if (tx.status === "ERROR") {
       const msg = (tx.messages || []).map((m) => m.text).join("; ")
       throw new MedusaError(

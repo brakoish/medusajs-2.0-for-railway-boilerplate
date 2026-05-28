@@ -13,10 +13,11 @@ import { markFulfillmentAsDeliveredWorkflow } from "@medusajs/medusa/core-flows"
  * and configure the webhook URL in Shippo's dashboard to include it.
  *
  * Handles event types:
- *  - track_updated   -> updates Medusa fulfillment status (DELIVERED -> mark
- *                       fulfillment delivered; TRANSIT -> info-only log).
- *  - transaction_updated -> currently logged only; could be wired to surface
- *                           refund / void state on the order in admin.
+ *  - track_updated -> persists carrier scan status and marks delivered.
+ *  - transaction_created / transaction_updated -> persists label purchase
+ *    status, label URLs, tracking numbers, and errors onto the fulfillment.
+ *  - batch_created / batch_purchased -> acknowledged and summarized. Full
+ *    order mutation waits until bulk shipping uses Shippo's batch API.
  */
 
 type ShippoTrackUpdatedPayload = {
@@ -64,12 +65,35 @@ type ShippoTxUpdatedPayload = {
   data: {
     object_id: string
     status?: string
+    metadata?: string
+    provider?: string
     tracking_number?: string
+    tracking_url_provider?: string
     label_url?: string
+    messages?: { code?: string; text: string }[]
+    servicelevel?: { name?: string; token?: string }
   }
 }
 
-type AnyShippoWebhook = ShippoTrackUpdatedPayload | ShippoTxUpdatedPayload
+type ShippoBatchPayload = {
+  event: "batch_created" | "batch_purchased"
+  data: {
+    object_id?: string
+    status?: string
+    metadata?: string
+    object_results?: {
+      purchase_succeeded?: ShippoTxUpdatedPayload["data"][]
+      purchase_failed?: ShippoTxUpdatedPayload["data"][]
+      creation_succeeded?: Record<string, unknown>[]
+      creation_failed?: Record<string, unknown>[]
+    }
+  }
+}
+
+type AnyShippoWebhook =
+  | ShippoTrackUpdatedPayload
+  | ShippoTxUpdatedPayload
+  | ShippoBatchPayload
 
 const carrierHasPossession = (status?: string): boolean =>
   status === "TRANSIT" ||
@@ -77,6 +101,59 @@ const carrierHasPossession = (status?: string): boolean =>
   status === "DELIVERED" ||
   status === "FAILURE" ||
   status === "RETURNED"
+
+const isFulfillmentId = (value?: string): value is string =>
+  typeof value === "string" && value.startsWith("ful_")
+
+async function updateFulfillmentFromTransaction(
+  req: MedusaRequest,
+  tx: ShippoTxUpdatedPayload["data"]
+): Promise<boolean> {
+  const logger = req.scope.resolve("logger")
+  const fulfillmentId = isFulfillmentId(tx.metadata) ? tx.metadata : undefined
+
+  if (!fulfillmentId) {
+    logger.info(
+      `[shippo webhook] transaction ${tx.object_id} has no fulfillment metadata; no order mutation`
+    )
+    return false
+  }
+
+  const fulfillmentModuleService: IFulfillmentModuleService = req.scope.resolve(
+    Modules.FULFILLMENT
+  )
+  const fulfillment = await fulfillmentModuleService.retrieveFulfillment(
+    fulfillmentId
+  )
+  const currentData = ((fulfillment as { data?: Record<string, unknown> })
+    .data || {}) as Record<string, unknown>
+  const shippedAt = (fulfillment as { shipped_at?: Date | string | null })
+    .shipped_at
+
+  const hasTracking = !!tx.tracking_number
+
+  await fulfillmentModuleService.updateFulfillment(fulfillmentId, {
+    ...(hasTracking && !shippedAt ? { shipped_at: new Date() } : {}),
+    data: {
+      ...currentData,
+      transaction_id: tx.object_id,
+      transaction_status: {
+        status: tx.status,
+        messages: tx.messages || [],
+        updated_at: new Date().toISOString(),
+      },
+      ...(tx.label_url ? { label_url: tx.label_url } : {}),
+      ...(tx.tracking_number ? { tracking_number: tx.tracking_number } : {}),
+      ...(tx.tracking_url_provider
+        ? { tracking_url: tx.tracking_url_provider }
+        : {}),
+      ...(tx.provider ? { carrier: tx.provider } : {}),
+      ...(tx.servicelevel?.name ? { service: tx.servicelevel.name } : {}),
+    },
+  })
+
+  return true
+}
 
 export async function POST(
   req: MedusaRequest,
@@ -171,11 +248,50 @@ export async function POST(
       break
     }
     case "transaction_updated":
-    case "transaction_created":
+    case "transaction_created": {
       logger.info(
         `[shippo webhook] ${payload.event} object_id=${payload.data.object_id} status=${payload.data.status}`
       )
+      try {
+        await updateFulfillmentFromTransaction(req, payload.data)
+      } catch (e) {
+        logger.warn(
+          `[shippo webhook] failed to update transaction ${payload.data.object_id}: ${
+            (e as Error).message
+          }`
+        )
+      }
       break
+    }
+    case "batch_created":
+    case "batch_purchased": {
+      const succeeded =
+        payload.data.object_results?.purchase_succeeded?.length ??
+        payload.data.object_results?.creation_succeeded?.length ??
+        0
+      const failed =
+        payload.data.object_results?.purchase_failed?.length ??
+        payload.data.object_results?.creation_failed?.length ??
+        0
+
+      logger.info(
+        `[shippo webhook] ${payload.event} object_id=${payload.data.object_id} status=${payload.data.status} succeeded=${succeeded} failed=${failed}`
+      )
+
+      const txs = payload.data.object_results?.purchase_succeeded || []
+      for (const tx of txs) {
+        try {
+          await updateFulfillmentFromTransaction(req, tx)
+        } catch (e) {
+          logger.warn(
+            `[shippo webhook] failed to update batch transaction ${tx.object_id}: ${
+              (e as Error).message
+            }`
+          )
+        }
+      }
+      break
+    }
     default:
       logger.info(`[shippo webhook] unhandled event=${(payload as { event?: string }).event}`)
   }
