@@ -30,8 +30,6 @@ const MINIO_ENDPOINT = process.env.MINIO_ENDPOINT;
 const MINIO_ACCESS_KEY = process.env.MINIO_ACCESS_KEY;
 const MINIO_SECRET_KEY = process.env.MINIO_SECRET_KEY;
 const MINIO_BUCKET = process.env.MINIO_BUCKET;
-const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST;
-const MEILISEARCH_ADMIN_KEY = process.env.MEILISEARCH_ADMIN_KEY;
 const SHIPPO_API_TOKEN = process.env.SHIPPO_API_TOKEN;
 const SHIPPO_API_URL = process.env.SHIPPO_API_URL;
 
@@ -202,30 +200,6 @@ const medusaConfig = {
           },
         ],
       },
-    }] : [])
-  ],
-  plugins: [
-  ...(MEILISEARCH_HOST && MEILISEARCH_ADMIN_KEY ? [{
-      resolve: '@rokmohar/medusa-plugin-meilisearch',
-      options: {
-        config: {
-          host: MEILISEARCH_HOST,
-          apiKey: MEILISEARCH_ADMIN_KEY
-        },
-        settings: {
-          products: {
-            type: 'products',
-            enabled: true,
-            fields: ['id', 'title', 'description', 'handle', 'variant_sku', 'thumbnail'],
-            indexSettings: {
-              searchableAttributes: ['title', 'description', 'variant_sku'],
-              displayedAttributes: ['id', 'handle', 'title', 'description', 'variant_sku', 'thumbnail'],
-              filterableAttributes: ['id', 'handle'],
-            },
-            primaryKey: 'id',
-          }
-        }
-      }
     }] : [])
   ]
 };

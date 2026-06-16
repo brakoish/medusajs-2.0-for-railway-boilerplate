@@ -37,9 +37,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(`${origin}${stripped}${search}`, 301)
   }
 
-  // 2. Single-product store: collapse the boilerplate listing surfaces
-  //    onto the homepage. /products/<anything>, /store, /collections/*,
-  //    /categories/* all 301 to /. The home is the canonical PDP.
+  // 2. Single-product store: collapse the boilerplate listing/search surfaces
+  //    onto the homepage. The home is the canonical PDP.
   //    Keeping them as 301s instead of just deleting the routes so any
   //    indexed/shared links land on a real page instead of 404.
   const SINGLE_PRODUCT_REDIRECT = [
@@ -47,6 +46,8 @@ export async function middleware(request: NextRequest) {
     /^\/store(?:\/|$)/,
     /^\/collections(?:\/|$)/,
     /^\/categories(?:\/|$)/,
+    /^\/search(?:\/|$)/,
+    /^\/results(?:\/|$)/,
   ]
   if (SINGLE_PRODUCT_REDIRECT.some((re) => re.test(pathname))) {
     return NextResponse.redirect(`${origin}/${search}`, 301)

@@ -45,9 +45,6 @@ importers:
       '@react-email/components':
         specifier: ^1.0.1
         version: 1.0.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@rokmohar/medusa-plugin-meilisearch':
-        specifier: 1.3.5
-        version: 1.3.5(@medusajs/admin-sdk@2.13.6)(@medusajs/cli@2.13.6(@types/node@20.19.25))(@medusajs/framework@2.13.6(@medusajs/cli@2.13.6(@types/node@20.19.25))(@types/node@20.19.25)(ioredis@5.8.2)(vite@5.4.21(@types/node@20.19.25))(zod@3.25.76))(@medusajs/icons@2.13.6(react@18.3.1))(@medusajs/medusa@2.13.6)(@medusajs/test-utils@2.13.6)(@medusajs/ui@4.1.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@mikro-orm/cli@6.6.12(pg@8.16.3))(@mikro-orm/core@6.6.12)(@mikro-orm/knex@6.6.12(@mikro-orm/core@6.6.12)(pg@8.16.3))(@mikro-orm/migrations@6.6.12(@mikro-orm/core@6.6.12)(@types/node@20.19.25)(pg@8.16.3))(@mikro-orm/postgresql@6.6.12(@mikro-orm/core@6.6.12))(@tanstack/react-query@5.64.2(react@18.3.1))(awilix@8.0.1)(pg@8.16.3)
       medusajs-launch-utils:
         specifier: 0.0.18
         version: 0.0.18
@@ -3892,26 +3889,6 @@ packages:
     resolution: {integrity: sha512-Ic6m2U/rMjTkhERIa/0ZtXJP17QUi2CbWE7cqx4J58M8aA3QTfW+2UlQ4psvTX9IO1RfNVhK3pcpdjej7L+t2w==}
     engines: {node: '>=14.0.0'}
 
-  '@rokmohar/medusa-plugin-meilisearch@1.3.5':
-    resolution: {integrity: sha512-ZZCYGqiMvaT9lWjxPh0zrfym1lNO+eFQRgY+F3hJty2aMA/oqjhBab3wj2FenxVjHJ5fU5fqdTrGT52ImbS2UQ==}
-    engines: {node: '>=20'}
-    peerDependencies:
-      '@medusajs/admin-sdk': ^2.10.2
-      '@medusajs/cli': ^2.10.2
-      '@medusajs/framework': ^2.10.2
-      '@medusajs/icons': ^2.10.2
-      '@medusajs/medusa': ^2.10.2
-      '@medusajs/test-utils': ^2.10.2
-      '@medusajs/ui': ^4.0.22
-      '@mikro-orm/cli': 6.4.3
-      '@mikro-orm/core': 6.4.3
-      '@mikro-orm/knex': 6.4.3
-      '@mikro-orm/migrations': 6.4.3
-      '@mikro-orm/postgresql': 6.4.3
-      '@tanstack/react-query': 5.64.2
-      awilix: ^8.0.1
-      pg: ^8.13.0
-
   '@rolldown/pluginutils@1.0.0-beta.27':
     resolution: {integrity: sha512-+d0F4MKMCbeVUJwG96uQ4SgAznZNSq93I3V+9NHA4OpvqG8mRCpGdKmK8l/dl02h2CCDHwW2FqilnTyDcAnqjA==}
 
@@ -5666,6 +5643,7 @@ packages:
 
   glob@10.5.0:
     resolution: {integrity: sha512-DfXN8DfhJ7NH3Oe7cFmu3NCu1wKbkReJ8TorzSAFbSKrlNaQSKfIzqYqVY8zlbs2NLBbWpRiU52GX2PbaBVNkg==}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   glob@13.0.6:
@@ -6152,6 +6130,7 @@ packages:
   json-2-csv@5.5.10:
     resolution: {integrity: sha512-Dep8wO3Fr5wNjQevO2Z8Y7yeee/nYSGRsi7q6zJDKEVHxXkXT+v21vxHmDX923UzmCXXkSo62HaTz6eTWzFLaw==}
     engines: {node: '>= 16'}
+    deprecated: A security vulnerability has been reported with the preventCsvInjection option which has been fixed in version 5.5.11. Please upgrade as soon as possible.
 
   json-parse-even-better-errors@2.3.1:
     resolution: {integrity: sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==}
@@ -6379,9 +6358,6 @@ packages:
   medusajs-launch-utils@0.0.18:
     resolution: {integrity: sha512-ReJT1qpYMnoIvkFls5Mzn1bzacLtxZQpsit+bTwt5LzrnqDODzWDzRiUYaV66n359La1VfK3prMghoM3k/kFxA==}
     hasBin: true
-
-  meilisearch@0.53.0:
-    resolution: {integrity: sha512-nG4VXbEOSzUmtbfsgOo+t6yX1ECEgXaT4hC0ap9MBpQGK5xwT+NWYDENYsKWR75cVaWaAqva+ok4zHlgtdXlLw==}
 
   merge-descriptors@1.0.3:
     resolution: {integrity: sha512-gaNvAS7TZ897/rVaZ0nMtAyxNyi/pdbjbAwUpFQpN70GqnVfOiXpeUUMKRBmzXaSQ8DdTX4/0ms62r2K+hE6mQ==}
@@ -7842,6 +7818,7 @@ packages:
 
   uuid@9.0.1:
     resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   v8-compile-cache-lib@3.0.1:
@@ -10708,27 +10685,6 @@ snapshots:
       - supports-color
       - tedious
 
-  '@mikro-orm/cli@6.6.12(pg@8.16.3)':
-    dependencies:
-      '@jercle/yargonaut': 1.1.5
-      '@mikro-orm/core': 6.6.12
-      '@mikro-orm/knex': 6.6.12(@mikro-orm/core@6.6.12)(pg@8.16.3)
-      fs-extra: 11.3.3
-      tsconfig-paths: 4.2.0
-      yargs: 17.7.2
-    transitivePeerDependencies:
-      - better-sqlite3
-      - libsql
-      - mariadb
-      - mysql
-      - mysql2
-      - pg
-      - pg-native
-      - pg-query-stream
-      - sqlite3
-      - supports-color
-      - tedious
-
   '@mikro-orm/cli@6.6.12(pg@8.20.0)':
     dependencies:
       '@jercle/yargonaut': 1.1.5
@@ -10760,22 +10716,6 @@ snapshots:
       mikro-orm: 6.6.12
       reflect-metadata: 0.2.2
 
-  '@mikro-orm/knex@6.6.12(@mikro-orm/core@6.6.12)(pg@8.16.3)':
-    dependencies:
-      '@mikro-orm/core': 6.6.12
-      fs-extra: 11.3.3
-      knex: 3.2.8(pg@8.16.3)
-      sqlstring: 2.3.3
-    transitivePeerDependencies:
-      - mysql
-      - mysql2
-      - pg
-      - pg-native
-      - pg-query-stream
-      - sqlite3
-      - supports-color
-      - tedious
-
   '@mikro-orm/knex@6.6.12(@mikro-orm/core@6.6.12)(pg@8.20.0)':
     dependencies:
       '@mikro-orm/core': 6.6.12
@@ -10783,26 +10723,6 @@ snapshots:
       knex: 3.2.8(pg@8.20.0)
       sqlstring: 2.3.3
     transitivePeerDependencies:
-      - mysql
-      - mysql2
-      - pg
-      - pg-native
-      - pg-query-stream
-      - sqlite3
-      - supports-color
-      - tedious
-
-  '@mikro-orm/migrations@6.6.12(@mikro-orm/core@6.6.12)(@types/node@20.19.25)(pg@8.16.3)':
-    dependencies:
-      '@mikro-orm/core': 6.6.12
-      '@mikro-orm/knex': 6.6.12(@mikro-orm/core@6.6.12)(pg@8.16.3)
-      fs-extra: 11.3.3
-      umzug: 3.8.2(@types/node@20.19.25)
-    transitivePeerDependencies:
-      - '@types/node'
-      - better-sqlite3
-      - libsql
-      - mariadb
       - mysql
       - mysql2
       - pg
@@ -13299,25 +13219,6 @@ snapshots:
       react: 18.3.1
 
   '@remix-run/router@1.23.2': {}
-
-  '@rokmohar/medusa-plugin-meilisearch@1.3.5(@medusajs/admin-sdk@2.13.6)(@medusajs/cli@2.13.6(@types/node@20.19.25))(@medusajs/framework@2.13.6(@medusajs/cli@2.13.6(@types/node@20.19.25))(@types/node@20.19.25)(ioredis@5.8.2)(vite@5.4.21(@types/node@20.19.25))(zod@3.25.76))(@medusajs/icons@2.13.6(react@18.3.1))(@medusajs/medusa@2.13.6)(@medusajs/test-utils@2.13.6)(@medusajs/ui@4.1.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@mikro-orm/cli@6.6.12(pg@8.16.3))(@mikro-orm/core@6.6.12)(@mikro-orm/knex@6.6.12(@mikro-orm/core@6.6.12)(pg@8.16.3))(@mikro-orm/migrations@6.6.12(@mikro-orm/core@6.6.12)(@types/node@20.19.25)(pg@8.16.3))(@mikro-orm/postgresql@6.6.12(@mikro-orm/core@6.6.12))(@tanstack/react-query@5.64.2(react@18.3.1))(awilix@8.0.1)(pg@8.16.3)':
-    dependencies:
-      '@medusajs/admin-sdk': 2.13.6
-      '@medusajs/cli': 2.13.6(@types/node@20.19.25)
-      '@medusajs/framework': 2.13.6(@medusajs/cli@2.13.6(@types/node@20.19.25))(@types/node@20.19.25)(ioredis@5.8.2)(vite@5.4.21(@types/node@20.19.25))(zod@3.25.76)
-      '@medusajs/icons': 2.13.6(react@18.3.1)
-      '@medusajs/medusa': 2.13.6(@medusajs/admin-sdk@2.13.6)(@medusajs/cli@2.13.6(@types/node@20.19.25))(@medusajs/framework@2.13.6(@medusajs/cli@2.13.6(@types/node@20.19.25))(@types/node@20.19.25)(ioredis@5.8.2)(vite@5.4.21(@types/node@20.19.25))(zod@3.25.76))(@medusajs/icons@2.13.6(react@18.3.1))(@medusajs/test-utils@2.13.6)(@medusajs/ui@4.1.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@swc/core@1.5.7(@swc/helpers@0.5.17))(@types/node@20.19.25)(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(awilix@8.0.1)(picomatch@4.0.3)(posthog-node@4.18.0)(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(yaml@2.8.0)
-      '@medusajs/test-utils': 2.13.6(@medusajs/core-flows@2.13.6(@medusajs/framework@2.13.6(@medusajs/cli@2.13.6(@types/node@20.19.25))(@types/node@20.19.25)(ioredis@5.8.2)(vite@5.4.21(@types/node@20.19.25))(zod@3.25.76)))(@medusajs/framework@2.13.6(@medusajs/cli@2.13.6(@types/node@20.19.25))(@types/node@20.19.25)(ioredis@5.8.2)(vite@5.4.21(@types/node@20.19.25))(zod@3.25.76))(@medusajs/medusa@2.13.6)
-      '@medusajs/ui': 4.1.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
-      '@mikro-orm/cli': 6.6.12(pg@8.16.3)
-      '@mikro-orm/core': 6.6.12
-      '@mikro-orm/knex': 6.6.12(@mikro-orm/core@6.6.12)(pg@8.16.3)
-      '@mikro-orm/migrations': 6.6.12(@mikro-orm/core@6.6.12)(@types/node@20.19.25)(pg@8.16.3)
-      '@mikro-orm/postgresql': 6.6.12(@mikro-orm/core@6.6.12)
-      '@tanstack/react-query': 5.64.2(react@18.3.1)
-      awilix: 8.0.1
-      meilisearch: 0.53.0
-      pg: 8.16.3
 
   '@rolldown/pluginutils@1.0.0-beta.27': {}
 
@@ -16029,27 +15930,6 @@ snapshots:
 
   kleur@3.0.3: {}
 
-  knex@3.2.8(pg@8.16.3):
-    dependencies:
-      colorette: 2.0.19
-      commander: 10.0.1
-      debug: 4.3.4
-      escalade: 3.2.0
-      esm: 3.2.25
-      get-package-type: 0.1.0
-      getopts: 2.3.0
-      interpret: 2.2.0
-      lodash: 4.17.21
-      pg-connection-string: 2.6.2
-      rechoir: 0.8.0
-      resolve-from: 5.0.0
-      tarn: 3.0.2
-      tildify: 2.0.0
-    optionalDependencies:
-      pg: 8.16.3
-    transitivePeerDependencies:
-      - supports-color
-
   knex@3.2.8(pg@8.20.0):
     dependencies:
       colorette: 2.0.19
@@ -16208,8 +16088,6 @@ snapshots:
     transitivePeerDependencies:
       - debug
       - pg-native
-
-  meilisearch@0.53.0: {}
 
   merge-descriptors@1.0.3: {}
 
