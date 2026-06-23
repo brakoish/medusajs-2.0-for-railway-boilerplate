@@ -4,12 +4,19 @@ import { InviteUserEmail, INVITE_USER, isInviteUserData } from './invite-user'
 import { OrderPlacedTemplate, ORDER_PLACED, isOrderPlacedTemplateData } from './order-placed'
 import { OrderShippedTemplate, ORDER_SHIPPED, isOrderShippedTemplateData } from './order-shipped'
 import { PasswordResetEmail, PASSWORD_RESET, isPasswordResetData } from './password-reset'
+import {
+  UnshippedOrderReminderTemplate,
+  UNSHIPPED_ORDER_REMINDER,
+  isUnshippedOrderReminderData,
+} from './unshipped-order-reminder'
+export type { ReminderOrder } from './unshipped-order-reminder'
 
 export const EmailTemplates = {
   INVITE_USER,
   ORDER_PLACED,
   ORDER_SHIPPED,
-  PASSWORD_RESET
+  PASSWORD_RESET,
+  UNSHIPPED_ORDER_REMINDER,
 } as const
 
 export type EmailTemplateType = keyof typeof EmailTemplates
@@ -52,6 +59,15 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <PasswordResetEmail {...data} />
 
+    case EmailTemplates.UNSHIPPED_ORDER_REMINDER:
+      if (!isUnshippedOrderReminderData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.UNSHIPPED_ORDER_REMINDER}"`
+        )
+      }
+      return <UnshippedOrderReminderTemplate {...data} />
+
     default:
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
@@ -60,4 +76,10 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
   }
 }
 
-export { InviteUserEmail, OrderPlacedTemplate, OrderShippedTemplate, PasswordResetEmail }
+export {
+  InviteUserEmail,
+  OrderPlacedTemplate,
+  OrderShippedTemplate,
+  PasswordResetEmail,
+  UnshippedOrderReminderTemplate,
+}
