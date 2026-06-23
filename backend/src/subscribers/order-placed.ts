@@ -21,7 +21,8 @@ export default async function orderPlacedHandler({
       data: {
         emailOptions: {
           replyTo: 'hello@thedabpal.com',
-          subject: 'Your order has been placed'
+          subject: 'Your order has been placed',
+          bcc: 'willbrako@gmail.com'
         },
         order,
         shippingAddress,
