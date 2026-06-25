@@ -49,13 +49,47 @@ const mapFrame = {
   height: 76,
 }
 
+const mapProjection = {
+  width: 1000,
+  height: 500,
+  scale: 175.76045313648214,
+  translateX: 500,
+  translateY: 250,
+}
+
 const pluralize = (count: number, word: string) =>
   `${count} ${word}${count === 1 ? "" : "s"}`
 
-const projectLocation = (longitude: number, latitude: number) => ({
-  left: `${mapFrame.left + ((longitude + 180) / 360) * mapFrame.width}%`,
-  top: `${mapFrame.top + ((90 - latitude) / 180) * mapFrame.height}%`,
-})
+const naturalEarthRaw = (longitude: number, latitude: number) => {
+  const lambda = (longitude * Math.PI) / 180
+  const phi = (latitude * Math.PI) / 180
+  const phi2 = phi * phi
+  const phi4 = phi2 * phi2
+
+  return {
+    x:
+      lambda *
+      (0.8707 -
+        0.131979 * phi2 +
+        phi4 * (-0.013791 + phi4 * (0.003971 * phi2 - 0.001529 * phi4))),
+    y:
+      phi *
+      (1.007226 +
+        phi2 *
+          (0.015085 + phi4 * (-0.044475 + 0.028874 * phi2 - 0.005916 * phi4))),
+  }
+}
+
+const projectLocation = (longitude: number, latitude: number) => {
+  const projected = naturalEarthRaw(longitude, latitude)
+  const x = mapProjection.translateX + projected.x * mapProjection.scale
+  const y = mapProjection.translateY - projected.y * mapProjection.scale
+
+  return {
+    left: `${mapFrame.left + (x / mapProjection.width) * mapFrame.width}%`,
+    top: `${mapFrame.top + (y / mapProjection.height) * mapFrame.height}%`,
+  }
+}
 
 const formatLocation = (location: PalLocation) =>
   [
@@ -77,7 +111,9 @@ const centerBetween = (a: PointerState, b: PointerState) => ({
   y: (a.y + b.y) / 2,
 })
 
-export default function InteractivePalMap({ locations }: InteractivePalMapProps) {
+export default function InteractivePalMap({
+  locations,
+}: InteractivePalMapProps) {
   const viewportRef = useRef<HTMLDivElement>(null)
   const pointers = useRef(new Map<number, PointerState>())
   const dragStart = useRef<{
