@@ -4,6 +4,7 @@ import Hero from "@modules/home/components/hero"
 import BuySection from "@modules/home/components/buy-section"
 import FeatureTrio from "@modules/home/components/feature-trio"
 import DetailBlock from "@modules/home/components/detail-block"
+import PalMap from "@modules/home/components/pal-map"
 import Reviews from "@modules/home/components/reviews"
 import FAQ from "@modules/home/components/faq"
 import StructuredData from "@modules/home/components/structured-data"
@@ -22,6 +23,7 @@ export default async function Home() {
       <BuySection countryCode="us" />
       <FeatureTrio />
       <DetailBlock />
+      <PalMap />
       <Reviews />
       <FAQ />
     </>
