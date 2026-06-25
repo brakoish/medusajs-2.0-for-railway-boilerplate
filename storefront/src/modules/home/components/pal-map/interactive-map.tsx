@@ -40,7 +40,8 @@ type PinchState = {
 }
 
 const MIN_SCALE = 1
-const MAX_SCALE = 4
+const MAX_SCALE = 8
+const ZOOM_STEP = 1.55
 const mapFrame = {
   left: 4,
   top: 12,
@@ -148,7 +149,7 @@ export default function InteractivePalMap({ locations }: InteractivePalMapProps)
     const handleWheel = (event: WheelEvent) => {
       event.preventDefault()
       const rect = viewport.getBoundingClientRect()
-      const zoomFactor = event.deltaY > 0 ? 0.88 : 1.12
+      const zoomFactor = event.deltaY > 0 ? 0.84 : 1.2
       zoomAt(
         view.scale * zoomFactor,
         event.clientX - rect.left,
@@ -333,7 +334,7 @@ export default function InteractivePalMap({ locations }: InteractivePalMapProps)
           className="pal-map-control"
           aria-label="Zoom in"
           title="Zoom in"
-          onClick={() => zoomAt(view.scale * 1.35)}
+          onClick={() => zoomAt(view.scale * ZOOM_STEP)}
         >
           <PlusMini />
         </button>
@@ -342,7 +343,7 @@ export default function InteractivePalMap({ locations }: InteractivePalMapProps)
           className="pal-map-control"
           aria-label="Zoom out"
           title="Zoom out"
-          onClick={() => zoomAt(view.scale / 1.35)}
+          onClick={() => zoomAt(view.scale / ZOOM_STEP)}
         >
           <MinusMini />
         </button>
