@@ -14,6 +14,9 @@ import {
   useRef,
   useState,
 } from "react"
+import { geoEquirectangular, geoGraticule10, geoPath } from "d3-geo"
+import { feature } from "topojson-client"
+import landAtlas from "world-atlas/land-50m.json"
 
 import { PalLocation } from "./locations"
 
@@ -42,54 +45,27 @@ type PinchState = {
 const MIN_SCALE = 1
 const MAX_SCALE = 8
 const ZOOM_STEP = 1.55
-const mapFrame = {
-  left: 4,
-  top: 12,
-  width: 92,
-  height: 76,
-}
-
-const mapProjection = {
+const MAP_FRAME: [[number, number], [number, number]] = [
+  [40, 60],
+  [960, 440],
+]
+const MAP_SIZE = {
   width: 1000,
   height: 500,
-  scale: 175.76045313648214,
-  translateX: 500,
-  translateY: 250,
 }
 
 const pluralize = (count: number, word: string) =>
   `${count} ${word}${count === 1 ? "" : "s"}`
 
-const naturalEarthRaw = (longitude: number, latitude: number) => {
-  const lambda = (longitude * Math.PI) / 180
-  const phi = (latitude * Math.PI) / 180
-  const phi2 = phi * phi
-  const phi4 = phi2 * phi2
+const landFeature = feature(landAtlas as any, (landAtlas as any).objects.land)
 
-  return {
-    x:
-      lambda *
-      (0.8707 -
-        0.131979 * phi2 +
-        phi4 * (-0.013791 + phi4 * (0.003971 * phi2 - 0.001529 * phi4))),
-    y:
-      phi *
-      (1.007226 +
-        phi2 *
-          (0.015085 + phi4 * (-0.044475 + 0.028874 * phi2 - 0.005916 * phi4))),
-  }
-}
+const projection = geoEquirectangular().fitExtent(MAP_FRAME, { type: "Sphere" })
+const path = geoPath(projection)
+const landPath = path(landFeature as any) || ""
+const graticulePath = path(geoGraticule10()) || ""
 
-const projectLocation = (longitude: number, latitude: number) => {
-  const projected = naturalEarthRaw(longitude, latitude)
-  const x = mapProjection.translateX + projected.x * mapProjection.scale
-  const y = mapProjection.translateY - projected.y * mapProjection.scale
-
-  return {
-    left: `${mapFrame.left + (x / mapProjection.width) * mapFrame.width}%`,
-    top: `${mapFrame.top + (y / mapProjection.height) * mapFrame.height}%`,
-  }
-}
+const projectLocation = (longitude: number, latitude: number) =>
+  projection([longitude, latitude])
 
 const formatLocation = (location: PalLocation) =>
   [
@@ -129,12 +105,35 @@ export default function InteractivePalMap({
 
   const locationPins = useMemo(
     () =>
-      locations.map((location) => ({
-        key: `${location.city}-${location.province}-${location.country}`,
-        location,
-        position: projectLocation(location.longitude, location.latitude),
-        size: Math.min(34, 18 + location.count * 5),
-      })),
+      locations
+        .map((location) => {
+          const position = projectLocation(
+            location.longitude,
+            location.latitude
+          )
+
+          if (!position) return null
+
+          return {
+            key: `${location.city}-${location.province}-${location.country}`,
+            location,
+            position: {
+              left: `${(position[0] / MAP_SIZE.width) * 100}%`,
+              top: `${(position[1] / MAP_SIZE.height) * 100}%`,
+            },
+            size: Math.min(34, 18 + location.count * 5),
+          }
+        })
+        .filter(
+          (
+            pin
+          ): pin is {
+            key: string
+            location: PalLocation
+            position: { left: string; top: string }
+            size: number
+          } => Boolean(pin)
+        ),
     [locations]
   )
 
@@ -321,14 +320,15 @@ export default function InteractivePalMap({
               } as CSSProperties
             }
           >
-            <div className="pal-map-graticule" aria-hidden="true" />
-            <img
+            <svg
               className="pal-map-outline"
-              src="/dab-pal/world-map.svg"
-              alt=""
+              viewBox={`0 0 ${MAP_SIZE.width} ${MAP_SIZE.height}`}
               aria-hidden="true"
-              draggable={false}
-            />
+              focusable={false}
+            >
+              <path className="pal-map-graticule" d={graticulePath} />
+              <path className="pal-map-land" d={landPath} />
+            </svg>
 
             {locationPins.map(({ key, location, position, size }) => {
               const active = activeKey === key
