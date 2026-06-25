@@ -2,8 +2,11 @@ import { palLocations } from "./locations"
 import InteractivePalMap from "./interactive-map"
 
 export default function PalMap() {
-  const countries = new Set(palLocations.map((location) => location.country))
-  const total = palLocations.reduce((sum, location) => sum + location.count, 0)
+  const usLocations = palLocations.filter(
+    (location) => location.country === "US" && location.province !== "PR"
+  )
+  const states = new Set(usLocations.map((location) => location.province))
+  const total = usLocations.reduce((sum, location) => sum + location.count, 0)
 
   return (
     <section className="bg-zinc-950 text-white py-20 small:py-32 overflow-hidden">
@@ -17,7 +20,7 @@ export default function PalMap() {
               Where Dab Pals have landed.
             </h2>
             <p className="text-white/65 mt-5 leading-relaxed">
-              Each bubble is a city with a Dab Pal out in the wild.
+              Each bubble is a US city with a Dab Pal out in the wild.
             </p>
 
             <dl className="grid grid-cols-3 gap-3 mt-8 max-w-xl">
@@ -32,21 +35,21 @@ export default function PalMap() {
                   Cities
                 </dt>
                 <dd className="text-2xl font-semibold mt-1">
-                  {palLocations.length}
+                  {usLocations.length}
                 </dd>
               </div>
               <div className="border border-white/10 bg-white/[0.04] rounded-lg px-4 py-3">
                 <dt className="text-[11px] uppercase tracking-[0.18em] text-white/40">
-                  Countries
+                  States
                 </dt>
                 <dd className="text-2xl font-semibold mt-1">
-                  {countries.size}
+                  {states.size}
                 </dd>
               </div>
             </dl>
           </div>
 
-          <InteractivePalMap locations={palLocations} />
+          <InteractivePalMap locations={usLocations} />
         </div>
       </div>
     </section>

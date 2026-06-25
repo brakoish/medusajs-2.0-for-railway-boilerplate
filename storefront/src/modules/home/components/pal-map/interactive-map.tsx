@@ -14,9 +14,9 @@ import {
   useRef,
   useState,
 } from "react"
-import { geoEquirectangular, geoGraticule10, geoPath } from "d3-geo"
+import { geoAlbersUsa, geoGraticule10, geoPath } from "d3-geo"
 import { feature } from "topojson-client"
-import landAtlas from "world-atlas/land-50m.json"
+import countriesAtlas from "world-atlas/countries-50m.json"
 
 import { PalLocation } from "./locations"
 
@@ -51,22 +51,28 @@ const MIN_SCALE = 1
 const MAX_SCALE = 8
 const ZOOM_STEP = 1.55
 const MAP_FRAME: [[number, number], [number, number]] = [
-  [40, 60],
-  [960, 440],
+  [55, 45],
+  [945, 575],
 ]
 const MAP_SIZE = {
   width: 1000,
-  height: 500,
+  height: 620,
 }
 
 const pluralize = (count: number, word: string) =>
   `${count} ${word}${count === 1 ? "" : "s"}`
 
-const landFeature = feature(landAtlas as any, (landAtlas as any).objects.land)
+const countriesFeature = feature(
+  countriesAtlas as any,
+  (countriesAtlas as any).objects.countries
+) as any
+const unitedStatesFeature = countriesFeature.features.find(
+  (country: any) => country.id === "840"
+)
 
-const projection = geoEquirectangular().fitExtent(MAP_FRAME, { type: "Sphere" })
+const projection = geoAlbersUsa().fitExtent(MAP_FRAME, unitedStatesFeature)
 const path = geoPath(projection)
-const landPath = path(landFeature as any) || ""
+const landPath = path(unitedStatesFeature) || ""
 const graticulePath = path(geoGraticule10()) || ""
 
 const projectLocation = (longitude: number, latitude: number) =>
