@@ -305,6 +305,7 @@ export default function InteractivePalMap({ locations }: InteractivePalMapProps)
                     left: position.left,
                     top: position.top,
                     "--pin-size": `${size}px`,
+                    "--pin-scale": 1 / view.scale,
                     "--pin-z": 10 + location.count,
                   } as CSSProperties
                 }

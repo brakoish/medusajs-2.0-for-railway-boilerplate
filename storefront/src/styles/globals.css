@@ -263,9 +263,11 @@
   background: transparent;
   cursor: pointer;
   transform: translate(
-    calc(-50% + var(--pin-offset-x, 0px)),
-    calc(-50% + var(--pin-offset-y, 0px))
-  );
+      calc(-50% + var(--pin-offset-x, 0px)),
+      calc(-50% + var(--pin-offset-y, 0px))
+    )
+    scale(var(--pin-scale, 1));
+  transform-origin: center;
 }
 
 .pal-map-pin-dot {
