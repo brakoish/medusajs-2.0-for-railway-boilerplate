@@ -273,56 +273,57 @@ export default function InteractivePalMap({ locations }: InteractivePalMapProps)
         onPointerUp={onPointerEnd}
         onPointerCancel={onPointerEnd}
       >
-        <div
-          className="pal-map-surface"
-          style={
-            {
-              "--map-x": `${view.x}px`,
-              "--map-y": `${view.y}px`,
-              "--map-scale": view.scale,
-            } as CSSProperties
-          }
-        >
-          <div className="pal-map-graticule" aria-hidden="true" />
-          <img
-            className="pal-map-outline"
-            src="/dab-pal/world-map.svg"
-            alt=""
-            aria-hidden="true"
-            draggable={false}
-          />
+        <div className="pal-map-surface">
+          <div
+            className="pal-map-layer"
+            style={
+              {
+                "--map-x": `${view.x}px`,
+                "--map-y": `${view.y}px`,
+                "--map-scale": view.scale,
+              } as CSSProperties
+            }
+          >
+            <div className="pal-map-graticule" aria-hidden="true" />
+            <img
+              className="pal-map-outline"
+              src="/dab-pal/world-map.svg"
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+            />
 
-          {locationPins.map(({ key, location, position, size }) => {
-            const active = activeKey === key
+            {locationPins.map(({ key, location, position, size }) => {
+              const active = activeKey === key
 
-            return (
-              <button
-                key={key}
-                type="button"
-                className={`pal-map-pin${active ? " is-active" : ""}`}
-                style={
-                  {
-                    left: position.left,
-                    top: position.top,
-                    "--pin-size": `${size}px`,
-                    "--pin-scale": 1 / view.scale,
-                    "--pin-z": 10 + location.count,
-                  } as CSSProperties
-                }
-                aria-label={`${formatLocation(location)}, ${pluralize(
-                  location.count,
-                  "Dab Pal"
-                )}`}
-                onClick={() => setActiveKey(active ? null : key)}
-              >
-                <span className="pal-map-pin-dot" />
-                <span className="pal-map-tooltip">
-                  <strong>{formatLocation(location)}</strong>
-                  <span>{pluralize(location.count, "Dab Pal")}</span>
-                </span>
-              </button>
-            )
-          })}
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  className={`pal-map-pin${active ? " is-active" : ""}`}
+                  style={
+                    {
+                      left: position.left,
+                      top: position.top,
+                      "--pin-size": `${size}px`,
+                      "--pin-z": 10 + location.count,
+                    } as CSSProperties
+                  }
+                  aria-label={`${formatLocation(location)}, ${pluralize(
+                    location.count,
+                    "Dab Pal"
+                  )}`}
+                  onClick={() => setActiveKey(active ? null : key)}
+                >
+                  <span className="pal-map-pin-dot" />
+                  <span className="pal-map-tooltip">
+                    <strong>{formatLocation(location)}</strong>
+                    <span>{pluralize(location.count, "Dab Pal")}</span>
+                  </span>
+                </button>
+              )
+            })}
+          </div>
         </div>
       </div>
 
