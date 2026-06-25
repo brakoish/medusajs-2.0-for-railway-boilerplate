@@ -1,22 +1,36 @@
 import { palLocations } from "./locations"
 
-const bounds = {
-  west: -124.75,
-  east: -66.9,
-  north: 49.4,
-  south: 24.5,
-}
-
 const pluralize = (count: number, word: string) =>
   `${count} ${word}${count === 1 ? "" : "s"}`
 
+const mapFrame = {
+  left: 4,
+  top: 12,
+  width: 92,
+  height: 76,
+}
+
 const projectLocation = (longitude: number, latitude: number) => ({
-  left: `${((longitude - bounds.west) / (bounds.east - bounds.west)) * 100}%`,
-  top: `${((bounds.north - latitude) / (bounds.north - bounds.south)) * 100}%`,
+  left: `${mapFrame.left + ((longitude + 180) / 360) * mapFrame.width}%`,
+  top: `${mapFrame.top + ((90 - latitude) / 180) * mapFrame.height}%`,
 })
 
+const formatLocation = (location: (typeof palLocations)[number]) =>
+  [
+    location.city,
+    location.province,
+    location.country === "US" ? "" : location.country,
+  ]
+    .filter(Boolean)
+    .join(", ")
+
 export default function PalMap() {
-  const states = new Set(palLocations.map((location) => location.province))
+  const regions = new Set(
+    palLocations
+      .map((location) => `${location.country}-${location.province}`)
+      .filter((region) => !region.endsWith("-"))
+  )
+  const countries = new Set(palLocations.map((location) => location.country))
   const total = palLocations.reduce((sum, location) => sum + location.count, 0)
 
   return (
@@ -31,11 +45,10 @@ export default function PalMap() {
               Where Dab Pals have landed.
             </h2>
             <p className="text-white/65 mt-5 leading-relaxed">
-              From the first site orders, every pin marks a city that has a Dab
-              Pal out in the wild.
+              Each bubble is a city with a Dab Pal out in the wild.
             </p>
 
-            <dl className="grid grid-cols-3 gap-3 mt-8 max-w-md">
+            <dl className="grid grid-cols-2 small:grid-cols-4 gap-3 mt-8 max-w-xl">
               <div className="border border-white/10 bg-white/[0.04] rounded-lg px-4 py-3">
                 <dt className="text-[11px] uppercase tracking-[0.18em] text-white/40">
                   Pals
@@ -52,35 +65,30 @@ export default function PalMap() {
               </div>
               <div className="border border-white/10 bg-white/[0.04] rounded-lg px-4 py-3">
                 <dt className="text-[11px] uppercase tracking-[0.18em] text-white/40">
-                  States
+                  Regions
                 </dt>
-                <dd className="text-2xl font-semibold mt-1">{states.size}</dd>
+                <dd className="text-2xl font-semibold mt-1">{regions.size}</dd>
+              </div>
+              <div className="border border-white/10 bg-white/[0.04] rounded-lg px-4 py-3">
+                <dt className="text-[11px] uppercase tracking-[0.18em] text-white/40">
+                  Countries
+                </dt>
+                <dd className="text-2xl font-semibold mt-1">
+                  {countries.size}
+                </dd>
               </div>
             </dl>
           </div>
 
           <div className="pal-map-shell">
             <div className="pal-map-surface" aria-label="Dab Pal order map">
-              <svg
+              <div className="pal-map-graticule" aria-hidden="true" />
+              <img
                 className="pal-map-outline"
-                viewBox="0 0 1000 620"
-                role="img"
+                src="/dab-pal/world-map.svg"
+                alt=""
                 aria-hidden="true"
-              >
-                <path
-                  d="M56 160 130 95l135-23 145 20 130-22 125 48 135-2 120 74-36 80 60 84-60 82 28 72-112 47-150 15-135-30-125 40-140-40-95-70 15-90-65-55 35-75-34-90Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M174 181c148 31 287 25 419-18M152 320c169-28 336-21 501 21M286 512c132-70 275-98 428-84M548 103c-17 169-13 318 12 448M718 122c-37 132-38 269-3 412M372 82c28 166 31 328 9 486"
-                  fill="none"
-                  opacity="0.35"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-              </svg>
-
-              <div className="pal-map-label">United States</div>
+              />
 
               {palLocations.map((location) => {
                 const position = projectLocation(
@@ -90,7 +98,7 @@ export default function PalMap() {
 
                 return (
                   <div
-                    key={`${location.city}-${location.province}`}
+                    key={`${location.city}-${location.province}-${location.country}`}
                     className="pal-map-pin"
                     style={{
                       left: position.left,
@@ -103,9 +111,7 @@ export default function PalMap() {
                   >
                     <span className="pal-map-pin-dot" />
                     <span className="pal-map-tooltip">
-                      <strong>
-                        {location.city}, {location.province}
-                      </strong>
+                      <strong>{formatLocation(location)}</strong>
                       <span>{pluralize(location.count, "Dab Pal")}</span>
                     </span>
                   </div>

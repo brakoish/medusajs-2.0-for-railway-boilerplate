@@ -6,26 +6,38 @@
 :root,
 .light,
 .dark {
-  --fg-interactive: rgb(217, 119, 6);              /* amber-600 */
-  --fg-interactive-hover: rgb(180, 83, 9);         /* amber-700 */
-  --bg-interactive: rgb(245, 158, 11);             /* amber-500 */
-  --border-interactive: rgb(245, 158, 11);         /* amber-500 */
+  --fg-interactive: rgb(217, 119, 6); /* amber-600 */
+  --fg-interactive-hover: rgb(180, 83, 9); /* amber-700 */
+  --bg-interactive: rgb(245, 158, 11); /* amber-500 */
+  --border-interactive: rgb(245, 158, 11); /* amber-500 */
   --details-contrast-on-bg-interactive: 0px 1px 2px 0px rgba(120, 53, 15, 0.5);
-  --borders-interactive-with-focus: 0px 1px 2px 0px rgba(120, 53, 15, 0.4), 0px 0px 0px 1px rgb(245, 158, 11), 0px 0px 0px 2px rgb(255, 255, 255), 0px 0px 0px 4px rgba(245, 158, 11, 0.5);
-  --borders-interactive-with-shadow: 0px 1px 2px 0px rgba(120, 53, 15, 0.4), 0px 0px 0px 1px rgb(245, 158, 11);
-  --borders-interactive-with-active: 0px 0px 0px 4px rgba(245, 158, 11, 0.2), 0px 0px 0px 1px rgb(245, 158, 11);
+  --borders-interactive-with-focus: 0px 1px 2px 0px rgba(120, 53, 15, 0.4),
+    0px 0px 0px 1px rgb(245, 158, 11), 0px 0px 0px 2px rgb(255, 255, 255),
+    0px 0px 0px 4px rgba(245, 158, 11, 0.5);
+  --borders-interactive-with-shadow: 0px 1px 2px 0px rgba(120, 53, 15, 0.4),
+    0px 0px 0px 1px rgb(245, 158, 11);
+  --borders-interactive-with-active: 0px 0px 0px 4px rgba(245, 158, 11, 0.2),
+    0px 0px 0px 1px rgb(245, 158, 11);
 }
 
 @layer utilities {
   /* Cart-badge bounce when count changes (subtle pop, not chaotic). */
   @keyframes cart-pop {
-    0% { transform: scale(1); }
-    35% { transform: scale(1.25); }
-    65% { transform: scale(0.95); }
-    100% { transform: scale(1); }
+    0% {
+      transform: scale(1);
+    }
+    35% {
+      transform: scale(1.25);
+    }
+    65% {
+      transform: scale(0.95);
+    }
+    100% {
+      transform: scale(1);
+    }
   }
   .animate-cart-pop {
-    animation: cart-pop 320ms cubic-bezier(.34,1.56,.64,1);
+    animation: cart-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   /* Chrome, Safari and Opera */
@@ -138,7 +150,7 @@
 
 .pal-map-shell {
   position: relative;
-  min-height: 420px;
+  min-height: 360px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
@@ -148,7 +160,7 @@
 
 @media (min-width: 768px) {
   .pal-map-shell {
-    min-height: 560px;
+    min-height: 500px;
   }
 }
 
@@ -165,10 +177,8 @@
       rgba(255, 255, 255, 0.05),
       transparent 18%
     ),
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
     #090909;
-  background-size: auto, auto, 72px 72px, 72px 72px, auto;
+  background-size: auto, auto, auto;
 }
 
 .pal-map-surface::before,
@@ -193,23 +203,36 @@
 
 .pal-map-outline {
   position: absolute;
-  inset: 7% 5%;
-  width: 90%;
-  height: 86%;
-  color: rgba(88, 103, 108, 0.52);
+  left: 4%;
+  top: 12%;
+  z-index: 2;
+  width: 92%;
+  height: 76%;
+  object-fit: fill;
+  opacity: 0.78;
   filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.65));
 }
 
-.pal-map-label {
+.pal-map-graticule {
   position: absolute;
-  left: 47%;
-  top: 54%;
-  color: rgba(255, 255, 255, 0.26);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transform: translate(-50%, -50%);
+  left: 4%;
+  top: 12%;
+  z-index: 1;
+  width: 92%;
+  height: 76%;
+  border: 1px solid rgba(255, 255, 255, 0.035);
+  background-image: linear-gradient(
+      rgba(255, 255, 255, 0.035) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 10% 20%, 10% 20%;
+  -webkit-mask-image: radial-gradient(
+    ellipse at center,
+    black 64%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(ellipse at center, black 64%, transparent 100%);
 }
 
 .pal-map-pin {
@@ -217,7 +240,10 @@
   z-index: 4;
   width: var(--pin-size);
   height: var(--pin-size);
-  transform: translate(-50%, -50%);
+  transform: translate(
+    calc(-50% + var(--pin-offset-x, 0px)),
+    calc(-50% + var(--pin-offset-y, 0px))
+  );
 }
 
 .pal-map-pin-dot {

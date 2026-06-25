@@ -72,57 +72,6 @@ const stateAliases = new Map(
   })
 )
 
-const contiguousStates = new Set([
-  "AL",
-  "AZ",
-  "AR",
-  "CA",
-  "CO",
-  "CT",
-  "DE",
-  "FL",
-  "GA",
-  "ID",
-  "IL",
-  "IN",
-  "IA",
-  "KS",
-  "KY",
-  "LA",
-  "ME",
-  "MD",
-  "MA",
-  "MI",
-  "MN",
-  "MS",
-  "MO",
-  "MT",
-  "NE",
-  "NV",
-  "NH",
-  "NJ",
-  "NM",
-  "NY",
-  "NC",
-  "ND",
-  "OH",
-  "OK",
-  "OR",
-  "PA",
-  "RI",
-  "SC",
-  "SD",
-  "TN",
-  "TX",
-  "UT",
-  "VT",
-  "VA",
-  "WA",
-  "WV",
-  "WI",
-  "WY",
-])
-
 const normalizeProvince = (value) => {
   const normalized = String(value || "")
     .trim()
@@ -141,11 +90,27 @@ const normalizeCountry = (value) => {
     .trim()
     .toUpperCase()
 
-  if (normalized === "US" || normalized === "USA" || normalized === "UNITED STATES") {
+  if (
+    normalized === "US" ||
+    normalized === "USA" ||
+    normalized === "UNITED STATES"
+  ) {
     return "US"
   }
 
-  return normalized
+  if (normalized === "CA" || normalized === "CAN" || normalized === "CANADA") {
+    return "Canada"
+  }
+
+  if (normalized === "DE" || normalized === "DEU" || normalized === "GERMANY") {
+    return "Germany"
+  }
+
+  if (normalized === "PL" || normalized === "POL" || normalized === "POLAND") {
+    return "Poland"
+  }
+
+  return titleCase(normalized)
 }
 
 const locationKey = (location) =>
@@ -217,7 +182,9 @@ const parseCsv = (content) => {
   return body
     .filter((values) => values.some(Boolean))
     .map((values) =>
-      Object.fromEntries(header.map((column, index) => [column, values[index] || ""]))
+      Object.fromEntries(
+        header.map((column, index) => [column, values[index] || ""])
+      )
     )
 }
 
@@ -357,9 +324,12 @@ const geocode = async (location, cache) => {
     format: "jsonv2",
     limit: "1",
     city: location.city,
-    state: location.province,
-    country: "US",
+    country: location.country === "US" ? "United States" : location.country,
   })
+
+  if (location.province) {
+    params.set("state", location.province)
+  }
 
   const response = await fetch(
     `https://nominatim.openstreetmap.org/search?${params.toString()}`,
@@ -386,7 +356,7 @@ const geocode = async (location, cache) => {
 const serialize = (locations) => `export type PalLocation = {
   city: string
   province: string
-  country: "US"
+  country: string
   latitude: number
   longitude: number
   count: number
@@ -413,8 +383,7 @@ const main = async () => {
   }
 
   const cities = Array.from(merged.values()).filter(
-    (location) =>
-      location.country === "US" && contiguousStates.has(location.province)
+    (location) => location.city && location.country
   )
 
   for (const city of cities) {

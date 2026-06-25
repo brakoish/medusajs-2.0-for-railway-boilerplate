@@ -1,0 +1,390 @@
+{
+  "SADDLEBROOKE|AZ|US": {
+    "latitude": 32.5347527,
+    "longitude": -110.880573
+  },
+  "CHAMBERSBURG|PA|US": {
+    "latitude": 39.9375112,
+    "longitude": -77.6612586
+  },
+  "WINCHESTER|CA|US": {
+    "latitude": 33.6947357,
+    "longitude": -117.0849113
+  },
+  "MERIDIAN|ID|US": {
+    "latitude": 43.6086295,
+    "longitude": -116.392326
+  },
+  "TOLEDO|OH|US": {
+    "latitude": 41.6529143,
+    "longitude": -83.5378173
+  },
+  "WHITTIER|CA|US": {
+    "latitude": 33.9749136,
+    "longitude": -118.0338664
+  },
+  "OMAHA|NE|US": {
+    "latitude": 41.2587459,
+    "longitude": -95.9383758
+  },
+  "DUBLIN|OH|US": {
+    "latitude": 40.0996009,
+    "longitude": -83.1135563
+  },
+  "OAK CREEK|WI|US": {
+    "latitude": 42.898729,
+    "longitude": -87.9177966
+  },
+  "GAINESVILLE|FL|US": {
+    "latitude": 29.6519684,
+    "longitude": -82.3249846
+  },
+  "WEST LEBANON|NH|US": {
+    "latitude": 43.6482811,
+    "longitude": -72.3102794
+  },
+  "DOWNEY|CA|US": {
+    "latitude": 33.9404441,
+    "longitude": -118.1292846
+  },
+  "MONTEBELLO|CA|US": {
+    "latitude": 34.0159398,
+    "longitude": -118.111975
+  },
+  "DETROIT|MI|US": {
+    "latitude": 42.3315509,
+    "longitude": -83.0466403
+  },
+  "EDGEWATER|NJ|US": {
+    "latitude": 40.8270448,
+    "longitude": -73.975694
+  },
+  "PIKE|NH|US": {
+    "latitude": 44.0308991,
+    "longitude": -72.0081433
+  },
+  "MADERA|CA|US": {
+    "latitude": 36.9622745,
+    "longitude": -120.0594685
+  },
+  "WASILLA|AK|US": {
+    "latitude": 61.5824216,
+    "longitude": -149.442563
+  },
+  "LYNNWOOD|WA|US": {
+    "latitude": 47.8278656,
+    "longitude": -122.3053932
+  },
+  "TIVERTON|RI|US": {
+    "latitude": 41.6257406,
+    "longitude": -71.166333
+  },
+  "MAPLE RIDGE|BC|Canada": {
+    "latitude": 49.2197345,
+    "longitude": -122.599707
+  },
+  "LOS ANGELES|CA|US": {
+    "latitude": 34.0536909,
+    "longitude": -118.242766
+  },
+  "YUCCA VALLEY|CA|US": {
+    "latitude": 34.1236205,
+    "longitude": -116.4139839
+  },
+  "CHARLOTTE|NC|US": {
+    "latitude": 35.2272086,
+    "longitude": -80.8430827
+  },
+  "ORLANDO|FL|US": {
+    "latitude": 28.5421218,
+    "longitude": -81.379045
+  },
+  "MILFORD|IN|US": {
+    "latitude": 41.4097696,
+    "longitude": -85.8455482
+  },
+  "GALENA PARK|TX|US": {
+    "latitude": 29.7335616,
+    "longitude": -95.2302123
+  },
+  "MONTAUK|NY|US": {
+    "latitude": 41.0347223,
+    "longitude": -71.9442623
+  },
+  "HAWTHORNE|FL|US": {
+    "latitude": 29.5918856,
+    "longitude": -82.0869578
+  },
+  "UPLAND|CA|US": {
+    "latitude": 34.09751,
+    "longitude": -117.6483876
+  },
+  "RUTLAND|VT|US": {
+    "latitude": 43.6084792,
+    "longitude": -72.9724768
+  },
+  "ATTICA|NY|US": {
+    "latitude": 42.8642267,
+    "longitude": -78.2802946
+  },
+  "NILES|MI|US": {
+    "latitude": 41.8297694,
+    "longitude": -86.2541768
+  },
+  "STEAMBOAT SPRINGS|CO|US": {
+    "latitude": 40.4848003,
+    "longitude": -106.831735
+  },
+  "MIAMI|FL|US": {
+    "latitude": 25.7741566,
+    "longitude": -80.1935973
+  },
+  "TOWSON|MD|US": {
+    "latitude": 39.4018513,
+    "longitude": -76.6023803
+  },
+  "MAMMOTH LAKES|CA|US": {
+    "latitude": 37.6432525,
+    "longitude": -118.9668509
+  },
+  "LAKEWOOD|CO|US": {
+    "latitude": 39.7085736,
+    "longitude": -105.0846694
+  },
+  "LANTANA|TX|US": {
+    "latitude": 33.0935112,
+    "longitude": -97.1200046
+  },
+  "WARSZAWA||Poland": {
+    "latitude": 52.2319581,
+    "longitude": 21.0067249
+  },
+  "MONETA|VA|US": {
+    "latitude": 37.1805799,
+    "longitude": -79.6199404
+  },
+  "NEWARK|NJ|US": {
+    "latitude": 40.735657,
+    "longitude": -74.1723667
+  },
+  "MARION|OH|US": {
+    "latitude": 40.5886259,
+    "longitude": -83.1287349
+  },
+  "STERLING HEIGHTS|MI|US": {
+    "latitude": 42.5803122,
+    "longitude": -83.0302033
+  },
+  "AVONDALE|AZ|US": {
+    "latitude": 33.4355977,
+    "longitude": -112.349602
+  },
+  "FAIR HAVEN|VT|US": {
+    "latitude": 43.5947898,
+    "longitude": -73.2659674
+  },
+  "FRANKLIN|MA|US": {
+    "latitude": 42.0825801,
+    "longitude": -71.3971167
+  },
+  "MINNEAPOLIS|MN|US": {
+    "latitude": 44.9772995,
+    "longitude": -93.2654692
+  },
+  "WESTLAND|MI|US": {
+    "latitude": 42.3238056,
+    "longitude": -83.4005321
+  },
+  "LAS VEGAS|NV|US": {
+    "latitude": 36.1674263,
+    "longitude": -115.1484131
+  },
+  "CARY|NC|US": {
+    "latitude": 35.7882893,
+    "longitude": -78.7812081
+  },
+  "YORKTOWN|NY|US": {
+    "latitude": 41.2956496,
+    "longitude": -73.80819
+  },
+  "WAYNESBORO|VA|US": {
+    "latitude": 38.0686668,
+    "longitude": -78.8893999
+  },
+  "PASADENA|TX|US": {
+    "latitude": 29.6910753,
+    "longitude": -95.2092076
+  },
+  "TAMARAC|FL|US": {
+    "latitude": 26.2128609,
+    "longitude": -80.2497707
+  },
+  "LINDEN||Germany": {
+    "latitude": 50.6019526,
+    "longitude": 7.8504832
+  },
+  "GARDENA|CA|US": {
+    "latitude": 33.8815601,
+    "longitude": -118.2935879
+  },
+  "BROOKLYN|NY|US": {
+    "latitude": 40.6526006,
+    "longitude": -73.9497211
+  },
+  "SPOKANE|WA|US": {
+    "latitude": 47.6571934,
+    "longitude": -117.42351
+  },
+  "HENRICO|VA|US": {
+    "latitude": 37.6294756,
+    "longitude": -77.5189032
+  },
+  "SOUTH LAKE TAHOE|CA|US": {
+    "latitude": 38.9319293,
+    "longitude": -119.9780188
+  },
+  "PHILADELPHIA|PA|US": {
+    "latitude": 39.9527237,
+    "longitude": -75.1635262
+  },
+  "SAN FRANCISCO|CA|US": {
+    "latitude": 37.7879363,
+    "longitude": -122.4075201
+  },
+  "SUMMERVILLE|GA|US": {
+    "latitude": 34.480642,
+    "longitude": -85.3477343
+  },
+  "SEATTLE|WA|US": {
+    "latitude": 47.6038321,
+    "longitude": -122.330062
+  },
+  "PLANO|TX|US": {
+    "latitude": 33.0136764,
+    "longitude": -96.6925096
+  },
+  "ALEXANDRIA|VA|US": {
+    "latitude": 38.8051095,
+    "longitude": -77.0470229
+  },
+  "MAHOPAC|NY|US": {
+    "latitude": 41.372316,
+    "longitude": -73.733465
+  },
+  "EAGAN|MN|US": {
+    "latitude": 44.818173,
+    "longitude": -93.1659179
+  },
+  "MORGANTOWN|WV|US": {
+    "latitude": 39.6296809,
+    "longitude": -79.9559437
+  },
+  "ANGLETON|TX|US": {
+    "latitude": 29.16941,
+    "longitude": -95.4318847
+  },
+  "SEBRING|FL|US": {
+    "latitude": 27.4957453,
+    "longitude": -81.4410425
+  },
+  "BUFFALO|NY|US": {
+    "latitude": 42.8864163,
+    "longitude": -78.8781493
+  },
+  "WEARE|NH|US": {
+    "latitude": 43.094966,
+    "longitude": -71.73111
+  },
+  "LONG BEACH|CA|US": {
+    "latitude": 33.7690164,
+    "longitude": -118.191604
+  },
+  "SAN ANTONIO|TX|US": {
+    "latitude": 29.4246002,
+    "longitude": -98.4951405
+  },
+  "ATKINS|AR|US": {
+    "latitude": 35.2450217,
+    "longitude": -92.937615
+  },
+  "LINCOLN|NE|US": {
+    "latitude": 40.8088861,
+    "longitude": -96.7077751
+  },
+  "LANCASTER|PA|US": {
+    "latitude": 40.0379958,
+    "longitude": -76.3056707
+  },
+  "BEAVER FALLS|NY|US": {
+    "latitude": 43.8857302,
+    "longitude": -75.4287942
+  },
+  "LONGMONT|CO|US": {
+    "latitude": 40.1672117,
+    "longitude": -105.101928
+  },
+  "TAYLOR|PA|US": {
+    "latitude": 41.3840712,
+    "longitude": -75.709405
+  },
+  "DENTON|TX|US": {
+    "latitude": 33.215038,
+    "longitude": -97.1330431
+  },
+  "BOZEMAN|MT|US": {
+    "latitude": 45.6794293,
+    "longitude": -111.044047
+  },
+  "PITTSBURGH|PA|US": {
+    "latitude": 40.4406968,
+    "longitude": -80.0025666
+  },
+  "CORONA|CA|US": {
+    "latitude": 33.8752945,
+    "longitude": -117.566444
+  },
+  "HARRISONBURG|VA|US": {
+    "latitude": 38.4493315,
+    "longitude": -78.8688833
+  },
+  "WEST HOLLYWOOD|CA|US": {
+    "latitude": 34.0923014,
+    "longitude": -118.3692894
+  },
+  "COSTA MESA|CA|US": {
+    "latitude": 33.6633386,
+    "longitude": -117.903317
+  },
+  "CAROLINA|PR|US": {
+    "latitude": 18.3808516,
+    "longitude": -65.9570244
+  },
+  "ASHEVILLE|NC|US": {
+    "latitude": 35.595363,
+    "longitude": -82.5508407
+  },
+  "TAUNTON|MA|US": {
+    "latitude": 41.9019257,
+    "longitude": -71.0931485
+  },
+  "SPEONK|NY|US": {
+    "latitude": 40.8193623,
+    "longitude": -72.7052544
+  },
+  "HOUSTON|TX|US": {
+    "latitude": 29.7589382,
+    "longitude": -95.3676974
+  },
+  "CAPE CORAL|FL|US": {
+    "latitude": 26.5625742,
+    "longitude": -81.9438802
+  },
+  "DENVER|CO|US": {
+    "latitude": 39.7392364,
+    "longitude": -104.984862
+  },
+  "CHICAGO|IL|US": {
+    "latitude": 41.8755616,
+    "longitude": -87.6244212
+  }
+}
