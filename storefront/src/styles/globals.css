@@ -218,8 +218,8 @@
   position: absolute;
   left: var(--map-x, 0);
   top: var(--map-y, 0);
-  width: calc(100% * var(--map-scale, 1));
-  height: calc(100% * var(--map-scale, 1));
+  width: var(--map-width, 100%);
+  height: var(--map-height, 100%);
   transition: left 120ms ease-out, top 120ms ease-out, width 120ms ease-out,
     height 120ms ease-out;
 }
@@ -274,8 +274,8 @@
     #fbbf24 15% 48%,
     #b45309 49% 100%
   );
-  box-shadow: 0 0 0 7px rgba(245, 158, 11, 0.2),
-    0 0 28px rgba(245, 158, 11, 0.55), 0 10px 24px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2),
+    0 0 18px rgba(245, 158, 11, 0.55), 0 8px 18px rgba(0, 0, 0, 0.45);
   transition: transform 160ms ease, box-shadow 160ms ease;
 }
 
@@ -283,8 +283,8 @@
 .pal-map-pin:focus-visible .pal-map-pin-dot,
 .pal-map-pin.is-active .pal-map-pin-dot {
   transform: scale(1.18);
-  box-shadow: 0 0 0 10px rgba(245, 158, 11, 0.24),
-    0 0 34px rgba(245, 158, 11, 0.7), 0 12px 28px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 7px rgba(245, 158, 11, 0.24),
+    0 0 26px rgba(245, 158, 11, 0.7), 0 10px 24px rgba(0, 0, 0, 0.5);
 }
 
 .pal-map-pin:hover,

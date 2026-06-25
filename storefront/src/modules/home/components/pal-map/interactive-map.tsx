@@ -30,6 +30,11 @@ type ViewState = {
   y: number
 }
 
+type ViewportSize = {
+  width: number
+  height: number
+}
+
 type PointerState = {
   x: number
   y: number
@@ -101,7 +106,35 @@ export default function InteractivePalMap({
   const pinchStart = useRef<PinchState | null>(null)
 
   const [view, setView] = useState<ViewState>({ scale: 1, x: 0, y: 0 })
+  const [viewportSize, setViewportSize] = useState<ViewportSize>({
+    width: 0,
+    height: 0,
+  })
   const [activeKey, setActiveKey] = useState<string | null>(null)
+
+  const mapCanvas = useMemo(() => {
+    if (!viewportSize.width || !viewportSize.height) {
+      return {
+        width: 0,
+        height: 0,
+        left: 0,
+        top: 0,
+      }
+    }
+
+    const width = Math.min(
+      viewportSize.width,
+      viewportSize.height * (MAP_SIZE.width / MAP_SIZE.height)
+    )
+    const height = width / (MAP_SIZE.width / MAP_SIZE.height)
+
+    return {
+      width,
+      height,
+      left: (viewportSize.width - width) / 2,
+      top: (viewportSize.height - height) / 2,
+    }
+  }, [viewportSize.height, viewportSize.width])
 
   const locationPins = useMemo(
     () =>
@@ -121,7 +154,7 @@ export default function InteractivePalMap({
               left: `${(position[0] / MAP_SIZE.width) * 100}%`,
               top: `${(position[1] / MAP_SIZE.height) * 100}%`,
             },
-            size: Math.min(34, 18 + location.count * 5),
+            size: Math.min(24, 10 + Math.sqrt(location.count) * 5),
           }
         })
         .filter(
@@ -142,11 +175,13 @@ export default function InteractivePalMap({
     if (!viewport) return next
 
     const { width, height } = viewport.getBoundingClientRect()
+    const baseWidth = mapCanvas.width || width
+    const baseHeight = mapCanvas.height || height
     const margin = Math.min(width, height) * 0.18
-    const minX = width - width * next.scale - margin
-    const maxX = margin
-    const minY = height - height * next.scale - margin
-    const maxY = margin
+    const minX = width - mapCanvas.left - baseWidth * next.scale - margin
+    const maxX = margin - mapCanvas.left
+    const minY = height - mapCanvas.top - baseHeight * next.scale - margin
+    const maxY = margin - mapCanvas.top
 
     return {
       scale: next.scale,
@@ -167,15 +202,32 @@ export default function InteractivePalMap({
     const nextScale = clamp(scale, MIN_SCALE, MAX_SCALE)
     const originX = centerX ?? rect.width / 2
     const originY = centerY ?? rect.height / 2
-    const contentX = (originX - view.x) / view.scale
-    const contentY = (originY - view.y) / view.scale
+    const contentX = (originX - mapCanvas.left - view.x) / view.scale
+    const contentY = (originY - mapCanvas.top - view.y) / view.scale
 
     setClampedView({
       scale: nextScale,
-      x: originX - contentX * nextScale,
-      y: originY - contentY * nextScale,
+      x: originX - mapCanvas.left - contentX * nextScale,
+      y: originY - mapCanvas.top - contentY * nextScale,
     })
   }
+
+  useEffect(() => {
+    const viewport = viewportRef.current
+    if (!viewport) return
+
+    const resize = () => {
+      const { width, height } = viewport.getBoundingClientRect()
+      setViewportSize({ width, height })
+    }
+
+    resize()
+
+    const observer = new ResizeObserver(resize)
+    observer.observe(viewport)
+
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     const viewport = viewportRef.current
@@ -194,7 +246,7 @@ export default function InteractivePalMap({
 
     viewport.addEventListener("wheel", handleWheel, { passive: false })
     return () => viewport.removeEventListener("wheel", handleWheel)
-  }, [view.scale, view.x, view.y])
+  }, [mapCanvas.left, mapCanvas.top, view.scale, view.x, view.y])
 
   const beginPinch = () => {
     const [first, second] = Array.from(pointers.current.values())
@@ -262,13 +314,15 @@ export default function InteractivePalMap({
       const originY = center.y - rect.top
       const startOriginX = start.centerX - rect.left
       const startOriginY = start.centerY - rect.top
-      const contentX = (startOriginX - start.view.x) / start.view.scale
-      const contentY = (startOriginY - start.view.y) / start.view.scale
+      const contentX =
+        (startOriginX - mapCanvas.left - start.view.x) / start.view.scale
+      const contentY =
+        (startOriginY - mapCanvas.top - start.view.y) / start.view.scale
 
       setClampedView({
         scale: nextScale,
-        x: originX - contentX * nextScale,
-        y: originY - contentY * nextScale,
+        x: originX - mapCanvas.left - contentX * nextScale,
+        y: originY - mapCanvas.top - contentY * nextScale,
       })
       return
     }
@@ -314,9 +368,10 @@ export default function InteractivePalMap({
             className="pal-map-layer"
             style={
               {
-                "--map-x": `${view.x}px`,
-                "--map-y": `${view.y}px`,
-                "--map-scale": view.scale,
+                "--map-x": `${mapCanvas.left + view.x}px`,
+                "--map-y": `${mapCanvas.top + view.y}px`,
+                "--map-width": `${mapCanvas.width * view.scale}px`,
+                "--map-height": `${mapCanvas.height * view.scale}px`,
               } as CSSProperties
             }
           >
