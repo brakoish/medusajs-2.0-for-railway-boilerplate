@@ -2,11 +2,6 @@ import { palLocations } from "./locations"
 import InteractivePalMap from "./interactive-map"
 
 export default function PalMap() {
-  const regions = new Set(
-    palLocations
-      .map((location) => `${location.country}-${location.province}`)
-      .filter((region) => !region.endsWith("-"))
-  )
   const countries = new Set(palLocations.map((location) => location.country))
   const total = palLocations.reduce((sum, location) => sum + location.count, 0)
 
@@ -25,7 +20,7 @@ export default function PalMap() {
               Each bubble is a city with a Dab Pal out in the wild.
             </p>
 
-            <dl className="grid grid-cols-2 small:grid-cols-4 gap-3 mt-8 max-w-xl">
+            <dl className="grid grid-cols-3 gap-3 mt-8 max-w-xl">
               <div className="border border-white/10 bg-white/[0.04] rounded-lg px-4 py-3">
                 <dt className="text-[11px] uppercase tracking-[0.18em] text-white/40">
                   Pals
@@ -39,12 +34,6 @@ export default function PalMap() {
                 <dd className="text-2xl font-semibold mt-1">
                   {palLocations.length}
                 </dd>
-              </div>
-              <div className="border border-white/10 bg-white/[0.04] rounded-lg px-4 py-3">
-                <dt className="text-[11px] uppercase tracking-[0.18em] text-white/40">
-                  Regions
-                </dt>
-                <dd className="text-2xl font-semibold mt-1">{regions.size}</dd>
               </div>
               <div className="border border-white/10 bg-white/[0.04] rounded-lg px-4 py-3">
                 <dt className="text-[11px] uppercase tracking-[0.18em] text-white/40">
