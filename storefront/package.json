@@ -35,7 +35,7 @@
     "@stripe/stripe-js": "^4.10.0",
     "algoliasearch": "^4.20.0",
     "axios": "^1.15.0",
-    "d3-geo": "^3.1.1",
+    "leaflet": "^1.9.4",
     "lodash": "^4.18.1",
     "medusajs-launch-utils": "0.0.18",
     "next": "^15.5.15",
@@ -49,15 +49,14 @@
     "react-intersection-observer": "^9.3.4",
     "server-only": "^0.0.1",
     "tailwindcss-radix": "^2.8.0",
-    "topojson-client": "^3.1.0",
-    "webpack": "^5.106.2",
-    "world-atlas": "^2.0.2"
+    "webpack": "^5.106.2"
   },
   "devDependencies": {
     "@babel/core": "^7.28.6",
     "@medusajs/client-types": "preview",
     "@medusajs/ui-preset": "preview",
     "@playwright/test": "^1.55.1",
+    "@types/leaflet": "^1.9.21",
     "@types/lodash": "^4.14.195",
     "@types/node": "17.0.21",
     "@types/pg": "^8.11.0",

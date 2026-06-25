@@ -1,5 +1,6 @@
 import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
+import "leaflet/dist/leaflet.css"
 import "styles/globals.css"
 import { PostHogProvider } from "./posthog-provider"
 
