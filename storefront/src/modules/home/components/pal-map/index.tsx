@@ -1,28 +1,5 @@
 import { palLocations } from "./locations"
-
-const pluralize = (count: number, word: string) =>
-  `${count} ${word}${count === 1 ? "" : "s"}`
-
-const mapFrame = {
-  left: 4,
-  top: 12,
-  width: 92,
-  height: 76,
-}
-
-const projectLocation = (longitude: number, latitude: number) => ({
-  left: `${mapFrame.left + ((longitude + 180) / 360) * mapFrame.width}%`,
-  top: `${mapFrame.top + ((90 - latitude) / 180) * mapFrame.height}%`,
-})
-
-const formatLocation = (location: (typeof palLocations)[number]) =>
-  [
-    location.city,
-    location.province,
-    location.country === "US" ? "" : location.country,
-  ]
-    .filter(Boolean)
-    .join(", ")
+import InteractivePalMap from "./interactive-map"
 
 export default function PalMap() {
   const regions = new Set(
@@ -80,45 +57,7 @@ export default function PalMap() {
             </dl>
           </div>
 
-          <div className="pal-map-shell">
-            <div className="pal-map-surface" aria-label="Dab Pal order map">
-              <div className="pal-map-graticule" aria-hidden="true" />
-              <img
-                className="pal-map-outline"
-                src="/dab-pal/world-map.svg"
-                alt=""
-                aria-hidden="true"
-              />
-
-              {palLocations.map((location) => {
-                const position = projectLocation(
-                  location.longitude,
-                  location.latitude
-                )
-
-                return (
-                  <div
-                    key={`${location.city}-${location.province}-${location.country}`}
-                    className="pal-map-pin"
-                    style={{
-                      left: position.left,
-                      top: position.top,
-                      ["--pin-size" as string]: `${Math.min(
-                        34,
-                        18 + location.count * 5
-                      )}px`,
-                    }}
-                  >
-                    <span className="pal-map-pin-dot" />
-                    <span className="pal-map-tooltip">
-                      <strong>{formatLocation(location)}</strong>
-                      <span>{pluralize(location.count, "Dab Pal")}</span>
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+          <InteractivePalMap locations={palLocations} />
         </div>
       </div>
     </section>
