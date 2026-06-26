@@ -5,11 +5,11 @@ export const config = defineRouteConfig({
   label: "Bulk Fulfill",
   icon: () => (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <rect x="2" y="3" width="16" height="3" rx="1.5" fill="currentColor" opacity="0.4"/>
-      <rect x="2" y="8.5" width="16" height="3" rx="1.5" fill="currentColor" opacity="0.7"/>
-      <rect x="2" y="14" width="10" height="3" rx="1.5" fill="currentColor"/>
-      <circle cx="16" cy="15.5" r="3" fill="currentColor"/>
-      <path d="M14.5 15.5l1 1 2-2" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+      <rect x="2" y="3" width="16" height="3" rx="1.5" fill="currentColor" opacity="0.4" />
+      <rect x="2" y="8.5" width="16" height="3" rx="1.5" fill="currentColor" opacity="0.7" />
+      <rect x="2" y="14" width="10" height="3" rx="1.5" fill="currentColor" />
+      <circle cx="16" cy="15.5" r="3" fill="currentColor" />
+      <path d="M14.5 15.5l1 1 2-2" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   ),
 })
@@ -31,7 +31,13 @@ type Order = {
     province?: string
     postal_code?: string
   }
-  items: { id: string; title: string; variant_sku?: string; quantity: number; detail?: { fulfilled_quantity?: number } }[]
+  items: {
+    id: string
+    title: string
+    variant_sku?: string
+    quantity: number
+    detail?: { fulfilled_quantity?: number }
+  }[]
 }
 
 type Rate = {
@@ -69,29 +75,108 @@ type FulfillResult = {
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const S: Record<string, React.CSSProperties> = {
-  page:     { padding: 32, maxWidth: 1100, margin: "0 auto", fontFamily: "Inter, sans-serif" },
-  heading:  { fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 4px" },
-  sub:      { fontSize: 14, color: "#6b7280", margin: "0 0 28px" },
-  card:     { background: "#fff", border: "1px solid #e5e7eb", borderRadius: 12, overflow: "hidden", marginBottom: 16 },
-  cardHead: { padding: "14px 20px", borderBottom: "1px solid #e5e7eb", display: "flex", alignItems: "center", justifyContent: "space-between" },
+  page: {
+    padding: 32,
+    maxWidth: 1100,
+    margin: "0 auto",
+    fontFamily: "Inter, sans-serif",
+  },
+  heading: {
+    fontSize: 22,
+    fontWeight: 700,
+    color: "#111827",
+    margin: "0 0 4px",
+  },
+  sub: { fontSize: 14, color: "#6b7280", margin: "0 0 28px" },
+  card: {
+    background: "#fff",
+    border: "1px solid #e5e7eb",
+    borderRadius: 12,
+    overflow: "hidden",
+    marginBottom: 16,
+  },
+  cardHead: {
+    padding: "14px 20px",
+    borderBottom: "1px solid #e5e7eb",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   cardBody: { padding: "0" },
-  table:    { width: "100%", borderCollapse: "collapse" as const },
-  th:       { padding: "10px 16px", textAlign: "left" as const, fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase" as const, letterSpacing: "0.06em", borderBottom: "1px solid #f3f4f6" },
-  td:       { padding: "12px 16px", fontSize: 13, color: "#374151", borderBottom: "1px solid #f9fafb", verticalAlign: "top" as const },
-  tdMuted:  { padding: "12px 16px", fontSize: 12, color: "#9ca3af", borderBottom: "1px solid #f9fafb", verticalAlign: "top" as const },
-  check:    { width: 16, height: 16, cursor: "pointer", accentColor: "#d4a22a" },
-  btn:      { padding: "8px 18px", fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer" },
+  table: { width: "100%", borderCollapse: "collapse" as const },
+  th: {
+    padding: "10px 16px",
+    textAlign: "left" as const,
+    fontSize: 11,
+    fontWeight: 600,
+    color: "#9ca3af",
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.06em",
+    borderBottom: "1px solid #f3f4f6",
+  },
+  td: {
+    padding: "12px 16px",
+    fontSize: 13,
+    color: "#374151",
+    borderBottom: "1px solid #f9fafb",
+    verticalAlign: "top" as const,
+  },
+  tdMuted: {
+    padding: "12px 16px",
+    fontSize: 12,
+    color: "#9ca3af",
+    borderBottom: "1px solid #f9fafb",
+    verticalAlign: "top" as const,
+  },
+  check: { width: 16, height: 16, cursor: "pointer", accentColor: "#d4a22a" },
+  btn: {
+    padding: "8px 18px",
+    fontSize: 13,
+    fontWeight: 600,
+    borderRadius: 8,
+    border: "none",
+    cursor: "pointer",
+  },
   btnAmber: { background: "#d4a22a", color: "#000" },
-  btnGray:  { background: "#f3f4f6", color: "#374151" },
-  btnDark:  { background: "#111827", color: "#fff" },
-  btnSm:    { padding: "5px 12px", fontSize: 12, fontWeight: 500, borderRadius: 6, border: "none", cursor: "pointer" },
-  select:   { padding: "5px 10px", fontSize: 12, borderRadius: 6, border: "1px solid #d1d5db", background: "#fff", color: "#111827", cursor: "pointer" },
-  badge:    { display: "inline-block", padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 500 },
-  row:      { display: "flex", alignItems: "center", gap: 10 },
-  green:    { background: "#d1fae5", color: "#065f46" },
-  red:      { background: "#fee2e2", color: "#991b1b" },
-  amber:    { background: "#fef3c7", color: "#92400e" },
-  spinner:  { display: "inline-block", width: 14, height: 14, border: "2px solid #e5e7eb", borderTopColor: "#d4a22a", borderRadius: "50%", animation: "spin 0.7s linear infinite" },
+  btnGray: { background: "#f3f4f6", color: "#374151" },
+  btnDark: { background: "#111827", color: "#fff" },
+  btnSm: {
+    padding: "5px 12px",
+    fontSize: 12,
+    fontWeight: 500,
+    borderRadius: 6,
+    border: "none",
+    cursor: "pointer",
+  },
+  select: {
+    padding: "5px 10px",
+    fontSize: 12,
+    borderRadius: 6,
+    border: "1px solid #d1d5db",
+    background: "#fff",
+    color: "#111827",
+    cursor: "pointer",
+  },
+  badge: {
+    display: "inline-block",
+    padding: "2px 8px",
+    borderRadius: 4,
+    fontSize: 11,
+    fontWeight: 500,
+  },
+  row: { display: "flex", alignItems: "center", gap: 10 },
+  green: { background: "#d1fae5", color: "#065f46" },
+  red: { background: "#fee2e2", color: "#991b1b" },
+  amber: { background: "#fef3c7", color: "#92400e" },
+  spinner: {
+    display: "inline-block",
+    width: 14,
+    height: 14,
+    border: "2px solid #e5e7eb",
+    borderTopColor: "#d4a22a",
+    borderRadius: "50%",
+    animation: "spin 0.7s linear infinite",
+  },
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -99,6 +184,7 @@ const S: Record<string, React.CSSProperties> = {
 export default function BulkFulfillPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
   // Step 2: rates
@@ -113,10 +199,22 @@ export default function BulkFulfillPage() {
 
   // Load orders
   useEffect(() => {
+    setLoadError(null)
     fetch("/admin/bulk-fulfill/orders", { credentials: "include" })
-      .then((r) => r.json())
-      .then((d) => { setOrders(d.orders || []); setLoading(false) })
-      .catch(() => setLoading(false))
+      .then((r) => {
+        if (!r.ok) {
+          throw new Error(r.status === 401 ? "Session expired. Log in again." : `Could not load orders (${r.status}).`)
+        }
+        return r.json()
+      })
+      .then((d) => {
+        setOrders(d.orders || [])
+        setLoading(false)
+      })
+      .catch((error) => {
+        setLoadError(error instanceof Error ? error.message : "Could not load orders.")
+        setLoading(false)
+      })
   }, [])
 
   const toggleAll = useCallback(() => {
@@ -187,7 +285,9 @@ export default function BulkFulfillPage() {
         // Parse results from header before consuming body as blob
         const resultsHeader = res.headers.get("X-Fulfill-Results")
         if (resultsHeader) {
-          try { setFulfillResults(JSON.parse(resultsHeader)) } catch {}
+          try {
+            setFulfillResults(JSON.parse(resultsHeader))
+          } catch {}
         }
         const blob = await res.blob()
         const url = URL.createObjectURL(blob)
@@ -215,10 +315,22 @@ export default function BulkFulfillPage() {
     setFulfillResults([])
     // Refresh order list
     setLoading(true)
+    setLoadError(null)
     fetch("/admin/bulk-fulfill/orders", { credentials: "include" })
-      .then((r) => r.json())
-      .then((d) => { setOrders(d.orders || []); setLoading(false) })
-      .catch(() => setLoading(false))
+      .then((r) => {
+        if (!r.ok) {
+          throw new Error(r.status === 401 ? "Session expired. Log in again." : `Could not load orders (${r.status}).`)
+        }
+        return r.json()
+      })
+      .then((d) => {
+        setOrders(d.orders || [])
+        setLoading(false)
+      })
+      .catch((error) => {
+        setLoadError(error instanceof Error ? error.message : "Could not load orders.")
+        setLoading(false)
+      })
   }
 
   const itemSummary = (order: Order) => {
@@ -234,16 +346,14 @@ export default function BulkFulfillPage() {
 
   const addrLine = (order: Order) => {
     const a = order.shipping_address
-    return [
-      [a.first_name, a.last_name].filter(Boolean).join(" "),
-      a.address_1,
-      a.address_2,
-      `${a.city || ""}, ${a.province || ""} ${a.postal_code || ""}`.trim(),
-    ].filter(Boolean).join(" · ")
+    return [[a.first_name, a.last_name].filter(Boolean).join(" "), a.address_1, a.address_2, `${a.city || ""}, ${a.province || ""} ${a.postal_code || ""}`.trim()].filter(Boolean).join(" · ")
   }
 
   const fmtAmount = (amount: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount)
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(amount)
 
   // ── Render ────────────────────────────────────────────────────────────────
 
@@ -258,15 +368,15 @@ export default function BulkFulfillPage() {
       {step === "select" && (
         <div style={S.card}>
           <div style={S.cardHead}>
-            <span style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>
-              Unfulfilled orders {!loading && `(${orders.length})`}
-            </span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>Unfulfilled orders {!loading && `(${orders.length})`}</span>
             <div style={S.row}>
-              {selected.size > 0 && (
-                <span style={{ ...S.badge, ...S.amber }}>{selected.size} selected</span>
-              )}
+              {selected.size > 0 && <span style={{ ...S.badge, ...S.amber }}>{selected.size} selected</span>}
               <button
-                style={{ ...S.btn, ...S.btnAmber, opacity: selected.size === 0 || fetchingRates ? 0.5 : 1 }}
+                style={{
+                  ...S.btn,
+                  ...S.btnAmber,
+                  opacity: selected.size === 0 || fetchingRates ? 0.5 : 1,
+                }}
                 disabled={selected.size === 0 || fetchingRates}
                 onClick={fetchRates}
               >
@@ -277,6 +387,8 @@ export default function BulkFulfillPage() {
           <div style={S.cardBody}>
             {loading ? (
               <div style={{ padding: 32, textAlign: "center", color: "#9ca3af" }}>Loading…</div>
+            ) : loadError ? (
+              <div style={{ padding: 32, textAlign: "center", color: "#991b1b" }}>{loadError}</div>
             ) : orders.length === 0 ? (
               <div style={{ padding: 32, textAlign: "center", color: "#9ca3af" }}>No unfulfilled orders.</div>
             ) : (
@@ -294,7 +406,14 @@ export default function BulkFulfillPage() {
                 </thead>
                 <tbody>
                   {orders.map((order) => (
-                    <tr key={order.id} style={{ background: selected.has(order.id) ? "#fffbeb" : "transparent", cursor: "pointer" }} onClick={() => toggle(order.id)}>
+                    <tr
+                      key={order.id}
+                      style={{
+                        background: selected.has(order.id) ? "#fffbeb" : "transparent",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => toggle(order.id)}
+                    >
                       <td style={S.td} onClick={(e) => e.stopPropagation()}>
                         <input type="checkbox" style={S.check} checked={selected.has(order.id)} onChange={() => toggle(order.id)} />
                       </td>
@@ -302,10 +421,14 @@ export default function BulkFulfillPage() {
                         <span style={{ fontWeight: 600 }}>#{order.display_id}</span>
                       </td>
                       <td style={S.td}>
-                        <div style={{ fontWeight: 500 }}>
-                          {[order.shipping_address?.first_name, order.shipping_address?.last_name].filter(Boolean).join(" ")}
-                        </div>
-                        <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>
+                        <div style={{ fontWeight: 500 }}>{[order.shipping_address?.first_name, order.shipping_address?.last_name].filter(Boolean).join(" ")}</div>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            color: "#6b7280",
+                            marginTop: 2,
+                          }}
+                        >
                           {order.shipping_address?.address_1}
                           {order.shipping_address?.address_2 ? ` ${order.shipping_address.address_2}` : ""}
                         </div>
@@ -328,18 +451,27 @@ export default function BulkFulfillPage() {
       {step === "rates" && (
         <>
           <div style={{ ...S.row, marginBottom: 20 }}>
-            <button style={{ ...S.btn, ...S.btnGray }} onClick={() => setStep("select")}>← Back</button>
+            <button style={{ ...S.btn, ...S.btnGray }} onClick={() => setStep("select")}>
+              ← Back
+            </button>
             <span style={{ fontSize: 14, color: "#6b7280" }}>Review rates and pick shipping for each order.</span>
             <div style={{ flex: 1 }} />
             <button
-              style={{ ...S.btn, ...S.btnDark, opacity: Object.keys(selectedRates).length === 0 || executing ? 0.5 : 1 }}
+              style={{
+                ...S.btn,
+                ...S.btnDark,
+                opacity: Object.keys(selectedRates).length === 0 || executing ? 0.5 : 1,
+              }}
               disabled={Object.keys(selectedRates).length === 0 || executing}
               onClick={execute}
             >
-              {executing
-                ? <span style={S.row}><span style={S.spinner} /> Buying labels…</span>
-                : `Buy ${Object.keys(selectedRates).length} label${Object.keys(selectedRates).length !== 1 ? "s" : ""} + download PDF`
-              }
+              {executing ? (
+                <span style={S.row}>
+                  <span style={S.spinner} /> Buying labels…
+                </span>
+              ) : (
+                `Buy ${Object.keys(selectedRates).length} label${Object.keys(selectedRates).length !== 1 ? "s" : ""} + download PDF`
+              )}
             </button>
           </div>
 
@@ -353,18 +485,41 @@ export default function BulkFulfillPage() {
                     <span style={{ fontSize: 13, color: "#6b7280", marginLeft: 12 }}>{result.name}</span>
                     <span style={{ fontSize: 12, color: "#9ca3af", marginLeft: 8 }}>{result.address}</span>
                   </div>
-                  {result.weight_oz && (
-                    <span style={{ fontSize: 12, color: "#9ca3af" }}>{result.weight_oz} oz</span>
-                  )}
+                  {result.weight_oz && <span style={{ fontSize: 12, color: "#9ca3af" }}>{result.weight_oz} oz</span>}
                 </div>
                 {result.error ? (
-                  <div style={{ padding: "12px 20px", fontSize: 13, color: "#dc2626" }}>Rate error: {result.error}</div>
+                  <div
+                    style={{
+                      padding: "12px 20px",
+                      fontSize: 13,
+                      color: "#dc2626",
+                    }}
+                  >
+                    Rate error: {result.error}
+                  </div>
                 ) : (
                   <div style={{ padding: "12px 20px" }}>
                     <div style={{ ...S.row, flexWrap: "wrap" as const, gap: 8 }}>
-                      {order && <div style={{ fontSize: 12, color: "#6b7280", marginRight: 8 }}>{itemSummary(order)}</div>}
+                      {order && (
+                        <div
+                          style={{
+                            fontSize: 12,
+                            color: "#6b7280",
+                            marginRight: 8,
+                          }}
+                        >
+                          {itemSummary(order)}
+                        </div>
+                      )}
                     </div>
-                    <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginTop: 10 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap" as const,
+                        gap: 8,
+                        marginTop: 10,
+                      }}
+                    >
                       {result.rates.map((rate) => {
                         const picked = selectedRates[result.order_id] === rate.object_id
                         return (
@@ -381,12 +536,27 @@ export default function BulkFulfillPage() {
                               cursor: "pointer",
                               textAlign: "left" as const,
                             }}
-                            onClick={() => setSelectedRates((prev) => ({ ...prev, [result.order_id]: rate.object_id }))}
+                            onClick={() =>
+                              setSelectedRates((prev) => ({
+                                ...prev,
+                                [result.order_id]: rate.object_id,
+                              }))
+                            }
                           >
-                            <div>{rate.carrier} {rate.service}</div>
+                            <div>
+                              {rate.carrier} {rate.service}
+                            </div>
                             <div style={{ fontWeight: 700, marginTop: 2 }}>{fmtAmount(rate.amount)}</div>
                             {rate.estimated_days != null && (
-                              <div style={{ color: "#9ca3af", fontSize: 11, marginTop: 1 }}>{rate.estimated_days}d</div>
+                              <div
+                                style={{
+                                  color: "#9ca3af",
+                                  fontSize: 11,
+                                  marginTop: 1,
+                                }}
+                              >
+                                {rate.estimated_days}d
+                              </div>
                             )}
                           </button>
                         )
@@ -404,10 +574,10 @@ export default function BulkFulfillPage() {
       {step === "done" && (
         <div style={S.card}>
           <div style={S.cardHead}>
-            <span style={{ fontSize: 14, fontWeight: 600 }}>
-              Batch submitted
-            </span>
-            <button style={{ ...S.btn, ...S.btnAmber }} onClick={reset}>Fulfill more orders</button>
+            <span style={{ fontSize: 14, fontWeight: 600 }}>Batch submitted</span>
+            <button style={{ ...S.btn, ...S.btnAmber }} onClick={reset}>
+              Fulfill more orders
+            </button>
           </div>
           <table style={S.table}>
             <thead>
@@ -423,9 +593,7 @@ export default function BulkFulfillPage() {
                 <tr key={r.order_id}>
                   <td style={S.td}>#{r.display_id}</td>
                   <td style={S.td}>
-                    <span style={{ ...S.badge, ...(r.success ? S.green : S.red) }}>
-                      {r.success ? (r.status || "Submitted") : "Failed"}
-                    </span>
+                    <span style={{ ...S.badge, ...(r.success ? S.green : S.red) }}>{r.success ? r.status || "Submitted" : "Failed"}</span>
                   </td>
                   <td style={S.td}>{r.tracking || (r.error ? <span style={{ color: "#dc2626", fontSize: 12 }}>{r.error}</span> : "—")}</td>
                   <td style={S.td}>
@@ -433,14 +601,23 @@ export default function BulkFulfillPage() {
                       <a href={r.label_url} target="_blank" rel="noreferrer" style={{ color: "#d4a22a", fontSize: 12 }}>
                         Print
                       </a>
-                    ) : "—"}
+                    ) : (
+                      "—"
+                    )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
           {fulfillResults.some((r) => r.success) && (
-            <div style={{ padding: "12px 20px", fontSize: 13, color: "#6b7280", borderTop: "1px solid #f3f4f6" }}>
+            <div
+              style={{
+                padding: "12px 20px",
+                fontSize: 13,
+                color: "#6b7280",
+                borderTop: "1px solid #f3f4f6",
+              }}
+            >
               Shippo is purchasing the batch. Labels will attach to each order as webhook updates arrive.
             </div>
           )}
