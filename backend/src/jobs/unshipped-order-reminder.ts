@@ -1,6 +1,14 @@
 import { INotificationModuleService, IOrderModuleService, MedusaContainer } from "@medusajs/framework/types"
-import { Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { EmailTemplates, ReminderOrder } from "../modules/email-notifications/templates"
+
+type FulfillmentQuery = {
+  graph(input: {
+    entity: string
+    filters?: Record<string, unknown>
+    fields: string[]
+  }): Promise<{ data?: { order_id?: string }[] }>
+}
 
 const ADMIN_EMAIL = "willbrako@gmail.com"
 
@@ -17,6 +25,7 @@ const hasRemainingItems = (order: ReminderOrder) =>
 export default async function unshippedOrderReminder(container: MedusaContainer) {
   const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
   const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
+  const query: FulfillmentQuery = container.resolve(ContainerRegistrationKeys.QUERY)
 
   const orders = await orderModuleService.listOrders(
     {},
@@ -32,8 +41,26 @@ export default async function unshippedOrderReminder(container: MedusaContainer)
   const pending = (orders as ReminderOrder[]).filter(
     (order) => order.status !== "canceled" && hasRemainingItems(order)
   )
+  const pendingIds = pending.map((order) => order.id).filter(Boolean)
 
-  if (!pending.length) {
+  const { data: fulfillments = [] } = pendingIds.length
+    ? await query.graph({
+        entity: "fulfillment",
+        filters: {
+          order_id: pendingIds,
+        },
+        fields: ["id", "order_id"],
+      })
+    : { data: [] }
+
+  const fulfilledOrderIds = new Set(
+    fulfillments.map((fulfillment) => fulfillment.order_id).filter(Boolean)
+  )
+  const unfulfilled = pending.filter(
+    (order) => !fulfilledOrderIds.has(order.id)
+  )
+
+  if (!unfulfilled.length) {
     console.log("[unshipped-order-reminder] No unshipped orders")
     return
   }
@@ -45,15 +72,15 @@ export default async function unshippedOrderReminder(container: MedusaContainer)
     data: {
       emailOptions: {
         replyTo: "hello@thedabpal.com",
-        subject: `Dab Pal unshipped orders: ${pending.length}`,
+        subject: `Dab Pal unshipped orders: ${unfulfilled.length}`,
       },
-      orders: pending,
+      orders: unfulfilled,
       generatedAt: new Date().toISOString(),
-      preview: `${pending.length} Dab Pal order${pending.length === 1 ? "" : "s"} still need shipping.`,
+      preview: `${unfulfilled.length} Dab Pal order${unfulfilled.length === 1 ? "" : "s"} still need shipping.`,
     },
   })
 
-  console.log(`[unshipped-order-reminder] Sent ${pending.length} unshipped order reminder${pending.length === 1 ? "" : "s"} to ${ADMIN_EMAIL}`)
+  console.log(`[unshipped-order-reminder] Sent ${unfulfilled.length} unshipped order reminder${unfulfilled.length === 1 ? "" : "s"} to ${ADMIN_EMAIL}`)
 }
 
 export const config = {

@@ -11,6 +11,7 @@ type BulkOrderLineItem = {
 }
 
 type BulkOrder = {
+  id?: string
   status?: string
   items?: BulkOrderLineItem[]
 }
@@ -34,6 +35,7 @@ const hasRemainingShippableItems = (order: BulkOrder) =>
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const orderModuleService: IOrderModuleService = req.scope.resolve(Modules.ORDER)
+  const query = req.scope.resolve("query")
 
   const orders = await orderModuleService.listOrders(
     {},
@@ -49,6 +51,25 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const pending = ((orders || []) as BulkOrder[]).filter(
     (order) => order.status !== "canceled" && hasRemainingShippableItems(order)
   )
+  const pendingIds = pending.map((order) => order.id).filter(Boolean)
 
-  res.json({ orders: pending })
+  if (!pendingIds.length) {
+    return res.json({ orders: [] })
+  }
+
+  const { data: fulfillments = [] } = await query.graph({
+    entity: "fulfillment",
+    filters: {
+      order_id: pendingIds,
+    },
+    fields: ["id", "order_id"],
+  })
+
+  const fulfilledOrderIds = new Set(
+    (fulfillments as { order_id?: string }[])
+      .map((fulfillment) => fulfillment.order_id)
+      .filter(Boolean)
+  )
+
+  res.json({ orders: pending.filter((order) => !fulfilledOrderIds.has(order.id || "")) })
 }
