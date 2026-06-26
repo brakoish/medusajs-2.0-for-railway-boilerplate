@@ -3,7 +3,16 @@ import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { EmailTemplates, ReminderOrder } from "../modules/email-notifications/templates"
 
 type QueryGraph = {
-  graph(input: { entity: string; filters?: Record<string, unknown>; fields: string[] }): Promise<{ data?: ReminderOrder[] }>
+  graph(input: {
+    entity: string
+    filters?: Record<string, unknown>
+    fields: string[]
+    pagination?: {
+      skip?: number
+      take?: number
+      order?: Record<string, "ASC" | "DESC">
+    }
+  }): Promise<{ data?: ReminderOrder[] }>
 }
 
 const ADMIN_EMAIL = "willbrako@gmail.com"
@@ -25,6 +34,12 @@ export default async function unshippedOrderReminder(container: MedusaContainer)
   const { data: orders = [] } = await query.graph({
     entity: "order",
     fields: ["id", "display_id", "status", "fulfillment_status", "email", "created_at", "shipping_address.first_name", "shipping_address.last_name", "shipping_address.city", "shipping_address.province", "shipping_address.postal_code", "items.id", "items.title", "items.variant_sku", "items.quantity", "items.detail.fulfilled_quantity"],
+    pagination: {
+      take: 200,
+      order: {
+        created_at: "DESC",
+      },
+    },
   })
 
   const pending = orders.filter(
