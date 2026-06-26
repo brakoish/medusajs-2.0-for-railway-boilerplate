@@ -1,4 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { IOrderModuleService } from "@medusajs/framework/types"
+import { Modules } from "@medusajs/framework/utils"
 
 type BulkOrderLineItem = {
   quantity?: number
@@ -31,18 +33,18 @@ const hasRemainingShippableItems = (order: BulkOrder) =>
  * Returns all unfulfilled orders with address + items for the bulk fulfill UI.
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve("query")
+  const orderModuleService: IOrderModuleService = req.scope.resolve(Modules.ORDER)
 
-  const { data: orders } = await query.graph({
-    entity: "order",
-    fields: ["id", "display_id", "status", "fulfillment_status", "email", "created_at", "shipping_address.first_name", "shipping_address.last_name", "shipping_address.address_1", "shipping_address.address_2", "shipping_address.city", "shipping_address.province", "shipping_address.postal_code", "shipping_address.country_code", "items.id", "items.title", "items.variant_sku", "items.quantity", "items.requires_shipping", "items.detail.fulfilled_quantity"],
-    pagination: {
+  const orders = await orderModuleService.listOrders(
+    {},
+    {
       take: 200,
       order: {
         created_at: "DESC",
       },
-    },
-  })
+      relations: ["shipping_address", "items", "items.detail"],
+    }
+  )
 
   const pending = ((orders || []) as BulkOrder[]).filter(
     (order) => order.status !== "canceled" && hasRemainingShippableItems(order)

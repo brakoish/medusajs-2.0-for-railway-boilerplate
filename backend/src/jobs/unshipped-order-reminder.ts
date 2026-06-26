@@ -1,19 +1,6 @@
-import { INotificationModuleService, MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { INotificationModuleService, IOrderModuleService, MedusaContainer } from "@medusajs/framework/types"
+import { Modules } from "@medusajs/framework/utils"
 import { EmailTemplates, ReminderOrder } from "../modules/email-notifications/templates"
-
-type QueryGraph = {
-  graph(input: {
-    entity: string
-    filters?: Record<string, unknown>
-    fields: string[]
-    pagination?: {
-      skip?: number
-      take?: number
-      order?: Record<string, "ASC" | "DESC">
-    }
-  }): Promise<{ data?: ReminderOrder[] }>
-}
 
 const ADMIN_EMAIL = "willbrako@gmail.com"
 
@@ -28,21 +15,21 @@ const hasRemainingItems = (order: ReminderOrder) =>
   (order.items || []).some((item) => remainingQuantity(item) > 0)
 
 export default async function unshippedOrderReminder(container: MedusaContainer) {
-  const query: QueryGraph = container.resolve(ContainerRegistrationKeys.QUERY)
+  const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
   const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
 
-  const { data: orders = [] } = await query.graph({
-    entity: "order",
-    fields: ["id", "display_id", "status", "fulfillment_status", "email", "created_at", "shipping_address.first_name", "shipping_address.last_name", "shipping_address.city", "shipping_address.province", "shipping_address.postal_code", "items.id", "items.title", "items.variant_sku", "items.quantity", "items.detail.fulfilled_quantity"],
-    pagination: {
+  const orders = await orderModuleService.listOrders(
+    {},
+    {
       take: 200,
       order: {
         created_at: "DESC",
       },
-    },
-  })
+      relations: ["shipping_address", "items", "items.detail"],
+    }
+  )
 
-  const pending = orders.filter(
+  const pending = (orders as ReminderOrder[]).filter(
     (order) => order.status !== "canceled" && hasRemainingItems(order)
   )
 
