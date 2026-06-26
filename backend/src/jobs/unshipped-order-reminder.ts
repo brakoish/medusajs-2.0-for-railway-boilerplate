@@ -15,7 +15,8 @@ const remainingQuantity = (item: NonNullable<ReminderOrder["items"]>[number]) =>
   return Math.max(0, quantity - fulfilled)
 }
 
-const hasRemainingItems = (order: ReminderOrder) => (order.items || []).some((item) => remainingQuantity(item) > 0)
+const hasRemainingItems = (order: ReminderOrder) =>
+  (order.items || []).some((item) => remainingQuantity(item) > 0)
 
 export default async function unshippedOrderReminder(container: MedusaContainer) {
   const query: QueryGraph = container.resolve(ContainerRegistrationKeys.QUERY)
@@ -26,8 +27,9 @@ export default async function unshippedOrderReminder(container: MedusaContainer)
     fields: ["id", "display_id", "status", "fulfillment_status", "email", "created_at", "shipping_address.first_name", "shipping_address.last_name", "shipping_address.city", "shipping_address.province", "shipping_address.postal_code", "items.id", "items.title", "items.variant_sku", "items.quantity", "items.detail.fulfilled_quantity"],
   })
 
-  const pendingStatuses = new Set(["not_fulfilled", "partially_fulfilled"])
-  const pending = orders.filter((order) => order.status !== "canceled" && pendingStatuses.has(order.fulfillment_status) && hasRemainingItems(order))
+  const pending = orders.filter(
+    (order) => order.status !== "canceled" && hasRemainingItems(order)
+  )
 
   if (!pending.length) {
     console.log("[unshipped-order-reminder] No unshipped orders")
