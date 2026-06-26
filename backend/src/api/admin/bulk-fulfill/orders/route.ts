@@ -57,17 +57,18 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     return res.json({ orders: [] })
   }
 
-  const { data: fulfillments = [] } = await query.graph({
-    entity: "fulfillment",
+  const { data: ordersWithFulfillments = [] } = await query.graph({
+    entity: "order",
     filters: {
-      order_id: pendingIds,
+      id: pendingIds,
     },
-    fields: ["id", "order_id"],
+    fields: ["id", "fulfillments.id"],
   })
 
   const fulfilledOrderIds = new Set(
-    (fulfillments as { order_id?: string }[])
-      .map((fulfillment) => fulfillment.order_id)
+    (ordersWithFulfillments as { id?: string; fulfillments?: { id?: string }[] }[])
+      .filter((order) => (order.fulfillments || []).length > 0)
+      .map((order) => order.id)
       .filter(Boolean)
   )
 

@@ -7,7 +7,7 @@ type FulfillmentQuery = {
     entity: string
     filters?: Record<string, unknown>
     fields: string[]
-  }): Promise<{ data?: { order_id?: string }[] }>
+  }): Promise<{ data?: { id?: string; fulfillments?: { id?: string }[] }[] }>
 }
 
 const ADMIN_EMAIL = "willbrako@gmail.com"
@@ -43,18 +43,21 @@ export default async function unshippedOrderReminder(container: MedusaContainer)
   )
   const pendingIds = pending.map((order) => order.id).filter(Boolean)
 
-  const { data: fulfillments = [] } = pendingIds.length
+  const { data: ordersWithFulfillments = [] } = pendingIds.length
     ? await query.graph({
-        entity: "fulfillment",
+        entity: "order",
         filters: {
-          order_id: pendingIds,
+          id: pendingIds,
         },
-        fields: ["id", "order_id"],
+        fields: ["id", "fulfillments.id"],
       })
     : { data: [] }
 
   const fulfilledOrderIds = new Set(
-    fulfillments.map((fulfillment) => fulfillment.order_id).filter(Boolean)
+    ordersWithFulfillments
+      .filter((order) => (order.fulfillments || []).length > 0)
+      .map((order) => order.id)
+      .filter(Boolean)
   )
   const unfulfilled = pending.filter(
     (order) => !fulfilledOrderIds.has(order.id)
