@@ -20,7 +20,7 @@ export default function PalMap() {
               Where Dab Pals have landed.
             </h2>
             <p className="text-white/65 mt-5 leading-relaxed">
-              Each bubble is a US city with a Dab Pal out in the wild.
+              Each dot is a real US city with a Dab Pal out in the wild.
             </p>
 
             <dl className="grid grid-cols-3 gap-3 mt-8 max-w-xl">
@@ -42,11 +42,24 @@ export default function PalMap() {
                 <dt className="text-[11px] uppercase tracking-[0.18em] text-white/40">
                   States
                 </dt>
-                <dd className="text-2xl font-semibold mt-1">
-                  {states.size}
-                </dd>
+                <dd className="text-2xl font-semibold mt-1">{states.size}</dd>
               </div>
             </dl>
+
+            <div className="mt-8 flex flex-col min-[420px]:flex-row gap-3">
+              <a
+                href="#shop"
+                className="inline-flex h-11 items-center justify-center rounded-full bg-amber-400 px-5 text-sm font-semibold text-black transition hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200"
+              >
+                Join the map
+              </a>
+              <a
+                href="#reviews"
+                className="inline-flex h-11 items-center justify-center rounded-full border border-white/14 px-5 text-sm font-semibold text-white transition hover:border-white/28 hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
+              >
+                Read reviews
+              </a>
+            </div>
           </div>
 
           <InteractivePalMap locations={usLocations} />

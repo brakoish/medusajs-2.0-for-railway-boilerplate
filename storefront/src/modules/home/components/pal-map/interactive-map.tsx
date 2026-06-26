@@ -9,6 +9,7 @@ import {
 import {
   CSSProperties,
   PointerEvent,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -161,6 +162,12 @@ export default function InteractivePalMap({
               top: `${(position[1] / MAP_SIZE.height) * 100}%`,
             },
             size: Math.min(24, 10 + Math.sqrt(location.count) * 5),
+            tooltipAlign:
+              position[0] < MAP_SIZE.width * 0.22
+                ? "left"
+                : position[0] > MAP_SIZE.width * 0.78
+                ? "right"
+                : "center",
           }
         })
         .filter(
@@ -171,52 +178,62 @@ export default function InteractivePalMap({
             location: PalLocation
             position: { left: string; top: string }
             size: number
+            tooltipAlign: "left" | "center" | "right"
           } => Boolean(pin)
         ),
     [locations]
   )
 
-  const clampView = (next: ViewState): ViewState => {
-    const viewport = viewportRef.current
-    if (!viewport) return next
+  const clampView = useCallback(
+    (next: ViewState): ViewState => {
+      const viewport = viewportRef.current
+      if (!viewport) return next
 
-    const { width, height } = viewport.getBoundingClientRect()
-    const baseWidth = mapCanvas.width || width
-    const baseHeight = mapCanvas.height || height
-    const margin = Math.min(width, height) * 0.18
-    const minX = width - mapCanvas.left - baseWidth * next.scale - margin
-    const maxX = margin - mapCanvas.left
-    const minY = height - mapCanvas.top - baseHeight * next.scale - margin
-    const maxY = margin - mapCanvas.top
+      const { width, height } = viewport.getBoundingClientRect()
+      const baseWidth = mapCanvas.width || width
+      const baseHeight = mapCanvas.height || height
+      const margin = Math.min(width, height) * 0.18
+      const minX = width - mapCanvas.left - baseWidth * next.scale - margin
+      const maxX = margin - mapCanvas.left
+      const minY = height - mapCanvas.top - baseHeight * next.scale - margin
+      const maxY = margin - mapCanvas.top
 
-    return {
-      scale: next.scale,
-      x: next.scale === 1 ? 0 : clamp(next.x, minX, maxX),
-      y: next.scale === 1 ? 0 : clamp(next.y, minY, maxY),
-    }
-  }
+      return {
+        scale: next.scale,
+        x: next.scale === 1 ? 0 : clamp(next.x, minX, maxX),
+        y: next.scale === 1 ? 0 : clamp(next.y, minY, maxY),
+      }
+    },
+    [mapCanvas.height, mapCanvas.left, mapCanvas.top, mapCanvas.width]
+  )
 
-  const setClampedView = (next: ViewState) => {
-    setView(clampView(next))
-  }
+  const setClampedView = useCallback(
+    (next: ViewState) => {
+      setView(clampView(next))
+    },
+    [clampView]
+  )
 
-  const zoomAt = (scale: number, centerX?: number, centerY?: number) => {
-    const viewport = viewportRef.current
-    if (!viewport) return
+  const zoomAt = useCallback(
+    (scale: number, centerX?: number, centerY?: number) => {
+      const viewport = viewportRef.current
+      if (!viewport) return
 
-    const rect = viewport.getBoundingClientRect()
-    const nextScale = clamp(scale, MIN_SCALE, MAX_SCALE)
-    const originX = centerX ?? rect.width / 2
-    const originY = centerY ?? rect.height / 2
-    const contentX = (originX - mapCanvas.left - view.x) / view.scale
-    const contentY = (originY - mapCanvas.top - view.y) / view.scale
+      const rect = viewport.getBoundingClientRect()
+      const nextScale = clamp(scale, MIN_SCALE, MAX_SCALE)
+      const originX = centerX ?? rect.width / 2
+      const originY = centerY ?? rect.height / 2
+      const contentX = (originX - mapCanvas.left - view.x) / view.scale
+      const contentY = (originY - mapCanvas.top - view.y) / view.scale
 
-    setClampedView({
-      scale: nextScale,
-      x: originX - mapCanvas.left - contentX * nextScale,
-      y: originY - mapCanvas.top - contentY * nextScale,
-    })
-  }
+      setClampedView({
+        scale: nextScale,
+        x: originX - mapCanvas.left - contentX * nextScale,
+        y: originY - mapCanvas.top - contentY * nextScale,
+      })
+    },
+    [mapCanvas.left, mapCanvas.top, setClampedView, view.scale, view.x, view.y]
+  )
 
   useEffect(() => {
     const viewport = viewportRef.current
@@ -252,7 +269,7 @@ export default function InteractivePalMap({
 
     viewport.addEventListener("wheel", handleWheel, { passive: false })
     return () => viewport.removeEventListener("wheel", handleWheel)
-  }, [mapCanvas.left, mapCanvas.top, view.scale, view.x, view.y])
+  }, [mapCanvas.left, mapCanvas.top, view.scale, view.x, view.y, zoomAt])
 
   const beginPinch = () => {
     const [first, second] = Array.from(pointers.current.values())
@@ -274,6 +291,8 @@ export default function InteractivePalMap({
     ) {
       return
     }
+
+    setActiveKey(null)
 
     event.currentTarget.setPointerCapture?.(event.pointerId)
     pointers.current.set(event.pointerId, {
@@ -391,36 +410,40 @@ export default function InteractivePalMap({
               <path className="pal-map-land" d={landPath} />
             </svg>
 
-            {locationPins.map(({ key, location, position, size }) => {
-              const active = activeKey === key
+            {locationPins.map(
+              ({ key, location, position, size, tooltipAlign }) => {
+                const active = activeKey === key
 
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  className={`pal-map-pin${active ? " is-active" : ""}`}
-                  style={
-                    {
-                      left: position.left,
-                      top: position.top,
-                      "--pin-size": `${size}px`,
-                      "--pin-z": 10 + location.count,
-                    } as CSSProperties
-                  }
-                  aria-label={`${formatLocation(location)}, ${pluralize(
-                    location.count,
-                    "Dab Pal"
-                  )}`}
-                  onClick={() => setActiveKey(active ? null : key)}
-                >
-                  <span className="pal-map-pin-dot" />
-                  <span className="pal-map-tooltip">
-                    <strong>{formatLocation(location)}</strong>
-                    <span>{pluralize(location.count, "Dab Pal")}</span>
-                  </span>
-                </button>
-              )
-            })}
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    className={`pal-map-pin is-${tooltipAlign}${
+                      active ? " is-active" : ""
+                    }`}
+                    style={
+                      {
+                        left: position.left,
+                        top: position.top,
+                        "--pin-size": `${size}px`,
+                        "--pin-z": 10 + location.count,
+                      } as CSSProperties
+                    }
+                    aria-label={`${formatLocation(location)}, ${pluralize(
+                      location.count,
+                      "Dab Pal"
+                    )}`}
+                    onClick={() => setActiveKey(active ? null : key)}
+                  >
+                    <span className="pal-map-pin-dot" />
+                    <span className="pal-map-tooltip">
+                      <strong>{formatLocation(location)}</strong>
+                      <span>{pluralize(location.count, "Dab Pal")}</span>
+                    </span>
+                  </button>
+                )
+              }
+            )}
           </div>
         </div>
       </div>
@@ -431,6 +454,7 @@ export default function InteractivePalMap({
           className="pal-map-control"
           aria-label="Zoom in"
           title="Zoom in"
+          disabled={view.scale >= MAX_SCALE}
           onClick={() => zoomAt(view.scale * ZOOM_STEP)}
         >
           <PlusMini />
@@ -440,6 +464,7 @@ export default function InteractivePalMap({
           className="pal-map-control"
           aria-label="Zoom out"
           title="Zoom out"
+          disabled={view.scale <= MIN_SCALE}
           onClick={() => zoomAt(view.scale / ZOOM_STEP)}
         >
           <MinusMini />
