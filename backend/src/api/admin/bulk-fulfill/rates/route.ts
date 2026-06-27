@@ -26,6 +26,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           fields: [
             "id",
             "display_id",
+            "status",
+            "canceled_at",
             "shipping_address.first_name",
             "shipping_address.last_name",
             "shipping_address.address_1",
@@ -42,6 +44,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
         const order = orders?.[0] as any
         if (!order) return { order_id: orderId, error: "Order not found", rates: [] }
+        if (order.status === "canceled" || order.canceled_at) {
+          return { order_id: orderId, display_id: order.display_id, error: "Order is canceled", rates: [] }
+        }
 
         const addr = order.shipping_address
         const items = order.items || []

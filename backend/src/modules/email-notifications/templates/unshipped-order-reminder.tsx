@@ -18,6 +18,7 @@ export type ReminderOrder = {
   email?: string | null
   created_at?: string | Date | null
   status?: string | null
+  canceled_at?: string | Date | null
   fulfillment_status?: string | null
   shipping_address?: {
     first_name?: string | null

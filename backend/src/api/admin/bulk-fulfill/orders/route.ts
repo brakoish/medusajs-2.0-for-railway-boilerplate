@@ -13,6 +13,7 @@ type BulkOrderLineItem = {
 type BulkOrder = {
   id?: string
   status?: string
+  canceled_at?: string | Date | null
   items?: BulkOrderLineItem[]
 }
 
@@ -27,6 +28,9 @@ const hasRemainingShippableItems = (order: BulkOrder) =>
   (order.items || []).some(
     (item) => item.requires_shipping !== false && remainingQuantity(item) > 0
   )
+
+const isCanceledOrder = (order: BulkOrder) =>
+  order.status === "canceled" || Boolean(order.canceled_at)
 
 /**
  * GET /admin/bulk-fulfill/orders
@@ -49,7 +53,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   )
 
   const pending = ((orders || []) as BulkOrder[]).filter(
-    (order) => order.status !== "canceled" && hasRemainingShippableItems(order)
+    (order) => !isCanceledOrder(order) && hasRemainingShippableItems(order)
   )
   const pendingIds = pending.map((order) => order.id).filter(Boolean)
 

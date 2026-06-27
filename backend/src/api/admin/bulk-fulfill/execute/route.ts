@@ -26,6 +26,8 @@ type OrderItem = {
 type BulkOrder = {
   id: string
   display_id?: number
+  status?: string
+  canceled_at?: string | Date | null
   email?: string
   shipping_address?: {
     first_name?: string
@@ -121,6 +123,9 @@ const remainingItems = (order: BulkOrder) =>
     })
     .filter((item) => item.quantity > 0)
 
+const isCanceledOrder = (order: BulkOrder) =>
+  order.status === "canceled" || Boolean(order.canceled_at)
+
 async function waitForValidBatch(client: ShippoClient, batchId: string): Promise<ShippoBatch> {
   for (let attempt = 0; attempt < 12; attempt++) {
     const batch = await client.getBatch(batchId, { results: 100 })
@@ -196,6 +201,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         fields: [
           "id",
           "display_id",
+          "status",
+          "canceled_at",
           "email",
           "shipping_address.first_name",
           "shipping_address.last_name",
@@ -217,6 +224,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       const order = orders?.[0] as BulkOrder | undefined
       if (!order) {
         results.push({ order_id: item.order_id, success: false, error: "Order not found" })
+        continue
+      }
+
+      if (isCanceledOrder(order)) {
+        results.push({
+          order_id: item.order_id,
+          display_id: order.display_id,
+          success: false,
+          error: "Order is canceled",
+        })
         continue
       }
 

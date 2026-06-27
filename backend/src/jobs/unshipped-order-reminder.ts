@@ -22,6 +22,9 @@ const remainingQuantity = (item: NonNullable<ReminderOrder["items"]>[number]) =>
 const hasRemainingItems = (order: ReminderOrder) =>
   (order.items || []).some((item) => remainingQuantity(item) > 0)
 
+const isCanceledOrder = (order: ReminderOrder) =>
+  order.status === "canceled" || Boolean(order.canceled_at)
+
 export default async function unshippedOrderReminder(container: MedusaContainer) {
   const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
   const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
@@ -39,7 +42,7 @@ export default async function unshippedOrderReminder(container: MedusaContainer)
   )
 
   const pending = (orders as ReminderOrder[]).filter(
-    (order) => order.status !== "canceled" && hasRemainingItems(order)
+    (order) => !isCanceledOrder(order) && hasRemainingItems(order)
   )
   const pendingIds = pending.map((order) => order.id).filter(Boolean)
 
