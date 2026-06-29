@@ -1,5 +1,6 @@
 import { INotificationModuleService, IOrderModuleService, MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { filterShippableOrders } from "../lib/shippable-orders"
 import { EmailTemplates, ReminderOrder } from "../modules/email-notifications/templates"
 
 type FulfillmentQuery = {
@@ -11,19 +12,6 @@ type FulfillmentQuery = {
 }
 
 const ADMIN_EMAIL = "willbrako@gmail.com"
-
-const remainingQuantity = (item: NonNullable<ReminderOrder["items"]>[number]) => {
-  const quantity = Number(item.quantity ?? 0)
-  const fulfilled = Number(item.detail?.fulfilled_quantity ?? 0)
-
-  return Math.max(0, quantity - fulfilled)
-}
-
-const hasRemainingItems = (order: ReminderOrder) =>
-  (order.items || []).some((item) => remainingQuantity(item) > 0)
-
-const isCanceledOrder = (order: ReminderOrder) =>
-  order.status === "canceled" || Boolean(order.canceled_at)
 
 export default async function unshippedOrderReminder(container: MedusaContainer) {
   const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
@@ -41,30 +29,7 @@ export default async function unshippedOrderReminder(container: MedusaContainer)
     }
   )
 
-  const pending = (orders as ReminderOrder[]).filter(
-    (order) => !isCanceledOrder(order) && hasRemainingItems(order)
-  )
-  const pendingIds = pending.map((order) => order.id).filter(Boolean)
-
-  const { data: ordersWithFulfillments = [] } = pendingIds.length
-    ? await query.graph({
-        entity: "order",
-        filters: {
-          id: pendingIds,
-        },
-        fields: ["id", "fulfillments.id"],
-      })
-    : { data: [] }
-
-  const fulfilledOrderIds = new Set(
-    ordersWithFulfillments
-      .filter((order) => (order.fulfillments || []).length > 0)
-      .map((order) => order.id)
-      .filter(Boolean)
-  )
-  const unfulfilled = pending.filter(
-    (order) => !fulfilledOrderIds.has(order.id)
-  )
+  const unfulfilled = await filterShippableOrders(query, orders as ReminderOrder[])
 
   if (!unfulfilled.length) {
     console.log("[unshipped-order-reminder] No unshipped orders")

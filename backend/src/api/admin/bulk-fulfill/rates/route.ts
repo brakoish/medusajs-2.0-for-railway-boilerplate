@@ -1,5 +1,44 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import {
+  fulfilledOrderIds,
+  isCanceledOrder,
+  hasRemainingShippableItems,
+  ShippableOrder,
+} from "../../../../lib/shippable-orders"
 import { ShippoClient } from "../../../../modules/shippo/client"
+
+type RateOrder = Omit<ShippableOrder, "items"> & {
+  id: string
+  display_id?: number
+  shipping_address?: {
+    first_name?: string
+    last_name?: string
+    address_1?: string
+    address_2?: string
+    city?: string
+    province?: string
+    postal_code?: string
+    country_code?: string
+  } | null
+  items?: {
+    id?: string
+    quantity?: number | string | null
+    requires_shipping?: boolean | null
+    variant_sku?: string | null
+    detail?: { fulfilled_quantity?: number | string | null } | null
+    variant?: { weight?: number | string | null } | null
+  }[] | null
+}
+
+type ShippoRate = {
+  object_id?: string
+  provider?: string
+  servicelevel?: { name?: string; token?: string }
+  carrier_account?: string
+  amount?: string | number
+  currency?: string
+  estimated_days?: number | null
+}
 
 /**
  * POST /admin/bulk-fulfill/rates
@@ -36,27 +75,41 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
             "shipping_address.province",
             "shipping_address.postal_code",
             "shipping_address.country_code",
+            "items.id",
             "items.quantity",
+            "items.requires_shipping",
             "items.variant_sku",
+            "items.detail.fulfilled_quantity",
             "items.variant.weight",
           ],
         })
 
-        const order = orders?.[0] as any
+        const order = orders?.[0] as RateOrder | undefined
         if (!order) return { order_id: orderId, error: "Order not found", rates: [] }
-        if (order.status === "canceled" || order.canceled_at) {
+        if (isCanceledOrder(order)) {
           return { order_id: orderId, display_id: order.display_id, error: "Order is canceled", rates: [] }
+        }
+        if (!hasRemainingShippableItems(order)) {
+          return { order_id: orderId, display_id: order.display_id, error: "No items to fulfill", rates: [] }
+        }
+        const alreadyFulfilled = await fulfilledOrderIds(query, [orderId])
+        if (alreadyFulfilled.has(orderId)) {
+          return { order_id: orderId, display_id: order.display_id, error: "Order already has a fulfillment", rates: [] }
         }
 
         const addr = order.shipping_address
+        if (!addr?.address_1 || !addr.city || !addr.province || !addr.postal_code) {
+          return { order_id: orderId, display_id: order.display_id, error: "Order is missing a complete shipping address", rates: [] }
+        }
+
         const items = order.items || []
-        const totalGrams = items.reduce((sum: number, item: any) => {
-          const w = item.variant?.weight ?? 0
-          return sum + w * Number(item.quantity || 1)
+        const totalGrams = items.reduce((sum, item) => {
+          const weight = Number(item.variant?.weight ?? 0)
+          return sum + weight * Number(item.quantity || 1)
         }, 0)
         const totalOz = Math.max(1, Math.round((totalGrams / 28.3495) * 100) / 100)
 
-        const skus = items.map((i: any) => i.variant_sku ?? "")
+        const skus = items.map((item) => item.variant_sku ?? "")
         const has6 = skus.some((s: string) => s.includes("-6-"))
         const has3 = skus.some((s: string) => s.includes("-3-"))
         const [pLen, pWid, pHgt] = has6 ? ["8","9","3"] : has3 ? ["8","8","2"] : ["4","6","1"]
@@ -85,7 +138,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           parcels: [{ length: pLen, width: pWid, height: pHgt, distance_unit: "in", weight: String(totalOz), mass_unit: "oz" }],
         })
 
-        const rates = (shipment.rates || []).map((r: any) => ({
+        const rates = ((shipment.rates || []) as ShippoRate[]).map((r) => ({
           object_id: r.object_id,
           carrier: r.provider,
           service: r.servicelevel?.name,
@@ -94,7 +147,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           amount: Number(r.amount),
           currency: r.currency,
           estimated_days: r.estimated_days ?? null,
-        })).sort((a: any, b: any) => a.amount - b.amount)
+        })).sort((a, b) => a.amount - b.amount)
 
         return {
           order_id: orderId,

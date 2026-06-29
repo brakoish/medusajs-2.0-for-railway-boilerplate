@@ -2,6 +2,12 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { IFulfillmentModuleService } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { createOrderFulfillmentWorkflow } from "@medusajs/medusa/core-flows"
+import {
+  fulfilledOrderIds,
+  isCanceledOrder,
+  remainingShippableItems,
+  ShippableOrder,
+} from "../../../../lib/shippable-orders"
 import { ShippoClient } from "../../../../modules/shippo/client"
 import { preSelectedRates } from "../../../../modules/shippo/pre-selected-rates"
 import { ShippoAddress, ShippoBatch, ShippoParcel } from "../../../../modules/shippo/types"
@@ -18,16 +24,15 @@ interface FulfillItem {
 type OrderItem = {
   id: string
   quantity: number
+  requires_shipping?: boolean | null
   variant_sku?: string
   detail?: { fulfilled_quantity?: number }
   variant?: { weight?: number }
 }
 
-type BulkOrder = {
+type BulkOrder = ShippableOrder & {
   id: string
   display_id?: number
-  status?: string
-  canceled_at?: string | Date | null
   email?: string
   shipping_address?: {
     first_name?: string
@@ -112,19 +117,6 @@ const toAddress = (order: BulkOrder): ShippoAddress => {
     email: order.email || undefined,
   }
 }
-
-const remainingItems = (order: BulkOrder) =>
-  (order.items || [])
-    .map((item) => {
-      const fulfilled = Number(item.detail?.fulfilled_quantity ?? 0)
-      const total = Number(item.quantity ?? 0)
-      const remaining = Math.max(0, total - fulfilled)
-      return { id: item.id, quantity: remaining > 0 ? remaining : total }
-    })
-    .filter((item) => item.quantity > 0)
-
-const isCanceledOrder = (order: BulkOrder) =>
-  order.status === "canceled" || Boolean(order.canceled_at)
 
 async function waitForValidBatch(client: ShippoClient, batchId: string): Promise<ShippoBatch> {
   for (let attempt = 0; attempt < 12; attempt++) {
@@ -215,6 +207,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           "shipping_address.phone",
           "items.id",
           "items.quantity",
+          "items.requires_shipping",
           "items.variant_sku",
           "items.detail.fulfilled_quantity",
           "items.variant.weight",
@@ -224,6 +217,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       const order = orders?.[0] as BulkOrder | undefined
       if (!order) {
         results.push({ order_id: item.order_id, success: false, error: "Order not found" })
+        continue
+      }
+
+      const alreadyFulfilled = await fulfilledOrderIds(query, [item.order_id])
+      if (alreadyFulfilled.has(item.order_id)) {
+        results.push({
+          order_id: item.order_id,
+          display_id: order.display_id,
+          success: false,
+          error: "Order already has a fulfillment",
+        })
         continue
       }
 
@@ -237,7 +241,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         continue
       }
 
-      const fulfillItems = remainingItems(order)
+      const fulfillItems = remainingShippableItems(order)
       if (!fulfillItems.length) {
         results.push({
           order_id: item.order_id,
