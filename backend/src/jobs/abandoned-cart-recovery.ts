@@ -10,6 +10,10 @@ import {
   isMarketingSuppressed,
   normalizeMarketingEmail,
 } from "../lib/marketing-suppression"
+import {
+  ABANDONED_CART_PROMO_CODE,
+  ABANDONED_CART_PROMO_PERCENT,
+} from "../lib/abandoned-cart-offer"
 
 type RecoveryCartItem = {
   id?: string
@@ -36,7 +40,7 @@ type RecoveryCart = {
 const STARTED_AT = new Date(
   process.env.ABANDONED_CART_RECOVERY_STARTED_AT || "2026-06-29T16:00:00.000Z"
 )
-const MIN_AGE_MINUTES = Number(process.env.ABANDONED_CART_RECOVERY_MIN_AGE_MINUTES || 90)
+const MIN_AGE_MINUTES = Number(process.env.ABANDONED_CART_RECOVERY_MIN_AGE_MINUTES || 60)
 const MAX_AGE_DAYS = Number(process.env.ABANDONED_CART_RECOVERY_MAX_AGE_DAYS || 7)
 const MAX_PER_RUN = Number(process.env.ABANDONED_CART_RECOVERY_MAX_PER_RUN || 10)
 
@@ -164,6 +168,8 @@ export default async function abandonedCartRecovery(container: MedusaContainer) 
         items: cart.items || [],
         subtotal: amountValue(cart.item_subtotal),
         currencyCode: cart.currency_code || "usd",
+        discountCode: ABANDONED_CART_PROMO_CODE,
+        discountPercent: ABANDONED_CART_PROMO_PERCENT,
         preview: "Your cart saved the cleanup kit.",
       },
     })

@@ -32,6 +32,8 @@ export interface AbandonedCartTemplateProps {
   items: AbandonedCartItem[]
   subtotal?: number | string | null
   currencyCode?: string | null
+  discountCode?: string | null
+  discountPercent?: number | string | null
   preview?: string
 }
 
@@ -114,6 +116,30 @@ const S = {
     padding: "14px 22px",
     textDecoration: "none",
   },
+  offerBox: {
+    backgroundColor: "#fffbeb",
+    border: "1px solid #fde68a",
+    borderRadius: "8px",
+    margin: "24px 0 0",
+    padding: "16px 18px",
+  },
+  offerText: {
+    color: "#52525b",
+    fontSize: "14px",
+    lineHeight: "1.5",
+    margin: "0 0 10px",
+  },
+  offerCode: {
+    backgroundColor: "#18181b",
+    borderRadius: "6px",
+    color: "#f59e0b",
+    display: "inline-block",
+    fontSize: "16px",
+    fontWeight: "800",
+    letterSpacing: "0.08em",
+    margin: "0",
+    padding: "9px 12px",
+  },
   itemWrap: {
     backgroundColor: "#fafafa",
     border: "1px solid #e4e4e7",
@@ -186,6 +212,8 @@ export const AbandonedCartTemplate: React.FC<AbandonedCartTemplateProps> & {
   items,
   subtotal,
   currencyCode = "usd",
+  discountCode,
+  discountPercent,
   preview,
 }) => {
   const greeting = firstName ? `${firstName}, future you wants this.` : "Future you wants this."
@@ -211,6 +239,15 @@ export const AbandonedCartTemplate: React.FC<AbandonedCartTemplateProps> & {
             <Button href={cartUrl} style={S.ctaButton}>
               Finish checkout
             </Button>
+
+            {discountCode && discountPercent && (
+              <Section style={S.offerBox}>
+                <Text style={S.offerText}>
+                  Tiny nudge from future you: use this for {discountPercent}% off your kit.
+                </Text>
+                <Text style={S.offerCode}>{discountCode}</Text>
+              </Section>
+            )}
 
             <Section style={S.itemWrap}>
               {items.map((item, index) => {
@@ -275,6 +312,8 @@ AbandonedCartTemplate.PreviewProps = {
   unsubscribeUrl: "https://backend-production-2b05.up.railway.app/marketing/unsubscribe?email=ashley@example.com&token=test",
   currencyCode: "usd",
   subtotal: 25,
+  discountCode: "DABBACK10",
+  discountPercent: 10,
   items: [
     {
       id: "item_1",
