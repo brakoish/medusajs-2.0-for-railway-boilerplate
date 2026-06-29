@@ -1,6 +1,7 @@
 import {
   ICartModuleService,
   INotificationModuleService,
+  IOrderModuleService,
   MedusaContainer,
 } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
@@ -74,6 +75,7 @@ const isRecoverable = (cart: RecoveryCart) => {
   const metadata = cart.metadata || {}
   if (metadata.abandoned_cart_recovery_sent_at) return false
   if (metadata.abandoned_cart_recovery_suppressed_at) return false
+  if (metadata.abandoned_cart_recovery_ordered_at) return false
 
   const updatedAt = cart.updated_at ? new Date(cart.updated_at).getTime() : 0
   if (!Number.isFinite(updatedAt)) return false
@@ -95,6 +97,32 @@ const recoveryUrls = (email: string, cartId: string) => {
   }
 }
 
+const hasOrderSinceCartUpdate = async (
+  orderModuleService: IOrderModuleService,
+  email: string,
+  cart: RecoveryCart
+) => {
+  const updatedAt = cart.updated_at ? new Date(cart.updated_at) : null
+  if (!updatedAt || Number.isNaN(updatedAt.getTime())) {
+    return false
+  }
+
+  const orders = await orderModuleService.listOrders(
+    {
+      email,
+      created_at: {
+        $gte: updatedAt.toISOString(),
+      },
+    } as never,
+    {
+      take: 1,
+      select: ["id", "created_at", "email"],
+    }
+  )
+
+  return orders.length > 0
+}
+
 export default async function abandonedCartRecovery(container: MedusaContainer) {
   if (process.env.ABANDONED_CART_RECOVERY_ENABLED === "0") {
     console.log("[abandoned-cart-recovery] Disabled by env")
@@ -102,6 +130,7 @@ export default async function abandonedCartRecovery(container: MedusaContainer) 
   }
 
   const cartModuleService: ICartModuleService = container.resolve(Modules.CART)
+  const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
   const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
 
   const now = new Date()
@@ -138,6 +167,16 @@ export default async function abandonedCartRecovery(container: MedusaContainer) 
   for (const cart of candidates) {
     const email = normalizeMarketingEmail(cart.email || "")
     if (!email) continue
+
+    if (await hasOrderSinceCartUpdate(orderModuleService, email, cart)) {
+      await cartModuleService.updateCarts(cart.id, {
+        metadata: {
+          ...(cart.metadata || {}),
+          abandoned_cart_recovery_ordered_at: now.toISOString(),
+        },
+      })
+      continue
+    }
 
     if (await isMarketingSuppressed(email)) {
       await cartModuleService.updateCarts(cart.id, {
