@@ -1,7 +1,7 @@
 import { Text, Section, Hr, Link, Html, Head, Preview, Body, Container, Row, Column } from '@react-email/components'
 import * as React from 'react'
 import { OrderDTO, OrderAddressDTO } from '@medusajs/framework/types'
-import { DabPalEmailLogo } from './brand'
+import { DabPalEmailLogo, DabPalProductImage } from './brand'
 
 export const ORDER_PLACED = 'order-placed'
 
@@ -33,6 +33,7 @@ const S = {
   value: { fontSize: '14px', color: '#18181b', margin: '0 0 20px' },
   hr: { borderColor: '#e4e4e7', margin: '20px 0' },
   itemRow: { padding: '12px 0', borderBottom: '1px solid #f4f4f5' },
+  itemPhotoCol: { width: '72px', verticalAlign: 'top' },
   itemName: { fontSize: '14px', color: '#18181b', margin: '0 0 2px', fontWeight: '500' },
   itemMeta: { fontSize: '13px', color: '#71717a', margin: '0' },
   itemPrice: { fontSize: '14px', color: '#18181b', fontWeight: '500', textAlign: 'right' as const },
@@ -81,6 +82,9 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
               const cleanTitle = variantTitle.replace(' / ', ', ')
               return (
                 <Row key={item.id} style={S.itemRow}>
+                  <Column style={S.itemPhotoCol}>
+                    <DabPalProductImage variantTitle={variantTitle} />
+                  </Column>
                   <Column>
                     <Text style={S.itemName}>Dab Pal</Text>
                     <Text style={S.itemMeta}>{cleanTitle} &times; {item.quantity}</Text>

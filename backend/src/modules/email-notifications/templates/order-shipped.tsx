@@ -1,7 +1,7 @@
 import { Text, Section, Hr, Link, Html, Head, Preview, Body, Container, Row, Column, Button } from '@react-email/components'
 import * as React from 'react'
 import { OrderDTO, OrderAddressDTO } from '@medusajs/framework/types'
-import { DabPalEmailLogo } from './brand'
+import { DabPalEmailLogo, DabPalProductImage } from './brand'
 
 export const ORDER_SHIPPED = 'order-shipped'
 
@@ -30,6 +30,7 @@ const S = {
   value: { fontSize: '14px', color: '#18181b', margin: '0 0 20px' },
   hr: { borderColor: '#e4e4e7', margin: '20px 0' },
   trackingBox: { backgroundColor: '#fef3c7', borderRadius: '8px', padding: '16px 20px', margin: '0 0 24px' },
+  productShot: { margin: '0 auto 24px', textAlign: 'center' as const },
   trackingLabel: { fontSize: '11px', fontWeight: '600', color: '#92400e', letterSpacing: '0.08em', textTransform: 'uppercase' as const, margin: '0 0 4px' },
   trackingNumber: { fontSize: '16px', fontWeight: '700', color: '#18181b', margin: '0 0 12px', letterSpacing: '0.02em' },
   ctaButton: { backgroundColor: '#f59e0b', borderRadius: '8px', color: '#18181b', fontSize: '14px', fontWeight: '600', padding: '12px 24px', textDecoration: 'none', display: 'inline-block' },
@@ -71,6 +72,9 @@ export const OrderShippedTemplate: React.FC<OrderShippedTemplateProps> & {
             <Text style={S.subtitle}>
               Tiny kit, big cleanup energy. Track it below.
             </Text>
+            <Section style={S.productShot}>
+              <DabPalProductImage size={128} />
+            </Section>
 
             {/* Tracking box */}
             <Section style={S.trackingBox}>

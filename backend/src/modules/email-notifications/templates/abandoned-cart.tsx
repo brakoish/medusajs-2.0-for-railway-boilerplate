@@ -13,7 +13,7 @@ import {
   Text,
 } from "@react-email/components"
 import * as React from "react"
-import { DabPalEmailLogo } from "./brand"
+import { DabPalEmailLogo, DabPalProductImage } from "./brand"
 
 export const ABANDONED_CART = "abandoned-cart"
 
@@ -125,6 +125,10 @@ const S = {
     borderBottom: "1px solid #e4e4e7",
     padding: "14px 0",
   },
+  itemPhotoCol: {
+    verticalAlign: "top",
+    width: "72px",
+  },
   itemName: {
     color: "#18181b",
     fontSize: "14px",
@@ -222,6 +226,9 @@ export const AbandonedCartTemplate: React.FC<AbandonedCartTemplateProps> & {
                       borderBottom: isLast ? "0" : S.itemRow.borderBottom,
                     }}
                   >
+                    <Column style={S.itemPhotoCol}>
+                      <DabPalProductImage variantTitle={item.variant_title || item.title} />
+                    </Column>
                     <Column>
                       <Text style={S.itemName}>Dab Pal</Text>
                       <Text style={S.itemMeta}>
