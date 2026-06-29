@@ -87,7 +87,10 @@ const recoveryUrls = (email: string, cartId: string) => {
   const params = new URLSearchParams({ email: normalized, token })
 
   return {
-    cartUrl: `${storefrontUrl()}/checkout?cart_id=${encodeURIComponent(cartId)}`,
+    cartUrl: `${storefrontUrl()}/checkout?${new URLSearchParams({
+      cart_id: cartId,
+      promo_code: ABANDONED_CART_PROMO_CODE,
+    }).toString()}`,
     unsubscribeUrl: `${backendUrl()}/marketing/unsubscribe?${params.toString()}`,
   }
 }
