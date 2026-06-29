@@ -28,7 +28,9 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
     )
 
     await applyPromotions(
-      validPromotions.filter((p) => p.code === undefined).map((p) => p.code!)
+      validPromotions
+        .filter((p) => p.code !== undefined)
+        .map((p) => p.code!)
     )
   }
 
