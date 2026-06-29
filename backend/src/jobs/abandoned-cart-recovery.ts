@@ -15,6 +15,7 @@ import {
   ABANDONED_CART_PROMO_CODE,
   ABANDONED_CART_PROMO_PERCENT,
 } from "../lib/abandoned-cart-offer"
+import { getEmailConfig } from "../lib/email-config"
 
 type RecoveryCartItem = {
   id?: string
@@ -163,6 +164,7 @@ export default async function abandonedCartRecovery(container: MedusaContainer) 
     return
   }
 
+  const emailConfig = await getEmailConfig(EmailTemplates.ABANDONED_CART)
   let sent = 0
   for (const cart of candidates) {
     const email = normalizeMarketingEmail(cart.email || "")
@@ -198,7 +200,7 @@ export default async function abandonedCartRecovery(container: MedusaContainer) 
       data: {
         emailOptions: {
           replyTo: "hello@thedabpal.com",
-          subject: "Your Dab Pal is still waiting",
+          subject: emailConfig.subject,
           tags: [
             { name: "campaign", value: "abandoned-cart" },
             { name: "cart_id", value: cart.id },
@@ -212,7 +214,7 @@ export default async function abandonedCartRecovery(container: MedusaContainer) 
         currencyCode: cart.currency_code || "usd",
         discountCode: ABANDONED_CART_PROMO_CODE,
         discountPercent: ABANDONED_CART_PROMO_PERCENT,
-        preview: "Your cart saved the cleanup kit.",
+        preview: emailConfig.preview,
       },
     })
 

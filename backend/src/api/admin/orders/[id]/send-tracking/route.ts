@@ -5,6 +5,7 @@ import {
 } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { EmailTemplates } from "../../../../../modules/email-notifications/templates"
+import { getEmailConfig } from "../../../../../lib/email-config"
 
 type SendTrackingBody = {
   fulfillment_id?: string
@@ -114,6 +115,7 @@ export async function POST(
   const notificationModuleService: INotificationModuleService = req.scope.resolve(
     Modules.NOTIFICATION
   )
+  const emailConfig = await getEmailConfig(EmailTemplates.ORDER_SHIPPED)
 
   await notificationModuleService.createNotifications({
     to: order.email,
@@ -122,14 +124,14 @@ export async function POST(
     data: {
       emailOptions: {
         replyTo: "hello@thedabpal.com",
-        subject: "Your Dab Pal is out the door",
+        subject: emailConfig.subject,
       },
       order,
       shippingAddress: order.shipping_address,
       trackingNumber,
       trackingUrl,
       carrier,
-      preview: `Your Dab Pal is out the door, ${order.shipping_address.first_name || "there"}.`,
+      preview: emailConfig.preview,
     },
   })
 

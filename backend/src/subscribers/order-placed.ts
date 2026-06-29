@@ -2,6 +2,7 @@ import { Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService, IOrderModuleService } from '@medusajs/framework/types'
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates } from '../modules/email-notifications/templates'
+import { getEmailConfig } from '../lib/email-config'
 
 export default async function orderPlacedHandler({
   event: { data },
@@ -14,6 +15,7 @@ export default async function orderPlacedHandler({
   const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(order.shipping_address.id)
 
   try {
+    const emailConfig = await getEmailConfig(EmailTemplates.ORDER_PLACED)
     await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
@@ -21,12 +23,12 @@ export default async function orderPlacedHandler({
       data: {
         emailOptions: {
           replyTo: 'hello@thedabpal.com',
-          subject: 'Your Dab Pal is locked in',
+          subject: emailConfig.subject,
           bcc: 'willbrako@gmail.com'
         },
         order,
         shippingAddress,
-        preview: 'Nice. Your Dab Pal is locked in and ships from Brooklyn soon.'
+        preview: emailConfig.preview
       }
     })
   } catch (error) {

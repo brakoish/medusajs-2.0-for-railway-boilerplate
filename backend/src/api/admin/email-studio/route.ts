@@ -1,6 +1,13 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { INotificationModuleService } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
+import { renderToStaticMarkup } from "react-dom/server"
+import { generateEmailTemplate } from "../../../modules/email-notifications/templates"
+import {
+  getEmailConfig,
+  listEmailConfigs,
+  updateEmailConfig,
+} from "../../../lib/email-config"
 import { emailLogStats, listEmailLogs } from "../../../lib/email-log"
 import {
   AbandonedCartTemplate,
@@ -18,7 +25,18 @@ type TestSendBody = {
   to?: string
 }
 
+type UpdateConfigBody = {
+  template?: string
+  subject?: string
+  preview?: string
+}
+
 const PREVIEW_TO = "willbrako@gmail.com"
+const EDITABLE_TEMPLATES: string[] = [
+  EmailTemplates.ORDER_PLACED,
+  EmailTemplates.ORDER_SHIPPED,
+  EmailTemplates.ABANDONED_CART,
+]
 
 const flowDefinitions = () => [
   {
@@ -29,7 +47,7 @@ const flowDefinitions = () => [
     trigger: "Order placed",
     timing: "Immediately",
     status: "Live",
-    editable: "Code review",
+    editable: "Subject + preview",
     strategy: "Confirm the order, show the exact kit, reinforce made-in-Brooklyn trust.",
   },
   {
@@ -40,7 +58,7 @@ const flowDefinitions = () => [
     trigger: "Fulfillment has tracking",
     timing: "Immediately, plus manual resend in order admin",
     status: "Live",
-    editable: "Code review",
+    editable: "Subject + preview",
     strategy: "Make tracking obvious and keep support paths simple.",
   },
   {
@@ -51,7 +69,7 @@ const flowDefinitions = () => [
     trigger: "Cart has email + items, no order, not unsubscribed",
     timing: `${process.env.ABANDONED_CART_RECOVERY_MIN_AGE_MINUTES || 60} minutes`,
     status: process.env.ABANDONED_CART_RECOVERY_ENABLED === "0" ? "Disabled" : "Live",
-    editable: "Env + code review",
+    editable: "Subject + preview",
     strategy: `${ABANDONED_CART_PROMO_CODE} gives ${ABANDONED_CART_PROMO_PERCENT}% off. Button restores cart and applies code.`,
   },
   {
@@ -116,7 +134,7 @@ const previewData = (template: string) => {
   switch (template) {
     case EmailTemplates.ORDER_PLACED:
       return {
-        subject: "[Dab Pal preview] Order confirmation",
+        defaultSubject: "[Dab Pal preview] Order confirmation",
         data: {
           ...OrderPlacedTemplate.PreviewProps,
           emailOptions: {
@@ -128,7 +146,7 @@ const previewData = (template: string) => {
       }
     case EmailTemplates.ORDER_SHIPPED:
       return {
-        subject: "[Dab Pal preview] Shipping confirmation",
+        defaultSubject: "[Dab Pal preview] Shipping confirmation",
         data: {
           ...OrderShippedTemplate.PreviewProps,
           emailOptions: {
@@ -140,7 +158,7 @@ const previewData = (template: string) => {
       }
     case EmailTemplates.ABANDONED_CART:
       return {
-        subject: "[Dab Pal preview] Abandoned cart",
+        defaultSubject: "[Dab Pal preview] Abandoned cart",
         data: {
           ...AbandonedCartTemplate.PreviewProps,
           emailOptions: {
@@ -155,18 +173,64 @@ const previewData = (template: string) => {
   }
 }
 
+const previewPayload = async (template: string) => {
+  const preview = previewData(template)
+  if (!preview) return null
+
+  const emailConfig = await getEmailConfig(template)
+  const data = {
+    ...preview.data,
+    preview: emailConfig.preview,
+    emailOptions: {
+      ...(preview.data.emailOptions || {}),
+      subject: emailConfig.subject,
+    },
+  }
+  const markup = renderToStaticMarkup(generateEmailTemplate(template, data))
+
+  return {
+    template,
+    subject: emailConfig.subject,
+    preview: emailConfig.preview,
+    html: `<!doctype html>${markup}`,
+  }
+}
+
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const [logs, stats] = await Promise.all([
+  const [logs, stats, configs, previews] = await Promise.all([
     listEmailLogs(50).catch(() => []),
     emailLogStats().catch(() => []),
+    listEmailConfigs(EDITABLE_TEMPLATES).catch(() => []),
+    Promise.all(EDITABLE_TEMPLATES.map((template) => previewPayload(template))).catch(() => []),
   ])
 
   res.json({
     flows: flowDefinitions(),
     logs,
     stats,
+    configs,
+    previews: previews.filter(Boolean),
     recommendations,
   })
+}
+
+export async function PUT(req: MedusaRequest, res: MedusaResponse) {
+  const body = (req.body || {}) as UpdateConfigBody
+  const template = body.template || ""
+
+  if (!EDITABLE_TEMPLATES.includes(template)) {
+    res.status(400).json({ error: "This email template is not editable in admin." })
+    return
+  }
+
+  const config = await updateEmailConfig({
+    template,
+    subject: body.subject || "",
+    preview: body.preview || "",
+  })
+  const preview = await previewPayload(template)
+
+  res.json({ ok: true, config, preview })
 }
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
@@ -181,12 +245,20 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   const notificationModuleService: INotificationModuleService = req.scope.resolve(Modules.NOTIFICATION)
   const to = body.to?.trim() || PREVIEW_TO
+  const emailConfig = await getEmailConfig(template)
 
   await notificationModuleService.createNotifications({
     to,
     channel: "email",
     template,
-    data: preview.data,
+    data: {
+      ...preview.data,
+      preview: emailConfig.preview,
+      emailOptions: {
+        ...(preview.data.emailOptions || {}),
+        subject: `[Dab Pal preview] ${emailConfig.subject}`,
+      },
+    },
   })
 
   res.json({ ok: true, template, to })

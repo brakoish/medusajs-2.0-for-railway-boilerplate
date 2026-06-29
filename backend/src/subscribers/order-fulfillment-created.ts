@@ -2,6 +2,7 @@ import { Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService, IOrderModuleService, IFulfillmentModuleService } from '@medusajs/framework/types'
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates } from '../modules/email-notifications/templates'
+import { getEmailConfig } from '../lib/email-config'
 
 export default async function orderFulfillmentCreatedHandler({
   event: { data },
@@ -50,6 +51,7 @@ export default async function orderFulfillmentCreatedHandler({
       return
     }
 
+    const emailConfig = await getEmailConfig(EmailTemplates.ORDER_SHIPPED)
     await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
@@ -57,14 +59,14 @@ export default async function orderFulfillmentCreatedHandler({
       data: {
         emailOptions: {
           replyTo: 'hello@thedabpal.com',
-          subject: 'Your Dab Pal is out the door',
+          subject: emailConfig.subject,
         },
         order,
         shippingAddress,
         trackingNumber,
         trackingUrl,
         carrier,
-        preview: `Your Dab Pal is out the door, ${shippingAddress.first_name || 'there'}.`,
+        preview: emailConfig.preview,
       },
     })
 

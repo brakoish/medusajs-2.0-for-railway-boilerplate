@@ -49,12 +49,30 @@ type Recommendation = {
   note: string
 }
 
+type EmailConfig = {
+  template: string
+  subject: string
+  preview: string
+  updated_at: string
+}
+
+type EmailPreview = {
+  template: string
+  subject: string
+  preview: string
+  html: string
+}
+
 type EmailStudioData = {
   flows: Flow[]
   logs: EmailLog[]
   stats: Stat[]
+  configs: EmailConfig[]
+  previews: EmailPreview[]
   recommendations: Recommendation[]
 }
+
+type Drafts = Record<string, { subject: string; preview: string }>
 
 const S: Record<string, React.CSSProperties> = {
   page: {
@@ -164,6 +182,42 @@ const S: Record<string, React.CSSProperties> = {
     opacity: 0.5,
     cursor: "not-allowed",
   },
+  field: {
+    width: "100%",
+    border: "1px solid #d1d5db",
+    borderRadius: 7,
+    padding: "9px 10px",
+    fontSize: 13,
+    color: "#111827",
+    outline: "none",
+    boxSizing: "border-box",
+  },
+  textarea: {
+    width: "100%",
+    minHeight: 74,
+    resize: "vertical",
+    border: "1px solid #d1d5db",
+    borderRadius: 7,
+    padding: "9px 10px",
+    fontSize: 13,
+    color: "#111827",
+    outline: "none",
+    boxSizing: "border-box",
+    fontFamily: "Inter, sans-serif",
+  },
+  previewShell: {
+    background: "#f4f4f5",
+    border: "1px solid #e5e7eb",
+    borderRadius: 8,
+    overflow: "hidden",
+    height: 620,
+  },
+  iframe: {
+    width: "100%",
+    height: "100%",
+    border: 0,
+    background: "#f4f4f5",
+  },
   table: { width: "100%", borderCollapse: "collapse" },
   th: {
     padding: "10px 14px",
@@ -193,6 +247,7 @@ const S: Record<string, React.CSSProperties> = {
 }
 
 const previewable = new Set(["order-placed", "order-shipped", "abandoned-cart"])
+const editableTemplates = ["order-placed", "order-shipped", "abandoned-cart"]
 
 const fmtDate = (value?: string | null) => {
   if (!value) return "Never"
@@ -223,7 +278,10 @@ export default function EmailStudioPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [sending, setSending] = useState<string | null>(null)
+  const [saving, setSaving] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const [selectedTemplate, setSelectedTemplate] = useState("order-placed")
+  const [drafts, setDrafts] = useState<Drafts>({})
 
   const load = () => {
     setLoading(true)
@@ -245,6 +303,18 @@ export default function EmailStudioPage() {
   useEffect(() => {
     load()
   }, [])
+
+  useEffect(() => {
+    if (!data?.configs) return
+    const nextDrafts: Drafts = {}
+    for (const config of data.configs) {
+      nextDrafts[config.template] = {
+        subject: config.subject,
+        preview: config.preview,
+      }
+    }
+    setDrafts(nextDrafts)
+  }, [data?.configs])
 
   const statsByTemplate = useMemo(() => {
     const byTemplate = new Map<string, { sent: number; failed: number; last: string | null }>()
@@ -285,6 +355,54 @@ export default function EmailStudioPage() {
         setNotice(sendError instanceof Error ? sendError.message : "Preview failed")
       })
       .finally(() => setSending(null))
+  }
+
+  const saveConfig = (template: string) => {
+    const draft = drafts[template]
+    if (!draft) return
+
+    setSaving(template)
+    setNotice(null)
+    fetch("/admin/email-studio", {
+      method: "PUT",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ template, ...draft }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then((payload) => {
+            throw new Error(payload.error || `Save failed (${response.status})`)
+          })
+        }
+        return response.json()
+      })
+      .then(() => {
+        setNotice(`Saved ${template}`)
+        load()
+      })
+      .catch((saveError) => {
+        setNotice(saveError instanceof Error ? saveError.message : "Save failed")
+      })
+      .finally(() => setSaving(null))
+  }
+
+  const setDraftValue = (template: string, field: "subject" | "preview", value: string) => {
+    setDrafts((current) => ({
+      ...current,
+      [template]: {
+        subject: current[template]?.subject || "",
+        preview: current[template]?.preview || "",
+        [field]: value,
+      },
+    }))
+  }
+
+  const selectedFlow = data?.flows.find((flow) => flow.template === selectedTemplate)
+  const selectedPreview = data?.previews.find((preview) => preview.template === selectedTemplate)
+  const selectedDraft = drafts[selectedTemplate] || {
+    subject: selectedPreview?.subject || "",
+    preview: selectedPreview?.preview || "",
   }
 
   if (loading && !data) {
@@ -370,6 +488,89 @@ export default function EmailStudioPage() {
             </div>
           )
         })}
+      </section>
+
+      <section style={S.panel}>
+        <div style={S.panelHead}>
+          <div>
+            <h2 style={S.panelTitle}>Preview + Editable Fields</h2>
+            <p style={S.panelSub}>Subject and inbox preview text are live-editable. Body/layout stays code-reviewed.</p>
+          </div>
+          <select
+            style={{ ...S.field, width: 220 }}
+            value={selectedTemplate}
+            onChange={(event) => setSelectedTemplate(event.target.value)}
+          >
+            {editableTemplates.map((template) => {
+              const flow = data?.flows.find((item) => item.template === template)
+              return (
+                <option key={template} value={template}>
+                  {flow?.name || template}
+                </option>
+              )
+            })}
+          </select>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 18, padding: 18 }}>
+          <div>
+            <div style={S.label}>Template</div>
+            <p style={{ ...S.text, fontWeight: 700 }}>{selectedFlow?.name || selectedTemplate}</p>
+            <p style={{ ...S.meta, marginBottom: 14 }}>{selectedFlow?.trigger}</p>
+
+            <label>
+              <div style={S.label}>Subject</div>
+              <input
+                style={S.field}
+                maxLength={120}
+                value={selectedDraft.subject}
+                onChange={(event) => setDraftValue(selectedTemplate, "subject", event.target.value)}
+              />
+            </label>
+
+            <label>
+              <div style={S.label}>Inbox Preview</div>
+              <textarea
+                style={S.textarea}
+                maxLength={160}
+                value={selectedDraft.preview}
+                onChange={(event) => setDraftValue(selectedTemplate, "preview", event.target.value)}
+              />
+            </label>
+
+            <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
+              <button
+                style={{ ...S.btn, ...S.btnAmber }}
+                onClick={() => saveConfig(selectedTemplate)}
+                disabled={saving === selectedTemplate}
+              >
+                {saving === selectedTemplate ? "Saving..." : "Save fields"}
+              </button>
+              <button
+                style={S.btn}
+                onClick={() => sendPreview(selectedTemplate)}
+                disabled={sending === selectedTemplate}
+              >
+                {sending === selectedTemplate ? "Sending..." : "Send preview to Will"}
+              </button>
+            </div>
+
+            <div style={{ marginTop: 16 }}>
+              <div style={S.label}>Preview Note</div>
+              <p style={S.text}>
+                Save first to refresh the rendered preview and make the fields live for future sends.
+              </p>
+            </div>
+          </div>
+
+          <div style={S.previewShell}>
+            {selectedPreview?.html ? (
+              <iframe title={`${selectedTemplate} preview`} style={S.iframe} srcDoc={selectedPreview.html} />
+            ) : (
+              <div style={{ padding: 20, color: "#6b7280" }}>No preview available.</div>
+            )}
+          </div>
+        </div>
       </section>
 
       <section style={S.panel}>
