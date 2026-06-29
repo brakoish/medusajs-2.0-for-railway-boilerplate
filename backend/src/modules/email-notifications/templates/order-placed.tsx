@@ -48,7 +48,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
 } = ({ order, shippingAddress, preview }) => {
   const firstName = shippingAddress.first_name || 'there'
   const total = order.summary?.raw_current_order_total?.value ?? 0
-  const previewText = preview || `Your order is confirmed, ${firstName}. Ships in 2-3 business days.`
+  const previewText = preview || `Nice. Your Dab Pal is locked in and ships from Brooklyn soon.`
 
   return (
     <Html>
@@ -64,17 +64,17 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
 
           {/* Body */}
           <Section style={S.body_pad}>
-            <Text style={S.h1}>Order confirmed</Text>
-            <Text style={S.subtitle}>Thanks, {firstName}. We got it.</Text>
+            <Text style={S.h1}>Your Dab Pal is locked in</Text>
+            <Text style={S.subtitle}>Good choice, {firstName}. Future you just got a cleaner table.</Text>
 
-            <Text style={S.badge}>Ships in 2-3 business days from Brooklyn, NY</Text>
+            <Text style={S.badge}>Made in Brooklyn. Ships in 2-3 business days.</Text>
 
             {/* Order info */}
             <Text style={S.label}>Order</Text>
             <Text style={S.value}>#{order.display_id}</Text>
 
             {/* Items */}
-            <Text style={S.label}>What you ordered</Text>
+            <Text style={S.label}>Your kit</Text>
             {(order.items || []).map((item) => {
               const variantTitle = (item as any).variant_title || item.title || ''
               // Clean up "Single / Black Speck" → "Single, Black Speck"
@@ -107,7 +107,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
 
           {/* Footer */}
           <Section style={S.footer}>
-            <Text style={S.footerText}>Questions? DM us on Instagram</Text>
+            <Text style={S.footerText}>Need anything? DM us on Instagram</Text>
             <Text style={{ ...S.footerText, margin: '0 0 8px' }}>
               <Link href="https://instagram.com/nslabs_" style={S.link}>@nslabs_</Link>
             </Text>

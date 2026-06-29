@@ -57,14 +57,14 @@ export default async function orderFulfillmentCreatedHandler({
       data: {
         emailOptions: {
           replyTo: 'hello@thedabpal.com',
-          subject: 'Your Dab Pal shipped',
+          subject: 'Your Dab Pal is out the door',
         },
         order,
         shippingAddress,
         trackingNumber,
         trackingUrl,
         carrier,
-        preview: `Your Dab Pal is on its way, ${shippingAddress.first_name || 'there'}.`,
+        preview: `Your Dab Pal is out the door, ${shippingAddress.first_name || 'there'}.`,
       },
     })
 

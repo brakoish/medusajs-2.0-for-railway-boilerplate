@@ -152,7 +152,7 @@ export default async function abandonedCartRecovery(container: MedusaContainer) 
       data: {
         emailOptions: {
           replyTo: "hello@thedabpal.com",
-          subject: "Still thinking it over?",
+          subject: "Your Dab Pal is still waiting",
           tags: [
             { name: "campaign", value: "abandoned-cart" },
             { name: "cart_id", value: cart.id },
@@ -164,7 +164,7 @@ export default async function abandonedCartRecovery(container: MedusaContainer) 
         items: cart.items || [],
         subtotal: amountValue(cart.item_subtotal),
         currencyCode: cart.currency_code || "usd",
-        preview: "Your Dab Pal is still saved.",
+        preview: "Your cart saved the cleanup kit.",
       },
     })
 

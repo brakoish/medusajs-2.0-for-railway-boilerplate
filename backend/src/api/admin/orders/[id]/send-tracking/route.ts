@@ -122,14 +122,14 @@ export async function POST(
     data: {
       emailOptions: {
         replyTo: "hello@thedabpal.com",
-        subject: "Your Dab Pal shipped",
+        subject: "Your Dab Pal is out the door",
       },
       order,
       shippingAddress: order.shipping_address,
       trackingNumber,
       trackingUrl,
       carrier,
-      preview: `Your Dab Pal is on its way, ${order.shipping_address.first_name || "there"}.`,
+      preview: `Your Dab Pal is out the door, ${order.shipping_address.first_name || "there"}.`,
     },
   })
 

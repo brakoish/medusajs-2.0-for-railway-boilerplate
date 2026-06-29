@@ -49,7 +49,7 @@ export const OrderShippedTemplate: React.FC<OrderShippedTemplateProps> & {
   preview,
 }) => {
   const firstName = shippingAddress.first_name || 'there'
-  const previewText = preview || `Your Dab Pal is on its way, ${firstName}.`
+  const previewText = preview || `Your Dab Pal is out the door, ${firstName}.`
   const uspsTrackingUrl = trackingUrl || `https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}`
   const carrierLabel = carrier ? carrier.toUpperCase() : 'USPS'
 
@@ -67,9 +67,9 @@ export const OrderShippedTemplate: React.FC<OrderShippedTemplateProps> & {
 
           {/* Body */}
           <Section style={S.body_pad}>
-            <Text style={S.h1}>Your order shipped</Text>
+            <Text style={S.h1}>Your Dab Pal is out the door</Text>
             <Text style={S.subtitle}>
-              It's on its way, {firstName}. Should arrive in a few days.
+              Tiny kit, big cleanup energy. Track it below.
             </Text>
 
             {/* Tracking box */}
@@ -78,7 +78,7 @@ export const OrderShippedTemplate: React.FC<OrderShippedTemplateProps> & {
               <Text style={S.trackingNumber}>{trackingNumber}</Text>
               {trackingUrl && (
                 <Link href={uspsTrackingUrl} style={S.ctaButton}>
-                  Track your package
+                  Track it
                 </Link>
               )}
             </Section>
@@ -100,7 +100,7 @@ export const OrderShippedTemplate: React.FC<OrderShippedTemplateProps> & {
 
           {/* Footer */}
           <Section style={S.footer}>
-            <Text style={S.footerText}>Questions? DM us on Instagram</Text>
+            <Text style={S.footerText}>Need anything? DM us on Instagram</Text>
             <Text style={{ ...S.footerText, margin: '0 0 8px' }}>
               <Link href="https://instagram.com/nslabs_" style={S.link}>@nslabs_</Link>
             </Text>
@@ -132,7 +132,7 @@ OrderShippedTemplate.PreviewProps = {
   trackingNumber: '9400111899560012345678',
   trackingUrl: 'https://tools.usps.com/go/TrackConfirmAction?tLabels=9400111899560012345678',
   carrier: 'USPS',
-  preview: 'Your Dab Pal is on its way.',
+  preview: 'Your Dab Pal is out the door.',
 }
 
 export default OrderShippedTemplate

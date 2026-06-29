@@ -21,12 +21,12 @@ export default async function orderPlacedHandler({
       data: {
         emailOptions: {
           replyTo: 'hello@thedabpal.com',
-          subject: 'Your order has been placed',
+          subject: 'Your Dab Pal is locked in',
           bcc: 'willbrako@gmail.com'
         },
         order,
         shippingAddress,
-        preview: 'Thank you for your order!'
+        preview: 'Nice. Your Dab Pal is locked in and ships from Brooklyn soon.'
       }
     })
   } catch (error) {

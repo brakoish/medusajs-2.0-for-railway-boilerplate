@@ -184,8 +184,8 @@ export const AbandonedCartTemplate: React.FC<AbandonedCartTemplateProps> & {
   currencyCode = "usd",
   preview,
 }) => {
-  const greeting = firstName ? `${firstName}, your Dab Pal is waiting.` : "Your Dab Pal is waiting."
-  const previewText = preview || "Pick up where you left off."
+  const greeting = firstName ? `${firstName}, future you wants this.` : "Future you wants this."
+  const previewText = preview || "Your cart saved the cleanup kit."
 
   return (
     <Html>
@@ -201,11 +201,11 @@ export const AbandonedCartTemplate: React.FC<AbandonedCartTemplateProps> & {
             <Text style={S.eyebrow}>Still in your cart</Text>
             <Text style={S.h1}>{greeting}</Text>
             <Text style={S.subtitle}>
-              The little travel kit for keeping your glass, banger, or Puffco clean is still saved for you.
+              One pocket-size kit, clean swabs on one side, used swabs on the other, and no more digging around when the rig needs a reset.
             </Text>
 
             <Button href={cartUrl} style={S.ctaButton}>
-              Return to cart
+              Finish checkout
             </Button>
 
             <Section style={S.itemWrap}>
@@ -240,12 +240,12 @@ export const AbandonedCartTemplate: React.FC<AbandonedCartTemplateProps> & {
 
             <Hr style={{ borderColor: "#e4e4e7", margin: "24px 0 0" }} />
             <Text style={S.note}>
-              Made in Brooklyn. Ships in 2-3 business days.
+              Made in Brooklyn. Ships in 2-3 business days. Your next cleanup does not have to be a whole thing.
             </Text>
           </Section>
 
           <Section style={S.footer}>
-            <Text style={S.footerText}>Questions? DM us on Instagram</Text>
+            <Text style={S.footerText}>Need anything? DM us on Instagram</Text>
             <Text style={S.footerText}>
               <Link href="https://instagram.com/nslabs_" style={S.link}>@nslabs_</Link>
               {" · "}
@@ -277,7 +277,7 @@ AbandonedCartTemplate.PreviewProps = {
       unit_price: 25,
     },
   ],
-  preview: "Pick up where you left off.",
+  preview: "Your cart saved the cleanup kit.",
 }
 
 export default AbandonedCartTemplate
