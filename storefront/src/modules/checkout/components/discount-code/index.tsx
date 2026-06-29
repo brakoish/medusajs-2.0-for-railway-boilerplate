@@ -5,6 +5,7 @@ import React from "react"
 import { useFormState } from "react-dom"
 
 import { applyPromotions, submitPromotionForm } from "@lib/data/cart"
+import { HIDDEN_PROMOTION_CODES } from "@lib/util/promotion-codes"
 import { convertToLocale } from "@lib/util/money"
 import { InformationCircleSolid } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
@@ -22,8 +23,12 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
   const [isOpen, setIsOpen] = React.useState(false)
 
   const { items = [], promotions = [] } = cart
+  const visiblePromotions = promotions.filter(
+    (promotion) =>
+      !promotion.code || !HIDDEN_PROMOTION_CODES.includes(promotion.code)
+  )
   const removePromotionCode = async (code: string) => {
-    const validPromotions = promotions.filter(
+    const validPromotions = visiblePromotions.filter(
       (promotion) => promotion.code !== code
     )
 
@@ -45,7 +50,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
     // Medusa, so normalize to upper-case to match the typical
     // ALL-CAPS convention; if a merchant deliberately created a
     // mixed-case code they can swap this for a different normalization.
-    const codes = promotions
+    const codes = visiblePromotions
       .filter((p) => p.code !== undefined)
       .map((p) => p.code!)
     codes.push(code.toString().trim().toUpperCase())
@@ -105,14 +110,14 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
           )}
         </form>
 
-        {promotions.length > 0 && (
+        {visiblePromotions.length > 0 && (
           <div className="w-full flex items-center">
             <div className="flex flex-col w-full">
               <Heading className="txt-medium mb-2">
                 Promotion(s) applied:
               </Heading>
 
-              {promotions.map((promotion) => {
+              {visiblePromotions.map((promotion) => {
                 return (
                   <div
                     key={promotion.id}

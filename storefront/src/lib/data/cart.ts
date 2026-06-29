@@ -9,6 +9,7 @@ import { redirect } from "next/navigation"
 import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
 import { getProductsById } from "./products"
 import { getRegion } from "./regions"
+import { expandPromotionCodes } from "@lib/util/promotion-codes"
 
 export async function retrieveCartById(cartId: string) {
   return await sdk.store.cart
@@ -373,7 +374,7 @@ export async function applyPromotions(codes: string[]) {
     throw new Error("No existing cart found")
   }
 
-  await updateCart({ promo_codes: codes })
+  await updateCart({ promo_codes: expandPromotionCodes(codes) })
     .then(() => {
       revalidateTag("cart")
     })
