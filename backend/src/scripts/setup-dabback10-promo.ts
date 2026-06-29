@@ -27,6 +27,7 @@ export default async function setupDabback10Promo({ container }: ExecArgs) {
           target_type: "items" as const,
           allocation: "each" as const,
           value: ABANDONED_CART_PROMO_PERCENT,
+          max_quantity: 999,
         },
       },
     ])
