@@ -3,8 +3,26 @@ import { Modules } from "@medusajs/framework/utils"
 
 const PUBLIC_CODE = "DPSUPERFAM"
 const SHIPPING_CODE = "DPSUPERFAM-SHIP-6J9K"
-const PRODUCT_ID = "prod_01KQT97EZ14E8HKH75BNF6GQ61"
+const SINGLE_VARIANT_IDS = [
+  "variant_01KREB7MPCF6RAXSQEXACNQT7K",
+  "variant_01KREB21QZ5REXYNFVME6C22R2",
+]
 const LIMIT = 5
+
+function targetRuleIsCurrent(rule: {
+  attribute?: string
+  operator?: string
+  values?: { value?: string }[]
+}) {
+  const values = new Set(rule.values?.map((value) => value.value))
+
+  return (
+    rule.attribute === "items.variant_id" &&
+    rule.operator === "in" &&
+    SINGLE_VARIANT_IDS.every((variantId) => values.has(variantId)) &&
+    values.size === SINGLE_VARIANT_IDS.length
+  )
+}
 
 export default async function setupDPSuperfamPromo({ container }: ExecArgs) {
   const promotionService = container.resolve(Modules.PROMOTION)
@@ -32,9 +50,9 @@ export default async function setupDPSuperfamPromo({ container }: ExecArgs) {
         max_quantity: 1,
         target_rules: [
           {
-            attribute: "items.product.id",
-            operator: "eq" as const,
-            values: [PRODUCT_ID],
+            attribute: "items.variant_id",
+            operator: "in" as const,
+            values: SINGLE_VARIANT_IDS,
           },
         ],
       },
@@ -62,10 +80,39 @@ export default async function setupDPSuperfamPromo({ container }: ExecArgs) {
     await promotionService.createPromotions(promotionsData)
   }
 
-  const activePromotions = await promotionService.listPromotions(
+  let activePromotions = await promotionService.listPromotions(
     { code: [PUBLIC_CODE, SHIPPING_CODE] },
     { relations: ["application_method", "application_method.target_rules"] }
   )
+
+  const publicPromotion = activePromotions.find(
+    (promotion) => promotion.code === PUBLIC_CODE
+  )
+  const targetRules = publicPromotion?.application_method?.target_rules ?? []
+  if (
+    publicPromotion &&
+    (targetRules.length !== 1 || !targetRuleIsCurrent(targetRules[0]))
+  ) {
+    if (targetRules.length) {
+      await promotionService.removePromotionTargetRules(
+        publicPromotion.id,
+        targetRules.map((rule) => rule.id)
+      )
+    }
+
+    await promotionService.addPromotionTargetRules(publicPromotion.id, [
+      {
+        attribute: "items.variant_id",
+        operator: "in",
+        values: SINGLE_VARIANT_IDS,
+      },
+    ])
+
+    activePromotions = await promotionService.listPromotions(
+      { code: [PUBLIC_CODE, SHIPPING_CODE] },
+      { relations: ["application_method", "application_method.target_rules"] }
+    )
+  }
 
   for (const promotion of activePromotions) {
     console.log(
