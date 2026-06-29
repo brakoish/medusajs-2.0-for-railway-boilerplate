@@ -84,7 +84,7 @@ const recoveryUrls = (email: string, cartId: string) => {
 
   return {
     cartUrl: `${storefrontUrl()}/checkout?cart_id=${encodeURIComponent(cartId)}`,
-    unsubscribeUrl: `${backendUrl()}/store/marketing/unsubscribe?${params.toString()}`,
+    unsubscribeUrl: `${backendUrl()}/marketing/unsubscribe?${params.toString()}`,
   }
 }
 

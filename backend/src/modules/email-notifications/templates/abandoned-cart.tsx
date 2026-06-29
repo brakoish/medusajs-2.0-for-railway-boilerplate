@@ -272,7 +272,7 @@ export const AbandonedCartTemplate: React.FC<AbandonedCartTemplateProps> & {
 AbandonedCartTemplate.PreviewProps = {
   firstName: "Ashley",
   cartUrl: "https://thedabpal.com/checkout?cart_id=cart_123",
-  unsubscribeUrl: "https://backend-production-2b05.up.railway.app/store/marketing/unsubscribe?email=ashley@example.com&token=test",
+  unsubscribeUrl: "https://backend-production-2b05.up.railway.app/marketing/unsubscribe?email=ashley@example.com&token=test",
   currencyCode: "usd",
   subtotal: 25,
   items: [

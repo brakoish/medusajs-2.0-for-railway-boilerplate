@@ -3,7 +3,7 @@ import {
   normalizeMarketingEmail,
   suppressMarketingEmail,
   verifyMarketingToken,
-} from "../../../../lib/marketing-suppression"
+} from "../../../lib/marketing-suppression"
 
 const page = (title: string, body: string, ok = true) => `<!doctype html>
 <html lang="en">
