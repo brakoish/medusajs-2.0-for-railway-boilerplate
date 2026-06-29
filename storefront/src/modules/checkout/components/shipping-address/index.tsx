@@ -1,4 +1,5 @@
 import { HttpTypes } from "@medusajs/types"
+import { updateCartEmail } from "@lib/data/cart"
 import { Container } from "@medusajs/ui"
 import AddressAutocomplete from "@modules/checkout/components/address-autocomplete"
 import Checkbox from "@modules/common/components/checkbox"
@@ -82,6 +83,15 @@ const ShippingAddress = ({
     })
   }
 
+  const handleEmailBlur = () => {
+    const email = String(formData.email || "").trim()
+    if (!email) return
+
+    updateCartEmail(email).catch(() => {
+      /* email capture is best-effort and should not block checkout */
+    })
+  }
+
   // Auto-fill city + state from US zip via zippopotam.us (free, no key).
   // Quietly no-op on non-US or network errors so it never blocks checkout.
   const lookupZip = async (zip: string) => {
@@ -144,6 +154,7 @@ const ShippingAddress = ({
           autoComplete="email"
           value={formData.email}
           onChange={handleChange}
+          onBlur={handleEmailBlur}
           required
           data-testid="shipping-email-input"
         />

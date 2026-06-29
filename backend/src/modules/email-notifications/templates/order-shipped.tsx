@@ -38,7 +38,9 @@ const S = {
   link: { color: '#f59e0b', textDecoration: 'none' },
 }
 
-export const OrderShippedTemplate: React.FC<OrderShippedTemplateProps> = ({
+export const OrderShippedTemplate: React.FC<OrderShippedTemplateProps> & {
+  PreviewProps: OrderShippedTemplateProps
+} = ({
   order,
   shippingAddress,
   trackingNumber,
@@ -113,6 +115,24 @@ export const OrderShippedTemplate: React.FC<OrderShippedTemplateProps> = ({
   )
 }
 
-OrderShippedTemplate.defaultProps = {}
+OrderShippedTemplate.PreviewProps = {
+  order: {
+    id: 'order_preview',
+    display_id: '14',
+  } as OrderDTO & { display_id: string },
+  shippingAddress: {
+    first_name: 'Ashley',
+    last_name: 'Boss',
+    address_1: '123 Main St',
+    city: 'Orlando',
+    province: 'FL',
+    postal_code: '32812',
+    country_code: 'US',
+  } as OrderAddressDTO,
+  trackingNumber: '9400111899560012345678',
+  trackingUrl: 'https://tools.usps.com/go/TrackConfirmAction?tLabels=9400111899560012345678',
+  carrier: 'USPS',
+  preview: 'Your Dab Pal is on its way.',
+}
 
 export default OrderShippedTemplate

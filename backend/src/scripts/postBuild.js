@@ -19,7 +19,7 @@ const rootPkgPath = path.join(process.cwd(), 'package.json');
 const serverPkgPath = path.join(MEDUSA_SERVER_PATH, 'package.json');
 const rootPkg = JSON.parse(fs.readFileSync(rootPkgPath, 'utf8'));
 const serverPkg = JSON.parse(fs.readFileSync(serverPkgPath, 'utf8'));
-for (const dep of ['pdf-lib']) {
+for (const dep of ['pdf-lib', 'pg']) {
   if (rootPkg.dependencies?.[dep]) {
     serverPkg.dependencies = serverPkg.dependencies || {};
     serverPkg.dependencies[dep] = rootPkg.dependencies[dep];

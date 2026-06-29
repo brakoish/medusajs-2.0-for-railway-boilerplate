@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import { MedusaError } from '@medusajs/framework/utils'
 import { InviteUserEmail, INVITE_USER, isInviteUserData } from './invite-user'
+import { AbandonedCartTemplate, ABANDONED_CART, isAbandonedCartTemplateData } from './abandoned-cart'
 import { OrderPlacedTemplate, ORDER_PLACED, isOrderPlacedTemplateData } from './order-placed'
 import { OrderShippedTemplate, ORDER_SHIPPED, isOrderShippedTemplateData } from './order-shipped'
 import { PasswordResetEmail, PASSWORD_RESET, isPasswordResetData } from './password-reset'
@@ -12,6 +13,7 @@ import {
 export type { ReminderOrder } from './unshipped-order-reminder'
 
 export const EmailTemplates = {
+  ABANDONED_CART,
   INVITE_USER,
   ORDER_PLACED,
   ORDER_SHIPPED,
@@ -23,6 +25,15 @@ export type EmailTemplateType = keyof typeof EmailTemplates
 
 export function generateEmailTemplate(templateKey: string, data: unknown): ReactNode {
   switch (templateKey) {
+    case EmailTemplates.ABANDONED_CART:
+      if (!isAbandonedCartTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ABANDONED_CART}"`
+        )
+      }
+      return <AbandonedCartTemplate {...data} />
+
     case EmailTemplates.INVITE_USER:
       if (!isInviteUserData(data)) {
         throw new MedusaError(
@@ -77,6 +88,7 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
 }
 
 export {
+  AbandonedCartTemplate,
   InviteUserEmail,
   OrderPlacedTemplate,
   OrderShippedTemplate,

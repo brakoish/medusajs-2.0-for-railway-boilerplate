@@ -79,6 +79,30 @@ export async function updateCart(
     .catch(medusaError)
 }
 
+export async function updateCartEmail(email: string) {
+  const normalized = email.trim().toLowerCase()
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+    return
+  }
+
+  const cartId = await getCartId()
+  if (!cartId) {
+    return
+  }
+
+  const cart = await retrieveCartById(cartId)
+  if (cart?.email?.toLowerCase() === normalized) {
+    return
+  }
+
+  await sdk.store.cart
+    .update(cartId, { email: normalized }, {}, await getAuthHeaders())
+    .then(() => {
+      revalidateTag("cart")
+    })
+    .catch(medusaError)
+}
+
 /**
  * Light-weight totals preview for the Apple Pay / Google Pay wallet sheet.
  *
