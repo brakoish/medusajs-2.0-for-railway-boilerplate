@@ -1,6 +1,7 @@
 import { Text, Section, Hr, Link, Html, Head, Preview, Body, Container, Row, Column } from '@react-email/components'
 import * as React from 'react'
 import { OrderDTO, OrderAddressDTO } from '@medusajs/framework/types'
+import { DabPalEmailLogo } from './brand'
 
 export const ORDER_PLACED = 'order-placed'
 
@@ -25,7 +26,6 @@ const S = {
   body: { backgroundColor: '#f4f4f5', fontFamily: 'Inter, -apple-system, sans-serif', margin: 0, padding: '40px 16px' },
   container: { backgroundColor: '#ffffff', borderRadius: '12px', maxWidth: '480px', margin: '0 auto', overflow: 'hidden' },
   header: { backgroundColor: '#18181b', padding: '28px 32px', textAlign: 'center' as const },
-  wordmark: { color: '#f59e0b', fontSize: '22px', fontWeight: '700', letterSpacing: '0.12em', textTransform: 'uppercase' as const, margin: '0' },
   body_pad: { padding: '32px 32px 24px' },
   h1: { fontSize: '20px', fontWeight: '600', color: '#18181b', margin: '0 0 8px' },
   subtitle: { fontSize: '14px', color: '#71717a', margin: '0 0 28px' },
@@ -59,7 +59,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
 
           {/* Header */}
           <Section style={S.header}>
-            <Text style={S.wordmark}>DAB PAL</Text>
+            <DabPalEmailLogo />
           </Section>
 
           {/* Body */}

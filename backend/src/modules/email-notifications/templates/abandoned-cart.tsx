@@ -13,6 +13,7 @@ import {
   Text,
 } from "@react-email/components"
 import * as React from "react"
+import { DabPalEmailLogo } from "./brand"
 
 export const ABANDONED_CART = "abandoned-cart"
 
@@ -78,14 +79,6 @@ const S = {
     backgroundColor: "#18181b",
     padding: "30px 32px",
     textAlign: "center" as const,
-  },
-  wordmark: {
-    color: "#f59e0b",
-    fontSize: "22px",
-    fontWeight: "700",
-    letterSpacing: "0.12em",
-    margin: "0",
-    textTransform: "uppercase" as const,
   },
   bodyPad: {
     padding: "32px",
@@ -201,7 +194,7 @@ export const AbandonedCartTemplate: React.FC<AbandonedCartTemplateProps> & {
       <Body style={S.body}>
         <Container style={S.container}>
           <Section style={S.header}>
-            <Text style={S.wordmark}>DAB PAL</Text>
+            <DabPalEmailLogo />
           </Section>
 
           <Section style={S.bodyPad}>
