@@ -70,6 +70,13 @@ export default async function orderFulfillmentCreatedHandler({
       },
     })
 
+    await fulfillmentModuleService.updateFulfillment(fulfillmentId, {
+      data: {
+        ...(fdata || {}),
+        tracking_email_sent_at: new Date().toISOString(),
+      },
+    })
+
     console.log(`[order-fulfillment-created] Shipping email sent for order ${data.id}, tracking ${trackingNumber}`)
   } catch (error) {
     console.error('[order-fulfillment-created] Error sending shipping notification:', error)

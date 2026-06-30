@@ -18,6 +18,7 @@ export type ShippableLineItem = {
 export type ShippableOrder = {
   id?: string
   status?: string | null
+  payment_status?: string | null
   canceled_at?: string | Date | null
   metadata?: Record<string, unknown> | null
   items?: ShippableLineItem[] | null
@@ -29,6 +30,9 @@ export const UNSHIPPED_REMINDER_SUPPRESSED_AT =
 
 export const isCanceledOrder = (order: ShippableOrder) =>
   order.status === "canceled" || Boolean(order.canceled_at)
+
+export const isRefundedOrder = (order: ShippableOrder) =>
+  order.payment_status === "refunded"
 
 export const isUnshippedReminderSuppressed = (order: ShippableOrder) =>
   Boolean(order.metadata?.[UNSHIPPED_REMINDER_SUPPRESSED_AT])
@@ -60,6 +64,7 @@ export const hasFulfillment = (order: ShippableOrder) =>
 
 export const isShippableOrder = (order: ShippableOrder) =>
   !isCanceledOrder(order) &&
+  !isRefundedOrder(order) &&
   !isUnshippedReminderSuppressed(order) &&
   !hasFulfillment(order) &&
   hasRemainingShippableItems(order)
@@ -91,6 +96,7 @@ export async function filterShippableOrders<T extends ShippableOrder>(
   const candidates = orders.filter(
     (order) =>
       !isCanceledOrder(order) &&
+      !isRefundedOrder(order) &&
       !isUnshippedReminderSuppressed(order) &&
       hasRemainingShippableItems(order)
   )
