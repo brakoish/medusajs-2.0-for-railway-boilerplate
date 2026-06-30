@@ -3,6 +3,7 @@ import {
   fulfilledOrderIds,
   isCanceledOrder,
   hasRemainingShippableItems,
+  isUnshippedReminderSuppressed,
   ShippableOrder,
 } from "../../../../lib/shippable-orders"
 import { ShippoClient } from "../../../../modules/shippo/client"
@@ -67,6 +68,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
             "display_id",
             "status",
             "canceled_at",
+            "metadata",
             "shipping_address.first_name",
             "shipping_address.last_name",
             "shipping_address.address_1",
@@ -88,6 +90,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         if (!order) return { order_id: orderId, error: "Order not found", rates: [] }
         if (isCanceledOrder(order)) {
           return { order_id: orderId, display_id: order.display_id, error: "Order is canceled", rates: [] }
+        }
+        if (isUnshippedReminderSuppressed(order)) {
+          return { order_id: orderId, display_id: order.display_id, error: "Order is suppressed from fulfillment reminders", rates: [] }
         }
         if (!hasRemainingShippableItems(order)) {
           return { order_id: orderId, display_id: order.display_id, error: "No items to fulfill", rates: [] }

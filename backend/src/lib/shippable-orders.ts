@@ -19,12 +19,19 @@ export type ShippableOrder = {
   id?: string
   status?: string | null
   canceled_at?: string | Date | null
+  metadata?: Record<string, unknown> | null
   items?: ShippableLineItem[] | null
   fulfillments?: { id?: string | null }[] | null
 }
 
+export const UNSHIPPED_REMINDER_SUPPRESSED_AT =
+  "unshipped_reminder_suppressed_at"
+
 export const isCanceledOrder = (order: ShippableOrder) =>
   order.status === "canceled" || Boolean(order.canceled_at)
+
+export const isUnshippedReminderSuppressed = (order: ShippableOrder) =>
+  Boolean(order.metadata?.[UNSHIPPED_REMINDER_SUPPRESSED_AT])
 
 export const remainingQuantity = (item: ShippableLineItem) => {
   const quantity = Number(item.quantity ?? 0)
@@ -53,6 +60,7 @@ export const hasFulfillment = (order: ShippableOrder) =>
 
 export const isShippableOrder = (order: ShippableOrder) =>
   !isCanceledOrder(order) &&
+  !isUnshippedReminderSuppressed(order) &&
   !hasFulfillment(order) &&
   hasRemainingShippableItems(order)
 
@@ -65,12 +73,12 @@ export async function fulfilledOrderIds(
   const { data: orders = [] } = await query.graph({
     entity: "order",
     filters: { id: orderIds },
-    fields: ["id", "fulfillments.id"],
+    fields: ["id", "metadata", "fulfillments.id"],
   })
 
   return new Set(
     orders
-      .filter(hasFulfillment)
+      .filter((order) => hasFulfillment(order) || isUnshippedReminderSuppressed(order))
       .map((order) => order.id)
       .filter((id): id is string => Boolean(id))
   )
@@ -81,7 +89,10 @@ export async function filterShippableOrders<T extends ShippableOrder>(
   orders: T[]
 ) {
   const candidates = orders.filter(
-    (order) => !isCanceledOrder(order) && hasRemainingShippableItems(order)
+    (order) =>
+      !isCanceledOrder(order) &&
+      !isUnshippedReminderSuppressed(order) &&
+      hasRemainingShippableItems(order)
   )
   const ids = candidates.map((order) => order.id).filter((id): id is string => Boolean(id))
   const fulfilled = await fulfilledOrderIds(query, ids)

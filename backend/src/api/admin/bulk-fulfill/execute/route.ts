@@ -5,6 +5,7 @@ import { createOrderFulfillmentWorkflow } from "@medusajs/medusa/core-flows"
 import {
   fulfilledOrderIds,
   isCanceledOrder,
+  isUnshippedReminderSuppressed,
   remainingShippableItems,
   ShippableOrder,
 } from "../../../../lib/shippable-orders"
@@ -195,6 +196,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           "display_id",
           "status",
           "canceled_at",
+          "metadata",
           "email",
           "shipping_address.first_name",
           "shipping_address.last_name",
@@ -237,6 +239,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           display_id: order.display_id,
           success: false,
           error: "Order is canceled",
+        })
+        continue
+      }
+
+      if (isUnshippedReminderSuppressed(order)) {
+        results.push({
+          order_id: item.order_id,
+          display_id: order.display_id,
+          success: false,
+          error: "Order is suppressed from fulfillment reminders",
         })
         continue
       }
