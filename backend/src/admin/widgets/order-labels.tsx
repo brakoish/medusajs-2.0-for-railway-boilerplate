@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { defineWidgetConfig } from "@medusajs/admin-sdk"
 
 type LabelInfo = {
@@ -143,18 +143,42 @@ const OrderLabelsWidget = () => {
   const [sendingId, setSendingId] = useState<string | null>(null)
   const [sendError, setSendError] = useState<string | null>(null)
 
-  const loadLabels = () => {
+  const loadLabels = useCallback((silent = false) => {
     if (!orderId) return
-    setLoading(true)
+    if (!silent) setLoading(true)
     fetch(`/admin/orders/${orderId}/labels`, { credentials: "include" })
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() })
-      .then((data: { labels?: LabelInfo[] }) => { setLabels(data.labels || []); setLoading(false) })
-      .catch((e: Error) => { setError(e.message); setLoading(false) })
-  }
+      .then((data: { labels?: LabelInfo[] }) => {
+        setLabels(data.labels || [])
+        setError(null)
+        if (!silent) setLoading(false)
+      })
+      .catch((e: Error) => {
+        if (!silent) {
+          setError(e.message)
+          setLoading(false)
+        }
+      })
+  }, [orderId])
 
   useEffect(() => {
     loadLabels()
-  }, [orderId])
+
+    const refresh = () => loadLabels(true)
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") refresh()
+    }
+    const interval = window.setInterval(refresh, 5000)
+
+    window.addEventListener("focus", refresh)
+    document.addEventListener("visibilitychange", refreshWhenVisible)
+
+    return () => {
+      window.clearInterval(interval)
+      window.removeEventListener("focus", refresh)
+      document.removeEventListener("visibilitychange", refreshWhenVisible)
+    }
+  }, [loadLabels])
 
   const sendTrackingEmail = async (fulfillmentId: string) => {
     if (!orderId) return
