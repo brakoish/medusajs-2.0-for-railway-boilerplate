@@ -51,23 +51,6 @@ const itemRemaining = (item: ReminderItem) => {
   return Math.max(0, quantity - fulfilled)
 }
 
-const customerName = (order: ReminderOrder) =>
-  [
-    order.shipping_address?.first_name,
-    order.shipping_address?.last_name,
-  ]
-    .filter(Boolean)
-    .join(" ") || order.email || "Customer"
-
-const addressLine = (order: ReminderOrder) =>
-  [
-    order.shipping_address?.city,
-    order.shipping_address?.province,
-    order.shipping_address?.postal_code,
-  ]
-    .filter(Boolean)
-    .join(", ")
-
 const daysOpen = (createdAt?: string | Date | null) => {
   if (!createdAt) return null
 
@@ -178,19 +161,19 @@ export const UnshippedOrderReminderTemplate: React.FC<UnshippedOrderReminderProp
             {orders.map((order) => {
               const openDays = daysOpen(order.created_at)
               const orderUrl = `https://admin.thedabpal.com/app/orders/${order.id}`
+              const metaParts = [
+                openDays !== null ? `${openDays} day${openDays === 1 ? "" : "s"} open` : null,
+                order.fulfillment_status ? order.fulfillment_status.replace("_", " ") : null,
+              ].filter(Boolean)
 
               return (
                 <Section key={order.id} style={S.order}>
                   <Text style={S.orderTitle}>
                     <Link href={orderUrl} style={S.link}>Order #{order.display_id || order.id}</Link>
-                    {" · "}
-                    {customerName(order)}
                   </Text>
-                  <Text style={S.meta}>
-                    {addressLine(order)}
-                    {openDays !== null ? ` · ${openDays} day${openDays === 1 ? "" : "s"} open` : ""}
-                    {order.fulfillment_status ? ` · ${order.fulfillment_status.replace("_", " ")}` : ""}
-                  </Text>
+                  {metaParts.length > 0 ? (
+                    <Text style={S.meta}>{metaParts.join(" · ")}</Text>
+                  ) : null}
 
                   {(order.items || [])
                     .filter((item) => itemRemaining(item) > 0)
@@ -231,11 +214,11 @@ UnshippedOrderReminderTemplate.PreviewProps = {
       created_at: new Date().toISOString(),
       fulfillment_status: "not_fulfilled",
       shipping_address: {
-        first_name: "Jason",
-        last_name: "Robertus",
+        first_name: "Customer",
+        last_name: null,
         city: "Oak Creek",
         province: "WI",
-        postal_code: "53154",
+        postal_code: null,
       },
       items: [
         {
