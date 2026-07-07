@@ -26,6 +26,7 @@ type ProductActionsProps = {
   region: HttpTypes.StoreRegion
   disabled?: boolean
   hideMobileActions?: boolean
+  initialVariantSku?: string
 }
 
 const optionsAsKeymap = (variantOptions: any) => {
@@ -197,13 +198,13 @@ export default function ProductActions({
   region,
   disabled,
   hideMobileActions,
+  initialVariantSku = "DABPAL-1-BLK",
 }: ProductActionsProps) {
   const [options, setOptions] = useState<Record<string, string | undefined>>(() => {
     // Pre-compute defaults so there's no "Select variant" flash on first render.
     if (!product.variants?.length) return {}
-    const DEFAULT_SKU = "DABPAL-1-BLK"
     const preferred =
-      product.variants.find((v) => v.sku === DEFAULT_SKU) ??
+      product.variants.find((v) => v.sku === initialVariantSku) ??
       product.variants[0]
     return optionsAsKeymap(preferred.options) ?? {}
   })
@@ -219,13 +220,12 @@ export default function ProductActions({
     if (!product.variants?.length) return
     setOptions((prev) => {
       if (Object.keys(prev).length > 0) return prev // already initialized
-      const DEFAULT_SKU = "DABPAL-1-BLK"
       const preferred =
-        product.variants!.find((v) => v.sku === DEFAULT_SKU) ??
+        product.variants!.find((v) => v.sku === initialVariantSku) ??
         product.variants![0]
       return optionsAsKeymap(preferred.options) ?? {}
     })
-  }, [product.variants])
+  }, [initialVariantSku, product.variants])
 
   const selectedVariant = useMemo(() => {
     if (!product.variants || product.variants.length === 0) {

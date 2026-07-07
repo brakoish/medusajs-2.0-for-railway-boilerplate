@@ -9,10 +9,12 @@ export default async function ProductActionsWrapper({
   id,
   region,
   hideMobileActions,
+  initialVariantSku,
 }: {
   id: string
   region: HttpTypes.StoreRegion
   hideMobileActions?: boolean
+  initialVariantSku?: string
 }) {
   const [product] = await getProductsById({
     ids: [id],
@@ -28,6 +30,7 @@ export default async function ProductActionsWrapper({
       product={product}
       region={region}
       hideMobileActions={hideMobileActions}
+      initialVariantSku={initialVariantSku}
     />
   )
 }

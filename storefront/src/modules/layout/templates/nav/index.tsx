@@ -51,15 +51,19 @@ export default function Nav() {
               Absolutely centered to the viewport so the menu sits exactly
               mid-bar regardless of logo/cart widths. */}
           <div className="hidden small:flex items-center gap-x-8 absolute left-1/2 -translate-x-1/2">
-            <NavLink href="/#shop">Shop</NavLink>
+            <NavLink href="/store">Shop</NavLink>
             <NavLink href="/#reviews">Reviews</NavLink>
             <NavLink href="/#faq">FAQ</NavLink>
           </div>
 
-          {/* MOBILE-ONLY: Reviews + FAQ only. No Shop link — the hero CTA
-              already handles that and a "Shop" nav link on a 1-product
-              store confuses users (implies a catalog). */}
+          {/* MOBILE-ONLY: Shop + Reviews + FAQ. */}
           <div className="flex small:hidden flex-1 items-center justify-center gap-x-5">
+            <LocalizedClientLink
+              href="/store"
+              className="text-xs text-ui-fg-subtle hover:text-ui-fg-base"
+            >
+              Shop
+            </LocalizedClientLink>
             <LocalizedClientLink
               href="/#reviews"
               className="text-xs text-ui-fg-subtle hover:text-ui-fg-base"

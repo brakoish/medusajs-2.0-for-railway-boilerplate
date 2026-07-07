@@ -33,7 +33,7 @@ const Hero = () => {
             </p>
             <div className="flex flex-wrap items-center gap-3 small:gap-4 pt-1 small:pt-2">
               <a
-                href="#shop"
+                href="/store"
                 className="inline-flex items-center justify-center rounded-full bg-white text-black px-6 small:px-8 py-3 small:py-3.5 text-sm small:text-base font-medium hover:bg-white/90 transition-colors"
               >
                 Shop now, from $25
