@@ -19,9 +19,9 @@ const finishes = [
 
 export default function ProductFamilyGallery() {
   return (
-    <section className="bg-white py-14 small:py-24 border-b border-gray-100">
+    <section className="bg-white py-10 small:py-24 border-b border-gray-100">
       <div className="content-container grid grid-cols-1 small:grid-cols-[0.95fr_1.05fr] gap-10 small:gap-16 items-center">
-        <div>
+        <div className="order-2 small:order-1">
           <span className="uppercase tracking-[0.25em] text-xs text-amber-700">
             The kit
           </span>
@@ -68,7 +68,7 @@ export default function ProductFamilyGallery() {
           </LocalizedClientLink>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 small:gap-4">
+        <div className="order-1 small:order-2 grid grid-cols-2 gap-3 small:gap-4">
           <div className="relative col-span-2 aspect-[16/10] rounded-lg bg-zinc-50 overflow-hidden">
             <Image
               src="/dab-pal/lineup.png"

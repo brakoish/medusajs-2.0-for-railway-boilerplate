@@ -11,15 +11,15 @@ const Hero = () => {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center opacity-90"
+          className="object-cover object-[58%_center] small:object-center opacity-95 small:opacity-90"
         />
         {/* Stronger gradient on mobile so the headline is readable */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/30 small:via-black/40 small:to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/10 small:via-black/40 small:to-black/20" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/40 small:from-black/70" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 min-h-[72vh] small:min-h-[80vh] flex items-end pb-8 small:pb-24">
+      <div className="relative z-10 min-h-[68vh] small:min-h-[80vh] flex items-end pb-8 small:pb-24">
         <div className="content-container w-full">
           <div className="max-w-2xl flex flex-col gap-4 small:gap-6 text-white">
             <span className="uppercase tracking-[0.25em] text-[10px] small:text-xs text-amber-400/90">
@@ -36,7 +36,7 @@ const Hero = () => {
                 href="/store"
                 className="inline-flex items-center justify-center rounded-full bg-white text-black px-6 small:px-8 py-3 small:py-3.5 text-sm small:text-base font-medium hover:bg-white/90 transition-colors"
               >
-                Shop now, from $25
+                Shop Dab Pal
               </a>
               <a
                 href="#details"
