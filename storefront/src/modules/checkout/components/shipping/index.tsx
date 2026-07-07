@@ -35,6 +35,11 @@ const Shipping: React.FC<ShippingProps> = ({
     // To do: remove the previously selected shipping method instead of using the last one
     (method) => method.id === cart.shipping_methods?.at(-1)?.shipping_option_id
   )
+  const cartShippingMethod = cart.shipping_methods?.at(-1)
+  const shippingMethodName =
+    selectedShippingMethod?.name || cartShippingMethod?.name
+  const shippingMethodAmount =
+    selectedShippingMethod?.amount ?? cartShippingMethod?.amount ?? 0
 
   const handleEdit = () => {
     router.push(pathname + "?step=delivery", { scroll: false })
@@ -170,9 +175,9 @@ const Shipping: React.FC<ShippingProps> = ({
                   Method
                 </Text>
                 <Text className="txt-medium text-ui-fg-subtle">
-                  {selectedShippingMethod?.name}{" "}
+                  {shippingMethodName}{" "}
                   {convertToLocale({
-                    amount: selectedShippingMethod?.amount!,
+                    amount: shippingMethodAmount,
                     currency_code: cart?.currency_code,
                   })}
                 </Text>

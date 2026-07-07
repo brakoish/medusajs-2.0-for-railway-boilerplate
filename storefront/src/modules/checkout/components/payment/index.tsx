@@ -13,10 +13,15 @@ import PaymentContainer from "@modules/checkout/components/payment-container"
 import PaymentButton from "@modules/checkout/components/payment-button"
 import { isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
+import StripeWrapper from "@modules/checkout/components/payment-wrapper/stripe-wrapper"
 import { initiatePaymentSession } from "@lib/data/cart"
 import { enrichStripePaymentIntent } from "@lib/data/enrich-pi"
 import { buildStripeSessionData } from "@lib/util/build-pi-data"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { loadStripe } from "@stripe/stripe-js"
+
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_KEY
+const stripePromise = stripeKey ? loadStripe(stripeKey) : null
 
 const Payment = ({
   cart,
@@ -52,7 +57,12 @@ const Payment = ({
   const isOpen = searchParams.get("step") === "payment"
 
   const isStripe = isStripeFunc(activeSession?.provider_id)
-  const stripeReady = useContext(StripeContext)
+  const hasParentStripeWrapper = useContext(StripeContext)
+  const canMountStripe =
+    isStripe &&
+    activeSession &&
+    (hasParentStripeWrapper ||
+      Boolean(stripeKey && stripePromise && activeSession.data?.client_secret))
 
   const paidByGiftcard =
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
@@ -95,6 +105,9 @@ const Payment = ({
           enrichStripePaymentIntent(cart.id).catch((e) =>
             console.warn("[payment] enrich-pi failed", e)
           )
+        }
+        if (shouldInputCard) {
+          window.location.assign(pathname + "?step=payment")
         }
       }
 
@@ -142,6 +155,7 @@ const Payment = ({
             console.warn("[payment] enrich-pi failed", e)
           )
         }
+        window.location.assign(pathname + "?step=payment")
       } catch (err: any) {
         if (!cancelled) setError(err.message)
       } finally {
@@ -153,6 +167,64 @@ const Payment = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, activeSession, paidByGiftcard, selectedPaymentMethod])
+
+  const renderStripeContent = () => {
+    if (!activeSession || !isStripe || !canMountStripe) {
+      return null
+    }
+
+    const content = (
+      <>
+        <div className="mt-5 transition-all duration-150 ease-in-out">
+          <Text className="txt-medium-plus text-ui-fg-base mb-1">
+            Choose how you'd like to pay:
+          </Text>
+
+          <PaymentElement
+            options={{
+              layout: "tabs",
+              wallets: {
+                applePay: "auto",
+                googlePay: "auto",
+              },
+            }}
+            onChange={(e) => {
+              setPaymentReadyToConfirm(e.complete)
+              setError(null)
+            }}
+          />
+        </div>
+
+        <div className="mt-6 flex flex-col gap-3">
+          <PaymentButton cart={cart} data-testid="submit-order-button" />
+          <Text className="txt-small text-ui-fg-subtle">
+            By clicking Place Order, you agree to our{" "}
+            <LocalizedClientLink
+              href="/terms"
+              className="underline hover:text-ui-fg-base"
+            >
+              Terms
+            </LocalizedClientLink>{" "}
+            and acknowledge our return policy.
+          </Text>
+        </div>
+      </>
+    )
+
+    if (hasParentStripeWrapper) {
+      return content
+    }
+
+    return (
+      <StripeWrapper
+        paymentSession={activeSession}
+        stripeKey={stripeKey}
+        stripePromise={stripePromise}
+      >
+        {content}
+      </StripeWrapper>
+    )
+  }
 
   return (
     <div className="bg-white">
@@ -209,27 +281,7 @@ const Payment = ({
                     })}
                 </RadioGroup>
               )}
-              {isStripe && stripeReady && (
-                <div className="mt-5 transition-all duration-150 ease-in-out">
-                  <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                    Choose how you'd like to pay:
-                  </Text>
-
-                  <PaymentElement
-                    options={{
-                      layout: "tabs",
-                      wallets: {
-                        applePay: "auto",
-                        googlePay: "auto",
-                      },
-                    }}
-                    onChange={(e) => {
-                      setPaymentReadyToConfirm(e.complete)
-                      setError(null)
-                    }}
-                  />
-                </div>
-              )}
+              {renderStripeContent()}
             </>
           ) : null}
 
@@ -256,21 +308,11 @@ const Payment = ({
               Stripe session as soon as the step opens, so PaymentButton
               picks up an `activeSession` and renders "Place order"
               immediately — no separate "Continue to review" click. */}
-          {activeSession && isStripe ? (
-            <div className="mt-6 flex flex-col gap-3">
-              <PaymentButton cart={cart} data-testid="submit-order-button" />
-              <Text className="txt-small text-ui-fg-subtle">
-                By clicking Place Order, you agree to our{" "}
-                <LocalizedClientLink
-                  href="/terms"
-                  className="underline hover:text-ui-fg-base"
-                >
-                  Terms
-                </LocalizedClientLink>{" "}
-                and acknowledge our return policy.
-              </Text>
-            </div>
-          ) : (
+          {activeSession && isStripe && !canMountStripe ? (
+            <Button size="large" className="mt-6" disabled>
+              Loading payment...
+            </Button>
+          ) : !activeSession || !isStripe ? (
             <Button
               size="large"
               className="mt-6"
@@ -286,7 +328,7 @@ const Payment = ({
                 ? " Enter payment details"
                 : "Continue"}
             </Button>
-          )}
+          ) : null}
         </div>
 
         <div className={isOpen ? "hidden" : "block"}>

@@ -41,6 +41,8 @@ type Props = {
 }
 
 const ExpressCheckout: React.FC<Props> = ({ cart, showDivider = true }) => {
+  const [hasWalletButtons, setHasWalletButtons] = useState(false)
+
   if (!stripeKey || !stripePromise) return null
   if (!cart?.region) return null
 
@@ -64,7 +66,7 @@ const ExpressCheckout: React.FC<Props> = ({ cart, showDivider = true }) => {
   }, [itemTotalCents])
 
   return (
-    <div className="mb-6">
+    <div className={hasWalletButtons ? "mb-6" : ""}>
       <Elements
         stripe={stripePromise}
         options={{
@@ -81,9 +83,9 @@ const ExpressCheckout: React.FC<Props> = ({ cart, showDivider = true }) => {
           },
         }}
       >
-        <ExpressInner cart={cart} />
+        <ExpressInner cart={cart} onAvailabilityChange={setHasWalletButtons} />
       </Elements>
-      {showDivider && (
+      {showDivider && hasWalletButtons && (
         <div className="flex items-center gap-x-3 my-6 text-ui-fg-subtle text-sm">
           <div className="flex-1 h-px bg-ui-border-base" />
           <span>Or continue with</span>
@@ -94,7 +96,10 @@ const ExpressCheckout: React.FC<Props> = ({ cart, showDivider = true }) => {
   )
 }
 
-const ExpressInner: React.FC<{ cart: HttpTypes.StoreCart }> = ({ cart }) => {
+const ExpressInner: React.FC<{
+  cart: HttpTypes.StoreCart
+  onAvailabilityChange: (hasWalletButtons: boolean) => void
+}> = ({ cart, onAvailabilityChange }) => {
   const router = useRouter()
   const stripe = useStripe()
   const elements = useElements()
@@ -134,6 +139,9 @@ const ExpressInner: React.FC<{ cart: HttpTypes.StoreCart }> = ({ cart }) => {
   return (
     <>
       <ExpressCheckoutElement
+        onReady={(event) =>
+          onAvailabilityChange(Boolean(event.availablePaymentMethods))
+        }
         onClick={handleClick as any}
         onConfirm={handleConfirm as any}
         onShippingAddressChange={handleAddressChange as any}

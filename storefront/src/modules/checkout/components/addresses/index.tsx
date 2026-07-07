@@ -27,7 +27,8 @@ const Addresses = ({
   const router = useRouter()
   const pathname = usePathname()
 
-  const isOpen = searchParams.get("step") === "address"
+  const isAddressComplete = hasCompleteShippingAddress(cart)
+  const isOpen = searchParams.get("step") === "address" || !isAddressComplete
 
   const { state: sameAsBilling, toggle: toggleSameAsBilling } = useToggleState(
     cart?.shipping_address && cart?.billing_address
@@ -49,9 +50,9 @@ const Addresses = ({
           className="flex flex-row text-3xl-regular gap-x-2 items-baseline"
         >
           Shipping Address
-          {!isOpen && <CheckCircleSolid />}
+          {!isOpen && isAddressComplete && <CheckCircleSolid />}
         </Heading>
-        {!isOpen && cart?.shipping_address && (
+        {!isOpen && isAddressComplete && (
           <Text>
             <button
               onClick={handleEdit}
@@ -94,7 +95,7 @@ const Addresses = ({
       ) : (
         <div>
           <div className="text-small-regular">
-            {cart && cart.shipping_address ? (
+            {cart && isAddressComplete ? (
               <div
                 className="grid grid-cols-1 small:grid-cols-3 gap-y-6 small:gap-x-6"
               >
@@ -158,6 +159,21 @@ const Addresses = ({
 }
 
 export default Addresses
+
+function hasCompleteShippingAddress(cart: HttpTypes.StoreCart | null) {
+  const address = cart?.shipping_address
+
+  return Boolean(
+    cart?.email &&
+      address?.first_name &&
+      address?.last_name &&
+      address?.address_1 &&
+      address?.city &&
+      address?.province &&
+      address?.postal_code &&
+      address?.country_code
+  )
+}
 
 /**
  * US-format address block: name / line1 / line2 / city, state ZIP / country.
