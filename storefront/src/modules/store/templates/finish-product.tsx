@@ -10,8 +10,6 @@ import { VariantProvider } from "@modules/products/contexts/variant-context"
 import ProductActionsWrapper from "@modules/products/templates/product-actions-wrapper"
 import { ShopProduct } from "./shop-products"
 
-const PRODUCT_HANDLE = "dab-pal"
-
 const details = [
   ["Inside", "30 Q-tips, 1oz iso bottle, clean/dirty slider."],
   ["Fit", "Pocket-sized case for Puffco and quartz banger cleaning."],
@@ -25,14 +23,14 @@ const FinishProductTemplate = async ({
   product: ShopProduct
   countryCode: string
 }) => {
-  if (!product.available || !product.sku) {
+  if (!product.available || !product.sku || !product.medusaHandle) {
     return <ComingSoonProduct product={product} />
   }
 
   const region = await getRegion(countryCode)
   if (!region) notFound()
 
-  const medusaProduct = await getProductByHandle(PRODUCT_HANDLE, region.id)
+  const medusaProduct = await getProductByHandle(product.medusaHandle, region.id)
   if (!medusaProduct) notFound()
 
   return (

@@ -37,6 +37,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(`${origin}${stripped}${search}`, 301)
   }
 
+  if (pathname === "/products/dab-pal") {
+    return NextResponse.redirect(`${origin}/store${search}`, 301)
+  }
+
   // 2. Collapse unused boilerplate search/grouping surfaces onto the homepage.
   //    Keeping them as 301s instead of just deleting the routes so any
   //    indexed/shared links land on a real page instead of 404.

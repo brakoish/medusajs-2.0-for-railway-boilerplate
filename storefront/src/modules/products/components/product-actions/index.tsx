@@ -198,7 +198,7 @@ export default function ProductActions({
   region,
   disabled,
   hideMobileActions,
-  initialVariantSku = "DABPAL-1-BLK",
+  initialVariantSku = "DABPAL-BLK-SINGLE",
 }: ProductActionsProps) {
   const [options, setOptions] = useState<Record<string, string | undefined>>(() => {
     // Pre-compute defaults so there's no "Select variant" flash on first render.

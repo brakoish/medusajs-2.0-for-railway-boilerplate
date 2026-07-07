@@ -7,6 +7,7 @@ export type ShopProduct = {
   price: string
   badge: string
   cta: string
+  medusaHandle?: string
   sku?: string
   available: boolean
 }
@@ -22,7 +23,8 @@ export const shopProducts: ShopProduct[] = [
     price: "From $25",
     badge: "Best seller",
     cta: "View product",
-    sku: "DABPAL-1-BLK",
+    medusaHandle: "dab-pal-black-speck",
+    sku: "DABPAL-BLK-SINGLE",
     available: true,
   },
   {
@@ -35,7 +37,8 @@ export const shopProducts: ShopProduct[] = [
     price: "From $25",
     badge: "Ready to ship",
     cta: "View product",
-    sku: "DABPAL-1-WHT",
+    medusaHandle: "dab-pal-white-speck",
+    sku: "DABPAL-WHT-SINGLE",
     available: true,
   },
   {
