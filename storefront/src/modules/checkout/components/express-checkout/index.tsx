@@ -18,7 +18,7 @@ import {
 } from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
 import { useRouter } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { retrieveCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import {
@@ -42,6 +42,33 @@ type Props = {
 
 const ExpressCheckout: React.FC<Props> = ({ cart, showDivider = true }) => {
   const [hasWalletButtons, setHasWalletButtons] = useState(false)
+  const [hasVisibleWalletButtons, setHasVisibleWalletButtons] = useState(false)
+  const walletElementRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!hasWalletButtons) {
+      setHasVisibleWalletButtons(false)
+      return
+    }
+
+    const element = walletElementRef.current
+    if (!element) return
+
+    const updateVisibility = () => {
+      const height = element.getBoundingClientRect().height
+      setHasVisibleWalletButtons(height > 20)
+    }
+
+    updateVisibility()
+    const observer = new ResizeObserver(updateVisibility)
+    observer.observe(element)
+    const interval = window.setInterval(updateVisibility, 500)
+
+    return () => {
+      observer.disconnect()
+      window.clearInterval(interval)
+    }
+  }, [hasWalletButtons])
 
   if (!stripeKey || !stripePromise) return null
   if (!cart?.region) return null
@@ -66,7 +93,7 @@ const ExpressCheckout: React.FC<Props> = ({ cart, showDivider = true }) => {
   }, [itemTotalCents])
 
   return (
-    <div className={hasWalletButtons ? "mb-6" : ""}>
+    <div className={hasVisibleWalletButtons ? "mb-6" : ""}>
       <Elements
         stripe={stripePromise}
         options={{
@@ -83,9 +110,14 @@ const ExpressCheckout: React.FC<Props> = ({ cart, showDivider = true }) => {
           },
         }}
       >
-        <ExpressInner cart={cart} onAvailabilityChange={setHasWalletButtons} />
+        <div ref={walletElementRef}>
+          <ExpressInner
+            cart={cart}
+            onAvailabilityChange={setHasWalletButtons}
+          />
+        </div>
       </Elements>
-      {showDivider && hasWalletButtons && (
+      {showDivider && hasVisibleWalletButtons && (
         <div className="flex items-center gap-x-3 my-6 text-ui-fg-subtle text-sm">
           <div className="flex-1 h-px bg-ui-border-base" />
           <span>Or continue with</span>
@@ -139,9 +171,21 @@ const ExpressInner: React.FC<{
   return (
     <>
       <ExpressCheckoutElement
-        onReady={(event) =>
-          onAvailabilityChange(Boolean(event.availablePaymentMethods))
-        }
+        onReady={(event) => {
+          const methods = event.availablePaymentMethods as
+            | Record<string, unknown>
+            | null
+            | undefined
+
+          onAvailabilityChange(
+            Boolean(
+              methods?.applePay ||
+                methods?.googlePay ||
+                methods?.amazonPay ||
+                methods?.paypal
+            )
+          )
+        }}
         onClick={handleClick as any}
         onConfirm={handleConfirm as any}
         onShippingAddressChange={handleAddressChange as any}
