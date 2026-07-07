@@ -1,7 +1,7 @@
 import { Metadata } from "next"
 
 import Hero from "@modules/home/components/hero"
-import BuySection from "@modules/home/components/buy-section"
+import ProductFamilyGallery from "@modules/home/components/product-family-gallery"
 import FeatureTrio from "@modules/home/components/feature-trio"
 import DetailBlock from "@modules/home/components/detail-block"
 import PalMap from "@modules/home/components/pal-map"
@@ -20,7 +20,7 @@ export default async function Home() {
     <>
       <StructuredData />
       <Hero />
-      <BuySection countryCode="us" />
+      <ProductFamilyGallery />
       <FeatureTrio />
       <DetailBlock />
       <PalMap />
