@@ -1,220 +1,122 @@
-import { Suspense } from "react"
 import Image from "next/image"
-import { HttpTypes } from "@medusajs/types"
 
-import { getProductByHandle } from "@lib/data/products"
-import { getRegion } from "@lib/data/regions"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import ProductActions from "@modules/products/components/product-actions"
-import ProductActionsWrapper from "@modules/products/templates/product-actions-wrapper"
-import { VariantProvider } from "@modules/products/contexts/variant-context"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import { shopProducts } from "./shop-products"
 
-const PRODUCT_HANDLE = "dab-pal"
-
-const finishes = [
-  {
-    id: "black",
-    title: "Black Speck",
-    description: "The original Dab Pal, made to disappear in a travel bag.",
-    image: "/dab-pal/product-front.png",
-    href: "#black",
-    cta: "Shop Black",
-    meta: "From $25",
-  },
-  {
-    id: "white",
-    title: "White Speck",
-    description: "Same pocket case, brighter finish, easy to spot on a desk.",
-    image: "/dab-pal/product-front-white.jpg",
-    href: "#white",
-    cta: "Shop White",
-    meta: "From $25",
-  },
-  {
-    id: "custom",
-    title: "Custom",
-    description: "Colorways, names, and small-batch ideas are next.",
-    image: "/dab-pal/lineup.png",
-    href: "#custom",
-    cta: "View Custom",
-    meta: "Soon",
-  },
-]
-
-const StoreTemplate = async ({
+const StoreTemplate = ({
   countryCode,
 }: {
   sortBy?: SortOptions
   page?: string
   countryCode: string
 }) => {
-  const region = await getRegion(countryCode)
-  if (!region) return null
-
-  const product = await getProductByHandle(PRODUCT_HANDLE, region.id)
-  if (!product) return null
+  void countryCode
 
   return (
     <main className="bg-white">
       <section className="border-b border-gray-100">
         <div className="content-container py-10 small:py-16">
-          <div className="max-w-3xl">
-            <span className="text-xs uppercase tracking-[0.25em] text-amber-700">
-              Shop Dab Pal
-            </span>
-            <h1 className="mt-3 text-3xl small:text-5xl font-semibold tracking-tight leading-tight text-gray-950">
-              Pick your finish. Stock the kit.
-            </h1>
-            <p className="mt-4 text-base small:text-lg leading-relaxed text-gray-600">
-              Black, white, and soon custom builds. Every Dab Pal holds 30 Q-tips and a 1oz iso bottle with a clean/dirty slider inside.
+          <div className="grid grid-cols-1 small:grid-cols-[0.95fr_1.05fr] gap-8 small:gap-16 items-end">
+            <div>
+              <span className="text-xs uppercase tracking-[0.25em] text-amber-700">
+                Shop
+              </span>
+              <h1 className="mt-3 text-4xl small:text-6xl font-semibold tracking-tight leading-[1.05] text-gray-950">
+                Dab Pal cleaning kits.
+              </h1>
+            </div>
+            <p className="max-w-xl text-base small:text-lg leading-relaxed text-gray-600 small:pb-2">
+              Pocket cases for Q-tips and iso. Pick Black Speck or White Speck now, with custom builds coming next.
             </p>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 small:grid-cols-3 gap-4 small:gap-6">
-            {finishes.map((finish) => (
+          <div className="mt-8 flex flex-wrap gap-2">
+            {[
+              ["All", "/store"],
+              ["Black", "/store/black-speck"],
+              ["White", "/store/white-speck"],
+              ["Custom", "/store/custom"],
+            ].map(([label, href], index) => (
               <LocalizedClientLink
-                key={finish.id}
-                href={finish.href}
-                className="group block rounded-lg border border-gray-200 bg-white overflow-hidden hover:border-amber-300 hover:shadow-elevation-card-rest transition"
+                key={label}
+                href={href}
+                className={`rounded-full border px-4 py-2 text-sm transition ${
+                  index === 0
+                    ? "border-black bg-black text-white"
+                    : "border-gray-200 text-gray-700 hover:border-amber-300"
+                }`}
               >
-                <div className="relative aspect-square bg-zinc-50">
-                  <Image
-                    src={finish.image}
-                    alt={`${finish.title} Dab Pal`}
-                    fill
-                    sizes="(max-width: 800px) 100vw, 33vw"
-                    className="object-contain p-7 transition-transform duration-300 group-hover:scale-[1.03]"
-                  />
-                </div>
-                <div className="p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <h2 className="text-lg font-semibold text-gray-950">
-                      {finish.title}
-                    </h2>
-                    <span className="text-sm text-gray-500">{finish.meta}</span>
-                  </div>
-                  <p className="mt-2 min-h-[44px] text-sm leading-relaxed text-gray-600">
-                    {finish.description}
-                  </p>
-                  <span className="mt-4 inline-flex text-sm font-medium text-amber-700 group-hover:text-amber-800">
-                    {finish.cta}
-                  </span>
-                </div>
+                {label}
               </LocalizedClientLink>
             ))}
           </div>
         </div>
       </section>
 
-      <FinishBuyPanel
-        id="black"
-        title="Black Speck Dab Pal"
-        description="Matte black speck finish, made to order in NY."
-        image="/dab-pal/product-front.png"
-        sku="DABPAL-1-BLK"
-        product={product}
-        region={region}
-      />
-      <FinishBuyPanel
-        id="white"
-        title="White Speck Dab Pal"
-        description="White speck finish with the same slider, bottle, and Q-tip storage."
-        image="/dab-pal/product-front-white.jpg"
-        sku="DABPAL-1-WHT"
-        product={product}
-        region={region}
-      />
+      <section className="content-container py-8 small:py-12">
+        <div className="grid grid-cols-1 small:grid-cols-3 gap-5 small:gap-6">
+          {shopProducts.map((product) => (
+            <LocalizedClientLink
+              key={product.handle}
+              href={`/store/${product.handle}`}
+              className="group block rounded-lg border border-gray-200 bg-white overflow-hidden transition hover:border-amber-300 hover:shadow-elevation-card-rest"
+            >
+              <div className="relative aspect-[4/5] bg-zinc-50">
+                <Image
+                  src={product.image}
+                  alt={`${product.title} Dab Pal`}
+                  fill
+                  sizes="(max-width: 800px) 100vw, 33vw"
+                  className="object-contain p-7 transition-transform duration-300 group-hover:scale-[1.03]"
+                />
+                <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-800 shadow-sm">
+                  {product.badge}
+                </span>
+              </div>
+              <div className="p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-semibold tracking-tight text-gray-950">
+                      {product.title}
+                    </h2>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {product.subtitle}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-sm font-medium text-gray-700">
+                    {product.price}
+                  </span>
+                </div>
+                <p className="mt-4 min-h-[64px] text-sm leading-relaxed text-gray-600">
+                  {product.description}
+                </p>
+                <span className="mt-5 inline-flex text-sm font-semibold text-amber-700 group-hover:text-amber-800">
+                  {product.cta}
+                </span>
+              </div>
+            </LocalizedClientLink>
+          ))}
+        </div>
+      </section>
 
-      <section id="custom" className="bg-zinc-950 text-white scroll-mt-24">
-        <div className="content-container grid grid-cols-1 small:grid-cols-[1fr_0.9fr] gap-8 small:gap-16 items-center py-12 small:py-20">
-          <div>
-            <span className="text-xs uppercase tracking-[0.25em] text-amber-400">
-              Custom
-            </span>
-            <h2 className="mt-3 text-2xl small:text-4xl font-semibold tracking-tight">
-              Customizer coming next.
-            </h2>
-            <p className="mt-4 text-sm small:text-base leading-relaxed text-white/70">
-              We are testing custom colorways and name plates next. Black and white are available now with fast checkout.
-            </p>
-          </div>
-          <div className="relative aspect-[4/3] bg-white/5 rounded-lg overflow-hidden">
-            <Image
-              src="/dab-pal/lineup.png"
-              alt="Dab Pal color lineup"
-              fill
-              sizes="(max-width: 800px) 100vw, 45vw"
-              className="object-contain p-6"
-            />
-          </div>
+      <section className="border-y border-gray-100 bg-zinc-50">
+        <div className="content-container grid grid-cols-1 small:grid-cols-3 divide-y small:divide-y-0 small:divide-x divide-gray-200">
+          {[
+            ["Made in NY", "Small-batch production from Astoria."],
+            ["Ships fast", "Most orders leave in 1 to 2 business days."],
+            ["Wallet ready", "Apple Pay, Google Pay, Link, PayPal, and cards."],
+          ].map(([title, body]) => (
+            <div key={title} className="py-6 small:px-8 first:small:pl-0">
+              <h3 className="text-sm font-semibold text-gray-950">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                {body}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
     </main>
-  )
-}
-
-const FinishBuyPanel = ({
-  id,
-  title,
-  description,
-  image,
-  sku,
-  product,
-  region,
-}: {
-  id: string
-  title: string
-  description: string
-  image: string
-  sku: string
-  product: HttpTypes.StoreProduct
-  region: HttpTypes.StoreRegion
-}) => {
-  return (
-    <section id={id} className="border-b border-gray-100 scroll-mt-24">
-      <div className="content-container grid grid-cols-1 small:grid-cols-2 gap-8 small:gap-16 items-start py-12 small:py-20">
-        <div className="relative aspect-square bg-zinc-50 rounded-lg overflow-hidden">
-          <Image
-            src={image}
-            alt={title}
-            fill
-            sizes="(max-width: 800px) 100vw, 50vw"
-            className="object-contain p-8 small:p-12"
-          />
-        </div>
-        <div className="w-full small:sticky small:top-28">
-          <div className="mb-6">
-            <h2 className="text-2xl small:text-4xl font-semibold tracking-tight leading-tight">
-              {title}
-            </h2>
-            <p className="mt-3 text-sm small:text-base leading-relaxed text-gray-600">
-              {description}
-            </p>
-          </div>
-          <VariantProvider>
-            <Suspense
-              fallback={
-                <ProductActions
-                  disabled
-                  product={product}
-                  region={region}
-                  hideMobileActions
-                  initialVariantSku={sku}
-                />
-              }
-            >
-              <ProductActionsWrapper
-                id={product.id!}
-                region={region}
-                hideMobileActions
-                initialVariantSku={sku}
-              />
-            </Suspense>
-          </VariantProvider>
-        </div>
-      </div>
-    </section>
   )
 }
 
