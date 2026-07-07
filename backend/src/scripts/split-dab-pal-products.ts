@@ -8,6 +8,7 @@ import {
 const OLD_HANDLE = "dab-pal"
 const BLACK_HANDLE = "dab-pal-black-speck"
 const WHITE_HANDLE = "dab-pal-white-speck"
+const DAB_PAL_SHIPPING_PROFILE_ID = "sp_01KPC1VXSBJFJCXR1ZCWZ67GW1"
 
 const BLACK_IMAGE =
   "https://bucket-production-a39d.up.railway.app/medusa-media/dab-pal-real-1024-01KQT97W2TVQHA8WVCR51M0CFE.png"
@@ -56,11 +57,12 @@ export default async function splitDabPalProducts({ container }: ExecArgs) {
     existingProducts.map((product) => [product.handle, product])
   )
   const oldProduct = byHandle.get(OLD_HANDLE)
-  const shippingProfileId = (oldProduct as { shipping_profile_id?: string })
-    ?.shipping_profile_id
+  const shippingProfileId =
+    (oldProduct as { shipping_profile_id?: string })?.shipping_profile_id ??
+    DAB_PAL_SHIPPING_PROFILE_ID
 
-  if (!oldProduct || !shippingProfileId) {
-    throw new Error("Legacy dab-pal product or shipping profile not found")
+  if (!oldProduct) {
+    throw new Error("Legacy dab-pal product not found")
   }
 
   const [defaultSalesChannel] = await salesChannelService.listSalesChannels({
