@@ -17,7 +17,7 @@ const details = [
 ]
 
 const instructions = [
-  "Fill the 1oz bottle with your preferred iso.",
+  "Fill the 1oz bottle with your preferred 90%+ iso.",
   "Load clean Q-tips into the clean side.",
   "Swab your Puffco bowl, e-rig chamber, or banger after each dab.",
   "Slide used swabs behind the slider, toward the hinge, until you can toss them.",
