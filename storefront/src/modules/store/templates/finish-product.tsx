@@ -16,6 +16,13 @@ const details = [
   ["Shipping", "Made in NY and ships in 1 to 2 business days."],
 ]
 
+const instructions = [
+  "Fill the 1oz bottle with your preferred iso.",
+  "Load clean Q-tips into the clean side.",
+  "Swab your Puffco bowl, e-rig chamber, or banger after each dab.",
+  "Slide used swabs behind the slider, toward the hinge, until you can toss them.",
+]
+
 const FinishProductTemplate = async ({
   product,
   countryCode,
@@ -72,6 +79,7 @@ const FinishProductTemplate = async ({
               ))}
             </div>
             <ProductDetails className="small:hidden" />
+            <ProductInstructions className="small:hidden" />
           </div>
 
           <div className="order-1 small:order-2 max-w-[20rem] small:max-w-none small:sticky small:top-28">
@@ -109,6 +117,7 @@ const FinishProductTemplate = async ({
             </div>
 
             <ProductDetails className="hidden small:block" />
+            <ProductInstructions className="hidden small:block" />
           </div>
         </div>
       </section>
@@ -167,6 +176,22 @@ const ProductDetails = ({ className = "" }: { className?: string }) => (
       </div>
     ))}
   </div>
+)
+
+const ProductInstructions = ({ className = "" }: { className?: string }) => (
+  <section className={`border-t border-gray-200 pt-5 ${className}`}>
+    <h2 className="text-sm font-semibold text-gray-950">How to use it</h2>
+    <ol className="mt-3 grid gap-3">
+      {instructions.map((instruction, index) => (
+        <li key={instruction} className="flex gap-3 text-sm leading-relaxed">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-xs font-semibold text-gray-700">
+            {index + 1}
+          </span>
+          <span className="text-gray-600">{instruction}</span>
+        </li>
+      ))}
+    </ol>
+  </section>
 )
 
 export default FinishProductTemplate
