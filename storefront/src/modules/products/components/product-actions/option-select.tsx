@@ -45,8 +45,7 @@ function buildPackHints(
   const valueToVariant: Record<string, HttpTypes.StoreProductVariant> = {}
   for (const v of variants) {
     for (const ov of v.options ?? []) {
-      const ovTitle =
-        (ov as any).option?.title ?? (ov as any).option_id ?? ""
+      const ovTitle = (ov as any).option?.title ?? (ov as any).option_id ?? ""
       const ovValue = ov.value as string | undefined
       if (!ovValue) continue
       const match = ovTitle === optionTitle || ovTitle === option.id
@@ -85,7 +84,8 @@ function buildPackHints(
   return Object.fromEntries(
     rows.map((r) => {
       const isCheapest = r.perUnit === cheapestUnit
-      const baseTotal = r.qty * (rows.find((x) => x.qty === 1)?.perUnit || r.perUnit)
+      const baseTotal =
+        r.qty * (rows.find((x) => x.qty === 1)?.perUnit || r.perUnit)
       const savings = baseTotal - r.amount
       return [
         r.value,
@@ -118,7 +118,12 @@ function buildPackHints(
     })
   ) as Record<
     string,
-    { perUnit: string; totalPrice: string; savings: string | null; isCheapestUnit: boolean }
+    {
+      perUnit: string
+      totalPrice: string
+      savings: string | null
+      isCheapestUnit: boolean
+    }
   >
 }
 
@@ -150,7 +155,10 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
     <div className="flex flex-col gap-y-3">
       <span className="text-sm">Select {title}</span>
       <div
-        className="flex flex-wrap justify-between gap-2"
+        className={clx(
+          "gap-2",
+          hints ? "grid grid-cols-3" : "flex flex-wrap justify-between"
+        )}
         data-testid={dataTestId}
       >
         {filteredOptions?.map((v) => {
@@ -160,10 +168,10 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               onClick={() => updateOption(option.title ?? "", v ?? "")}
               key={v}
               className={clx(
-                "relative border-ui-border-base bg-ui-bg-subtle border rounded-rounded flex-1 transition-shadow ease-in-out duration-150",
+                "relative min-w-0 border-ui-border-base bg-ui-bg-subtle border rounded-rounded transition-shadow ease-in-out duration-150",
                 hint
-                  ? "py-2 px-2 min-h-[56px]"
-                  : "h-10 p-2 text-small-regular",
+                  ? "py-2 px-1.5 min-h-[56px]"
+                  : "h-10 p-2 text-small-regular flex-1",
                 {
                   "border-ui-border-interactive": v === current,
                   "hover:shadow-elevation-card-rest": v !== current,
@@ -174,11 +182,13 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
             >
               {hint ? (
                 <div className="flex flex-col items-center justify-center leading-tight">
-                  <span className="text-sm font-medium">{v}</span>
-                  <span className={clx(
-                    "text-[10px] font-semibold mt-0.5 uppercase tracking-wide",
-                    hint.savings ? "text-amber-600" : "text-gray-400"
-                  )}>
+                  <span className="text-xs small:text-sm font-medium">{v}</span>
+                  <span
+                    className={clx(
+                      "text-[9px] small:text-[10px] font-semibold mt-0.5 uppercase tracking-normal small:tracking-wide",
+                      hint.savings ? "text-amber-600" : "text-gray-400"
+                    )}
+                  >
                     {hint.savings ?? hint.totalPrice}
                   </span>
                 </div>

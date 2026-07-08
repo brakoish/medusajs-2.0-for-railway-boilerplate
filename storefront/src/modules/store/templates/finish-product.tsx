@@ -30,13 +30,16 @@ const FinishProductTemplate = async ({
   const region = await getRegion(countryCode)
   if (!region) notFound()
 
-  const medusaProduct = await getProductByHandle(product.medusaHandle, region.id)
+  const medusaProduct = await getProductByHandle(
+    product.medusaHandle,
+    region.id
+  )
   if (!medusaProduct) notFound()
 
   return (
     <main className="bg-white">
-      <section className="content-container py-8 small:py-12">
-        <div className="mb-6 flex items-center gap-2 text-sm text-gray-500">
+      <section className="content-container py-5 small:py-12">
+        <div className="mb-5 small:mb-6 flex items-center gap-2 text-sm text-gray-500">
           <LocalizedClientLink href="/store" className="hover:text-gray-900">
             Shop
           </LocalizedClientLink>
@@ -45,22 +48,22 @@ const FinishProductTemplate = async ({
         </div>
 
         <div className="grid grid-cols-1 small:grid-cols-[1.08fr_0.92fr] gap-8 small:gap-16 items-start">
-          <div className="grid grid-cols-1 gap-4">
-            <div className="relative aspect-square rounded-lg bg-zinc-50 overflow-hidden">
+          <div className="order-2 small:order-1 grid grid-cols-1 gap-3 small:gap-4">
+            <div className="relative aspect-[4/3] small:aspect-square rounded-lg bg-zinc-50 overflow-hidden">
               <Image
                 src={product.image}
                 alt={`${product.title} Dab Pal`}
                 fill
                 priority
                 sizes="(max-width: 800px) 100vw, 55vw"
-                className="object-contain p-8 small:p-14"
+                className="object-contain p-5 small:p-14"
               />
             </div>
             <div className="grid grid-cols-3 gap-3">
               {["Front", "Bottle", "Slider"].map((label) => (
                 <div
                   key={label}
-                  className="rounded-lg border border-gray-200 bg-white px-4 py-3"
+                  className="rounded-lg border border-gray-200 bg-white px-3 py-2.5 small:px-4 small:py-3"
                 >
                   <span className="text-xs uppercase tracking-[0.18em] text-gray-400">
                     {label}
@@ -68,9 +71,10 @@ const FinishProductTemplate = async ({
                 </div>
               ))}
             </div>
+            <ProductDetails className="small:hidden" />
           </div>
 
-          <div className="small:sticky small:top-28">
+          <div className="order-1 small:order-2 max-w-[20rem] small:max-w-none small:sticky small:top-28">
             <span className="text-xs uppercase tracking-[0.25em] text-amber-700">
               {product.subtitle}
             </span>
@@ -81,7 +85,7 @@ const FinishProductTemplate = async ({
               {product.description}
             </p>
 
-            <div className="mt-7 border-y border-gray-200 py-6">
+            <div className="mt-5 small:mt-7 border-y border-gray-200 py-5 small:py-6">
               <VariantProvider>
                 <Suspense
                   fallback={
@@ -104,18 +108,7 @@ const FinishProductTemplate = async ({
               </VariantProvider>
             </div>
 
-            <div className="divide-y divide-gray-200">
-              {details.map(([title, body]) => (
-                <div key={title} className="py-4">
-                  <h2 className="text-sm font-semibold text-gray-950">
-                    {title}
-                  </h2>
-                  <p className="mt-1 text-sm leading-relaxed text-gray-600">
-                    {body}
-                  </p>
-                </div>
-              ))}
-            </div>
+            <ProductDetails className="hidden small:block" />
           </div>
         </div>
       </section>
@@ -141,7 +134,8 @@ const ComingSoonProduct = ({ product }: { product: ShopProduct }) => {
             Custom Dab Pal.
           </h1>
           <p className="mt-5 max-w-xl text-base small:text-lg leading-relaxed text-white/70">
-            We are testing custom colorways and name plates next. Black Speck and White Speck are available now.
+            We are testing custom colorways and name plates next. Black Speck
+            and White Speck are available now.
           </p>
           <LocalizedClientLink
             href="/store"
@@ -163,5 +157,16 @@ const ComingSoonProduct = ({ product }: { product: ShopProduct }) => {
     </main>
   )
 }
+
+const ProductDetails = ({ className = "" }: { className?: string }) => (
+  <div className={`divide-y divide-gray-200 ${className}`}>
+    {details.map(([title, body]) => (
+      <div key={title} className="py-4">
+        <h2 className="text-sm font-semibold text-gray-950">{title}</h2>
+        <p className="mt-1 text-sm leading-relaxed text-gray-600">{body}</p>
+      </div>
+    ))}
+  </div>
+)
 
 export default FinishProductTemplate

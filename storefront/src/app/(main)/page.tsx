@@ -23,8 +23,8 @@ export default async function Home() {
       <ProductFamilyGallery />
       <FeatureTrio />
       <DetailBlock />
-      <PalMap />
       <Reviews />
+      <PalMap />
       <FAQ />
     </>
   )

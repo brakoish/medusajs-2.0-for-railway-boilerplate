@@ -19,7 +19,10 @@ const finishes = [
 
 export default function ProductFamilyGallery() {
   return (
-    <section className="bg-white py-10 small:py-24 border-b border-gray-100">
+    <section
+      id="shop"
+      className="bg-white py-10 small:py-24 border-b border-gray-100"
+    >
       <div className="content-container grid grid-cols-1 small:grid-cols-[0.95fr_1.05fr] gap-10 small:gap-16 items-center">
         <div className="order-2 small:order-1">
           <span className="uppercase tracking-[0.25em] text-xs text-amber-700">
@@ -29,7 +32,8 @@ export default function ProductFamilyGallery() {
             One Dab Pal. Two finishes.
           </h2>
           <p className="mt-5 max-w-xl text-base small:text-lg leading-relaxed text-gray-600">
-            Same pocket case, same clean/dirty slider, same 30 Q-tip and 1oz iso setup. Pick the finish that fits your kit.
+            Same pocket case, same clean/dirty slider, same 30 Q-tip and 1oz iso
+            setup. Pick the finish that fits your kit.
           </p>
 
           <div className="mt-8 grid grid-cols-1 gap-3 max-w-xl">
@@ -54,7 +58,7 @@ export default function ProductFamilyGallery() {
                   </span>
                 </span>
                 <span className="text-sm font-semibold text-amber-700 group-hover:text-amber-800">
-                  Shop
+                  Choose {finish.name.replace(" Speck", "")}
                 </span>
               </LocalizedClientLink>
             ))}

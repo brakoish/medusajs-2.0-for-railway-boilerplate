@@ -73,7 +73,10 @@ const PdpBuyNow: React.FC<Props> = ({
   //
   // IMPORTANT: Medusa 2.x returns prices as decimal dollars (e.g. 25 for
   // $25), but Stripe wants cents (2500). Multiply by 100.
-  const itemCents = useMemo(() => Math.round(amount * 100 * quantity), [amount, quantity])
+  const itemCents = useMemo(
+    () => Math.round(amount * 100 * quantity),
+    [amount, quantity]
+  )
   const totalCents = useMemo(() => Math.max(50, itemCents + 700), [itemCents])
 
   // Human-readable label for the wallet sheet line item.
@@ -84,14 +87,23 @@ const PdpBuyNow: React.FC<Props> = ({
     if (title) return `${base} – ${title.replace(" / ", " · ")}`
     return base
   }, [(variant as any)?.title])
+  const [hasWalletButtons, setHasWalletButtons] = useState(false)
 
   return (
-    <div className="mt-3 animate-fade-slide-up">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="flex-1 h-px bg-gray-200" />
-        <span className="text-[11px] text-gray-400 uppercase tracking-widest select-none">or buy now</span>
-        <div className="flex-1 h-px bg-gray-200" />
-      </div>
+    <div
+      className={
+        hasWalletButtons ? "mt-3 animate-fade-slide-up" : "h-0 overflow-hidden"
+      }
+    >
+      {hasWalletButtons && (
+        <div className="flex items-center gap-3 mb-3">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-[11px] text-gray-400 uppercase tracking-widest select-none">
+            or buy now
+          </span>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
+      )}
       <Elements
         stripe={stripePromise}
         options={{
@@ -114,6 +126,7 @@ const PdpBuyNow: React.FC<Props> = ({
           quantity={quantity}
           variantLabel={variantLabel}
           itemCents={itemCents}
+          onAvailabilityChange={setHasWalletButtons}
         />
       </Elements>
     </div>
@@ -126,7 +139,15 @@ const PdpBuyNowInner: React.FC<{
   quantity: number
   variantLabel: string
   itemCents: number
-}> = ({ variantId, countryCode, quantity, variantLabel, itemCents }) => {
+  onAvailabilityChange: (hasWalletButtons: boolean) => void
+}> = ({
+  variantId,
+  countryCode,
+  quantity,
+  variantLabel,
+  itemCents,
+  onAvailabilityChange,
+}) => {
   const router = useRouter()
   const stripe = useStripe()
   const elements = useElements()
@@ -179,7 +200,9 @@ const PdpBuyNowInner: React.FC<{
   const ensureCartId = async (timeoutMs = 6000): Promise<string | null> => {
     if (cartIdRef.current) return cartIdRef.current
     if (!cartReadyRef.current) return null
-    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs))
+    const timeout = new Promise<null>((resolve) =>
+      setTimeout(() => resolve(null), timeoutMs)
+    )
     return await Promise.race([cartReadyRef.current, timeout])
   }
 
@@ -237,6 +260,14 @@ const PdpBuyNowInner: React.FC<{
   return (
     <>
       <ExpressCheckoutElement
+        onReady={(event) => {
+          const methods = event.availablePaymentMethods as
+            | Record<string, unknown>
+            | null
+            | undefined
+
+          onAvailabilityChange(Boolean(methods?.applePay || methods?.googlePay))
+        }}
         onClick={handleClick as any}
         onConfirm={handleConfirm as any}
         onShippingAddressChange={handleAddressChange as any}

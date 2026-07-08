@@ -56,14 +56,14 @@ const StoreTemplate = ({
               One kit. Pick your finish.
             </h1>
             <p className="mt-5 text-base small:text-lg leading-relaxed text-gray-600">
-              Pocket Q-tip and iso storage with a clean/dirty slider. Choose Black Speck or White Speck, then pick Single, 3-Pack, or 6-Pack on the product page.
+              Pocket Q-tip and iso storage with a clean/dirty slider. Choose
+              Black Speck or White Speck, then pick Single, 3-Pack, or 6-Pack on
+              the product page.
             </p>
 
             <div className="mt-8">
               <div className="flex items-center justify-between gap-4">
-                <h2 className="text-sm font-semibold text-gray-950">
-                  Finish
-                </h2>
+                <h2 className="text-sm font-semibold text-gray-950">Finish</h2>
                 <span className="text-sm text-gray-500">From $25</span>
               </div>
               <div className="mt-3 grid grid-cols-1 gap-3">
@@ -92,7 +92,7 @@ const StoreTemplate = ({
                       </span>
                     </span>
                     <span className="text-sm font-semibold text-amber-700 group-hover:text-amber-800">
-                      Shop
+                      Choose {finish.title.replace(" Speck", "")}
                     </span>
                   </LocalizedClientLink>
                 ))}

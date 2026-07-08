@@ -20,6 +20,11 @@
     0px 0px 0px 1px rgb(245, 158, 11);
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 @layer utilities {
   /* Cart-badge bounce when count changes (subtle pop, not chaotic). */
   @keyframes cart-pop {
