@@ -10,6 +10,9 @@ import { VariantProvider } from "@modules/products/contexts/variant-context"
 import ProductActionsWrapper from "@modules/products/templates/product-actions-wrapper"
 import { ShopProduct } from "./shop-products"
 
+const VIDEO_URL =
+  "https://bucket-production-a39d.up.railway.app/medusa-media/dabpal_video-01KRBQAN081CB5FHH4QC6G6PKN.mp4"
+
 const details = [
   ["Inside", "30 Q-tips, 1oz iso bottle, clean/dirty slider."],
   ["Fit", "Pocket-sized case for Puffco and quartz banger cleaning."],
@@ -21,6 +24,23 @@ const instructions = [
   "Load clean Q-tips into the clean side.",
   "Swab your Puffco bowl, e-rig chamber, or banger after each dab.",
   "Slide used swabs behind the slider, toward the hinge, until you can toss them.",
+]
+
+const reviews = [
+  {
+    quote:
+      "Great little tool, will work great with my erig when I'm on the go.",
+    name: "RichyFlows",
+  },
+  {
+    quote:
+      "Made from a durable plastic with a moveable piece for separating used from unused.",
+    name: "Verified buyer",
+  },
+  {
+    quote: "Product is as described. This definitely exceeded my expectations.",
+    name: "Martin K.",
+  },
 ]
 
 const FinishProductTemplate = async ({
@@ -56,28 +76,7 @@ const FinishProductTemplate = async ({
 
         <div className="grid grid-cols-1 small:grid-cols-[1.08fr_0.92fr] gap-8 small:gap-16 items-start">
           <div className="order-2 small:order-1 grid grid-cols-1 gap-3 small:gap-4">
-            <div className="relative aspect-[4/3] small:aspect-square rounded-lg bg-zinc-50 overflow-hidden">
-              <Image
-                src={product.image}
-                alt={`${product.title} Dab Pal`}
-                fill
-                priority
-                sizes="(max-width: 800px) 100vw, 55vw"
-                className="object-contain p-5 small:p-14"
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              {["Front", "Bottle", "Slider"].map((label) => (
-                <div
-                  key={label}
-                  className="rounded-lg border border-gray-200 bg-white px-3 py-2.5 small:px-4 small:py-3"
-                >
-                  <span className="text-xs uppercase tracking-[0.18em] text-gray-400">
-                    {label}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <ProductMedia product={product} />
             <ProductDetails className="small:hidden" />
             <ProductInstructions className="small:hidden" />
           </div>
@@ -116,12 +115,90 @@ const FinishProductTemplate = async ({
               </VariantProvider>
             </div>
 
+            <ProductReviewSnippets />
             <ProductDetails className="hidden small:block" />
             <ProductInstructions className="hidden small:block" />
           </div>
         </div>
       </section>
     </main>
+  )
+}
+
+const getAlternateFinish = (product: ShopProduct) =>
+  product.handle === "black-speck"
+    ? {
+        src: "/dab-pal/product-front-white.jpg",
+        alt: "White Speck Dab Pal finish",
+        label: "White Speck",
+      }
+    : {
+        src: "/dab-pal/product-front.png",
+        alt: "Black Speck Dab Pal finish",
+        label: "Black Speck",
+      }
+
+const ProductMedia = ({ product }: { product: ShopProduct }) => {
+  const alternate = getAlternateFinish(product)
+
+  return (
+    <div className="grid grid-cols-1 gap-3 small:gap-4">
+      <div className="relative aspect-[4/3] small:aspect-square rounded-lg bg-zinc-50 overflow-hidden">
+        <Image
+          src={product.image}
+          alt={`${product.title} Dab Pal`}
+          fill
+          priority
+          sizes="(max-width: 800px) 100vw, 55vw"
+          className="object-contain p-5 small:p-14"
+        />
+      </div>
+
+      <div className="overflow-hidden rounded-lg bg-black">
+        <video
+          controls
+          muted
+          playsInline
+          preload="metadata"
+          poster={product.image}
+          className="block aspect-video w-full bg-black object-contain"
+          aria-label="Dab Pal product demo video"
+        >
+          <source src={VIDEO_URL} type="video/mp4" />
+        </video>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 small:gap-4">
+        <figure className="rounded-lg border border-gray-200 bg-zinc-50 p-3">
+          <div className="relative aspect-[4/3]">
+            <Image
+              src="/dab-pal/lineup.png"
+              alt="Dab Pal Black and White finish lineup"
+              fill
+              sizes="(max-width: 800px) 50vw, 28vw"
+              className="object-contain"
+            />
+          </div>
+          <figcaption className="mt-2 text-xs uppercase tracking-[0.18em] text-gray-400">
+            Finish lineup
+          </figcaption>
+        </figure>
+        <figure className="rounded-lg border border-gray-200 bg-zinc-50 p-3">
+          <div className="relative aspect-[4/3]">
+            <Image
+              src={alternate.src}
+              alt={alternate.alt}
+              fill
+              sizes="(max-width: 800px) 50vw, 28vw"
+              className="object-contain"
+            />
+          </div>
+          <figcaption className="mt-2 text-xs uppercase tracking-[0.18em] text-gray-400">
+            {alternate.label}
+          </figcaption>
+        </figure>
+      </div>
+    </div>
   )
 }
 
@@ -176,6 +253,27 @@ const ProductDetails = ({ className = "" }: { className?: string }) => (
       </div>
     ))}
   </div>
+)
+
+const ProductReviewSnippets = () => (
+  <section className="border-b border-gray-200 pb-5">
+    <div className="flex items-center justify-between gap-3">
+      <h2 className="text-sm font-semibold text-gray-950">Buyer notes</h2>
+      <span className="text-xs font-semibold text-amber-700">Rated 5/5</span>
+    </div>
+    <div className="mt-3 grid gap-3">
+      {reviews.map((review) => (
+        <figure key={review.quote} className="text-sm leading-relaxed">
+          <blockquote className="text-gray-700">
+            &ldquo;{review.quote}&rdquo;
+          </blockquote>
+          <figcaption className="mt-1 text-xs text-gray-500">
+            {review.name} &middot; Verified buyer
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  </section>
 )
 
 const ProductInstructions = ({ className = "" }: { className?: string }) => (
