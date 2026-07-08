@@ -453,6 +453,381 @@ export const blogArticles: BlogArticle[] = [
       },
     ],
   },
+  {
+    slug: "how-to-clean-puffco-peak-pro",
+    title: "How to Clean a Puffco Peak Pro",
+    eyebrow: "Puffco Peak Pro cleaning",
+    description:
+      "A practical Puffco Peak Pro cleaning routine for the chamber, base, glass, cotton swabs, and 90%+ iso.",
+    publishedAt: "2026-07-08",
+    updatedAt: "2026-07-08",
+    readingMinutes: 4,
+    keywords: [
+      "how to clean puffco peak pro",
+      "puffco peak pro cleaning kit",
+      "puffco peak pro chamber cleaning",
+      "puffco peak pro swab holder",
+      "90% iso puffco peak pro",
+    ],
+    sourceLabel: "Puffco Peak Pro cleaning guidance",
+    sourceUrl:
+      "https://puffco.zendesk.com/hc/en-us/articles/360057955453-How-do-I-clean-my-Peak-Pro",
+    intro: [
+      "The Peak Pro is easiest to keep clean when you treat cleanup as part of the session, not a project for later.",
+      "Puffco's Peak Pro guidance points to cotton swabs, 90%+ isopropyl alcohol, dry electronics, and fully dried parts before reassembly.",
+    ],
+    sections: [
+      {
+        heading: "Let it cool first",
+        body: [
+          "Do not pull apart a hot Peak Pro. Let the chamber cool enough to handle, then remove the cap and unscrew the chamber from the base.",
+          "A warm chamber is easier to clean than a cold, crusted one, but hot parts are not worth rushing.",
+        ],
+      },
+      {
+        heading: "Swab the chamber",
+        body: [
+          "For light cleaning, use a cotton swab with 90%+ iso to gently lift residue from the chamber. Keep the swab damp, not dripping.",
+          "For deeper cleaning, Puffco says the chamber can be submerged in 90%+ iso for 20 minutes, then fully dried before use.",
+        ],
+      },
+      {
+        heading: "Clean the base carefully",
+        body: [
+          "Remove the glass and chamber before cleaning the base. Use cotton swabs with 90%+ iso on the gold threads and airpath.",
+          "Do not let water or alcohol pool in the base. The base has electronics, so controlled swabs beat flooding every time.",
+        ],
+      },
+      {
+        heading: "Soak glass separately",
+        body: [
+          "The glass can be removed and soaked separately. After soaking, rinse it clean and let it dry completely before it goes back on the base.",
+          "Keep water away from the bottom chamber area and any electronics. Dry parts are the rule.",
+        ],
+      },
+      {
+        heading: "Keep the kit close",
+        body: [
+          "A Peak Pro cleaning kit should have cotton swabs, 90%+ iso, a small bottle, and a clean place for used swabs.",
+          "Dab Pal keeps those tools together, so the quick clean happens before residue gets stubborn.",
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "What iso does Puffco recommend for the Peak Pro?",
+        a: "Puffco recommends 90%+ isopropyl alcohol for Peak Pro and chamber cleaning.",
+      },
+      {
+        q: "Can I soak the Peak Pro base?",
+        a: "No. Do not soak or flood the base. Use a cotton swab with 90%+ iso around threads and contact areas.",
+      },
+      {
+        q: "Does Dab Pal work as a Peak Pro cleaning kit?",
+        a: "Yes. Dab Pal holds regular Q-tips and a 1oz bottle for 90%+ iso, with a separate dirty side for used swabs.",
+      },
+    ],
+  },
+  {
+    slug: "how-to-clean-puffco-peak",
+    title: "How to Clean a Puffco Peak",
+    eyebrow: "Puffco Peak cleaning",
+    description:
+      "A simple Puffco Peak cleaning routine for the atomizer, glass, base contacts, cotton swabs, and iso.",
+    publishedAt: "2026-07-08",
+    updatedAt: "2026-07-08",
+    readingMinutes: 4,
+    keywords: [
+      "how to clean puffco peak",
+      "puffco peak cleaning kit",
+      "puffco peak atomizer cleaning",
+      "puffco peak swab holder",
+      "99% iso puffco peak",
+    ],
+    sourceLabel: "Puffco Peak cleaning guidance",
+    sourceUrl:
+      "https://puffco.zendesk.com/hc/en-us/articles/360055108754-How-do-I-clean-my-Peak",
+    intro: [
+      "The original Peak needs the same basic discipline as any e-rig: cool it down, clean residue early, keep the base dry, and let parts fully dry before use.",
+      "Puffco's Peak guidance says 99% isopropyl alcohol is preferred for the atomizer and glass, with no water rinse on the atomizer.",
+    ],
+    sections: [
+      {
+        heading: "Cool before disassembly",
+        body: [
+          "Let the bowl cool before removing the atomizer from the base. Remove the glass attachment carefully, then unscrew the atomizer.",
+          "If the bowl does not come out easily, do not force it. Forcing stuck parts is a good way to turn cleaning into a repair.",
+        ],
+      },
+      {
+        heading: "Clean the glass and carb cap",
+        body: [
+          "Puffco says the glass and carb cap can be soaked in isopropyl alcohol, with 99% preferred. Rinse glass after soaking, then let it dry completely.",
+          "Keep the base away from water and alcohol pools while the removable pieces are being cleaned.",
+        ],
+      },
+      {
+        heading: "Clean the atomizer",
+        body: [
+          "The atomizer can be submerged in isopropyl alcohol, with 99% preferred in Puffco's Peak guidance.",
+          "Do not rinse the atomizer with water. Puffco warns that water exposure to the ceramic can potentially damage the part.",
+        ],
+      },
+      {
+        heading: "Swab the connector points",
+        body: [
+          "Use an iso-dipped cotton swab to clean the gold connector pin on the base and the bottom of the atomizer.",
+          "Connection points are small, so keep the swab controlled. Damp is enough.",
+        ],
+      },
+      {
+        heading: "Make daily cleanup easier",
+        body: [
+          "The Peak is easier to maintain when Q-tips and iso live next to the device. Clean the bowl after use, then do deeper cleaning before buildup gets heavy.",
+          "Dab Pal keeps clean swabs, a 1oz iso bottle, and used swab storage in one case.",
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "What iso does Puffco prefer for the Peak?",
+        a: "Puffco's Peak guidance says 99% isopropyl alcohol is preferred, especially because lower percentages contain more water.",
+      },
+      {
+        q: "Can I rinse the Peak atomizer with water?",
+        a: "No. Puffco warns not to rinse the atomizer with water because water exposure to ceramic can potentially damage it.",
+      },
+      {
+        q: "How often should I clean my Peak?",
+        a: "Puffco suggests a thorough clean about every 20 uses, with light swabbing between sessions as needed.",
+      },
+    ],
+  },
+  {
+    slug: "how-to-clean-puffco-proxy",
+    title: "How to Clean a Puffco Proxy",
+    eyebrow: "Puffco Proxy cleaning",
+    description:
+      "How to clean a Puffco Proxy chamber, base, glass, and contact points with cotton swabs and 90%+ iso.",
+    publishedAt: "2026-07-08",
+    updatedAt: "2026-07-08",
+    readingMinutes: 4,
+    keywords: [
+      "how to clean puffco proxy",
+      "puffco proxy cleaning kit",
+      "puffco proxy chamber cleaning",
+      "puffco proxy swab holder",
+      "90% iso puffco proxy",
+    ],
+    sourceLabel: "Puffco Proxy cleaning guidance",
+    sourceUrl:
+      "https://puffco.zendesk.com/hc/en-us/articles/6771963837211-How-do-I-clean-my-Puffco-Proxy",
+    intro: [
+      "The Proxy is modular, which makes cleaning straightforward as long as you separate chamber, base, and glass care.",
+      "Puffco's Proxy guidance calls for 90%+ isopropyl alcohol for chamber cleaning, careful swabbing around contact points, and a fully dry chamber before use.",
+    ],
+    sections: [
+      {
+        heading: "Start cool",
+        body: [
+          "Let the Proxy cool before taking it apart. Do not handle the base, chamber, or glass while they are still hot.",
+          "Once it is cool, remove the glass and chamber so each part can be cleaned the right way.",
+        ],
+      },
+      {
+        heading: "Light clean the chamber",
+        body: [
+          "For light cleaning, use a cotton swab dipped in 90%+ iso to remove residue from the chamber.",
+          "Gently swab the gold contact points too. Keeping those points clean helps avoid connection issues.",
+        ],
+      },
+      {
+        heading: "Deep clean the chamber",
+        body: [
+          "For deeper cleaning, Puffco says the Proxy chamber can be submerged in 90%+ iso for 20 to 30 minutes.",
+          "Let the chamber fully dry before use. Iso is flammable, and wet parts do not belong near electronics.",
+        ],
+      },
+      {
+        heading: "Base and glass",
+        body: [
+          "Clean the base contact points and airpath with an iso-dipped swab. Do not flood or soak the base, and keep the USB port dry.",
+          "The glass can be soaked separately in iso, rinsed, and dried completely before reattaching.",
+        ],
+      },
+      {
+        heading: "Proxy travel cleaning",
+        body: [
+          "Proxy users often travel with the device, so loose swabs get annoying fast. Keep clean swabs separate from used swabs.",
+          "Dab Pal keeps 30 Q-tips and a 1oz bottle together, with the dirty side behind the slider toward the hinge.",
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "What iso does Puffco recommend for Proxy cleaning?",
+        a: "Puffco recommends 90%+ isopropyl alcohol for Proxy chamber cleaning.",
+      },
+      {
+        q: "Can I soak the Proxy base?",
+        a: "No. Do not soak or flood the base. Use a cotton swab around contact points and keep the USB port dry.",
+      },
+      {
+        q: "Can I soak the Proxy chamber?",
+        a: "Yes, Puffco's guidance says the chamber can be submerged in 90%+ iso for 20 to 30 minutes, then fully dried.",
+      },
+    ],
+  },
+  {
+    slug: "how-to-clean-puffco-pivot",
+    title: "How to Clean a Puffco Pivot",
+    eyebrow: "Puffco Pivot cleaning",
+    description:
+      "A Puffco Pivot cleaning routine for the chamber, mouthpiece, base connection, glass adapter, cotton swabs, and 90%+ iso.",
+    publishedAt: "2026-07-08",
+    updatedAt: "2026-07-08",
+    readingMinutes: 4,
+    keywords: [
+      "how to clean puffco pivot",
+      "puffco pivot cleaning kit",
+      "puffco pivot chamber cleaning",
+      "puffco pivot swab holder",
+      "90% iso puffco pivot",
+    ],
+    sourceLabel: "Puffco Pivot cleaning guidance",
+    sourceUrl:
+      "https://puffco.zendesk.com/hc/en-us/articles/45237725674779-How-do-I-clean-the-Pivot",
+    intro: [
+      "The Pivot has small parts, so cleaning works best when you keep chamber, mouthpiece, base, and adapter steps separate.",
+      "Puffco's Pivot guidance uses 90%+ isopropyl alcohol for chamber and mouthpiece cleaning, plus cotton swabs for the base threading and connection.",
+    ],
+    sections: [
+      {
+        heading: "Remove the chamber",
+        body: [
+          "Remove the chamber from the mouthpiece before cleaning. Small parts are easier to clean when they are separated.",
+          "If residue is heavy, do not force it with sharp tools. Let iso do the work.",
+        ],
+      },
+      {
+        heading: "Soak the chamber",
+        body: [
+          "Puffco says the Pivot chamber can be submerged in 90%+ iso for 20 to 30 minutes.",
+          "After soaking, set it upside down and allow time to fully dry before using it again.",
+        ],
+      },
+      {
+        heading: "Clean the base connection",
+        body: [
+          "Use a cotton swab dipped in 90%+ iso to wipe threading and the connection area on the base.",
+          "This matters because sticky residue can interfere with the chamber connection and trigger errors.",
+        ],
+      },
+      {
+        heading: "Mouthpiece and glass adapter",
+        body: [
+          "The mouthpiece can be submerged in 90%+ iso for 20 to 30 minutes, then rinsed and fully dried.",
+          "For the glass adapter, remove the chamber first, soak the adapter, rinse it, and let it dry completely.",
+        ],
+      },
+      {
+        heading: "What to keep in the kit",
+        body: [
+          "A Pivot cleaning kit should have cotton swabs, 90%+ iso, and a small case that keeps clean and used swabs apart.",
+          "Dab Pal works well for this because it keeps the bottle and swabs together without loose cotton floating around.",
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "What iso does Puffco recommend for the Pivot?",
+        a: "Puffco recommends 90%+ isopropyl alcohol for Pivot cleaning.",
+      },
+      {
+        q: "How long should I soak the Pivot chamber?",
+        a: "Puffco says to submerge the chamber in 90%+ iso for 20 to 30 minutes, then let it fully dry.",
+      },
+      {
+        q: "Can a dirty Pivot connection cause errors?",
+        a: "Yes. Puffco notes that residue between the chamber and base can interfere with the connection.",
+      },
+    ],
+  },
+  {
+    slug: "how-to-clean-puffco-plus",
+    title: "How to Clean a Puffco Plus",
+    eyebrow: "Puffco Plus cleaning",
+    description:
+      "A simple Puffco Plus cleaning routine for the chamber, Dart, mouthpiece, threading, cotton swabs, and iso.",
+    publishedAt: "2026-07-08",
+    updatedAt: "2026-07-08",
+    readingMinutes: 4,
+    keywords: [
+      "how to clean puffco plus",
+      "puffco plus cleaning kit",
+      "puffco plus chamber cleaning",
+      "puffco plus dart cleaning",
+      "puffco plus swab holder",
+    ],
+    sourceLabel: "Puffco Plus cleaning guidance",
+    sourceUrl:
+      "https://puffco.zendesk.com/hc/en-us/articles/360056926433-How-do-I-clean-my-Puffco-Plus",
+    intro: [
+      "The Puffco Plus is smaller than a Peak or Proxy, but it still benefits from cleaning right after use.",
+      "Puffco's Plus guidance focuses on cotton swabs, ISO, threading, the Dart, and one important caution: do not soak gunmetal parts in rubbing alcohol.",
+    ],
+    sections: [
+      {
+        heading: "Warm the chamber first",
+        body: [
+          "For general cleaning, Puffco says to warm the chamber by entering Sesh Mode for one cycle.",
+          "Then unscrew the mouthpiece and use a tightly wound cotton swab to remove leftover byproduct from the chamber and Dart.",
+        ],
+      },
+      {
+        heading: "Swab, do not scrape",
+        body: [
+          "Use a tightly wound swab so fibers do not shed into the chamber. Work gently around the Dart and chamber.",
+          "It is normal for the bottom of the chamber to darken over time, according to Puffco. That does not automatically mean the chamber is ruined.",
+        ],
+      },
+      {
+        heading: "Clean threading",
+        body: [
+          "Wipe threading with a cotton swab dipped in ISO. Sticky threading makes the pen feel worse and can create connection issues.",
+          "Keep the swab controlled and avoid flooding small parts.",
+        ],
+      },
+      {
+        heading: "Do not soak gunmetal parts",
+        body: [
+          "Puffco says the mouthpiece, battery, and threading can be wiped with an ISO-dipped swab.",
+          "Do not soak any gunmetal parts of the Plus in rubbing alcohol.",
+        ],
+      },
+      {
+        heading: "A Plus-friendly kit",
+        body: [
+          "For the Plus, a cleaning kit is mostly about having swabs ready and giving used swabs somewhere to go.",
+          "Dab Pal keeps regular Q-tips and a 1oz iso bottle together, then stores used swabs behind the slider until you can toss them.",
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "Can I soak my Puffco Plus?",
+        a: "Do not soak gunmetal parts of the Plus in rubbing alcohol. Puffco recommends wiping the mouthpiece, battery, and threading with an ISO-dipped swab.",
+      },
+      {
+        q: "What kind of swab should I use for the Plus?",
+        a: "Puffco recommends a tightly wound cotton swab for removing byproduct from the chamber and Dart.",
+      },
+      {
+        q: "Is chamber darkening normal on the Plus?",
+        a: "Yes. Puffco says it is normal for the bottom of the Plus chamber to darken over time and that it should not affect performance by itself.",
+      },
+    ],
+  },
 ]
 
 export const getBlogArticle = (slug: string) =>
