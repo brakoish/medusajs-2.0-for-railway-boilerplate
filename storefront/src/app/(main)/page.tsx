@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 
+import { getBaseURL } from "@lib/util/env"
 import Hero from "@modules/home/components/hero"
 import ProductFamilyGallery from "@modules/home/components/product-family-gallery"
 import FeatureTrio from "@modules/home/components/feature-trio"
@@ -10,9 +11,12 @@ import FAQ from "@modules/home/components/faq"
 import StructuredData from "@modules/home/components/structured-data"
 
 export const metadata: Metadata = {
-  title: "Dab Pal — Portable Q-tip and Iso Case for Puffco & Quartz Bangers",
+  title: "Dab Pal | Puffco Cleaning Kit and Dab Swab Case",
   description:
-    "The Dab Pal is a slim, made-to-order case that holds 30 Q-tips and a 1oz iso bottle, with a built-in slider to keep clean and dirty separate. Made in NY.",
+    "Portable dab cleaning kit for Puffco Peak, Pro, Proxy, e-rigs, and quartz bangers. Holds 30 Q-tips, a 1oz iso bottle, and clean/dirty swabs in one pocket case.",
+  alternates: {
+    canonical: getBaseURL(),
+  },
 }
 
 export default async function Home() {

@@ -32,8 +32,8 @@ export default function ProductFamilyGallery() {
             One Dab Pal. Two finishes.
           </h2>
           <p className="mt-5 max-w-xl text-base small:text-lg leading-relaxed text-gray-600">
-            Same pocket case, same clean/dirty slider, same 30 Q-tip and 1oz iso
-            setup. Pick the finish that fits your kit.
+            Same pocket Puffco cleaning kit, same clean/dirty dab swab slider,
+            same 30 Q-tip and 1oz iso setup. Pick the finish that fits your kit.
           </p>
 
           <div className="mt-8 grid grid-cols-1 gap-3 max-w-xl">

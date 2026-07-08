@@ -16,6 +16,10 @@ const faqs = [
     a: "There's a moveable divider inside the case. As you use Q-tips, slide them to the 'used' side, so clean ones stay separate and you never grab a dirty swab by mistake.",
   },
   {
+    q: "Can I use it for dab swabs or cotton swabs?",
+    a: "Yes. Dab Pal is sized for regular cotton swabs and Q-tips, the kind most people use for Puffco bowls, e-rigs, and quartz banger cleaning.",
+  },
+  {
     q: "How fast does it ship?",
     a: "Each Dab Pal is made to order in our Astoria, NY shop. Most orders ship in 2 to 3 business days. You'll get tracking when it goes out.",
   },

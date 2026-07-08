@@ -3,6 +3,7 @@ export type ShopProduct = {
   title: string
   subtitle: string
   description: string
+  seoDescription?: string
   image: string
   price: string
   badge: string
@@ -18,7 +19,9 @@ export const shopProducts: ShopProduct[] = [
     title: "Black Speck",
     subtitle: "Original finish",
     description:
-      "Matte black speck case with a 1oz iso bottle, 30 Q-tips, and the clean/dirty slider.",
+      "Matte black speck Puffco cleaning kit with a 1oz iso bottle, 30 Q-tips, and the clean/dirty swab slider.",
+    seoDescription:
+      "Black Speck Dab Pal is a portable Puffco cleaning kit and dab swab case for Q-tips, iso, e-rigs, and quartz bangers.",
     image: "/dab-pal/product-front.png",
     price: "From $25",
     badge: "Best seller",
@@ -32,7 +35,9 @@ export const shopProducts: ShopProduct[] = [
     title: "White Speck",
     subtitle: "Bright finish",
     description:
-      "White speck case with the same compact bottle, swab storage, and slider layout.",
+      "White speck Puffco cleaning kit with the same compact bottle, dab swab storage, and slider layout.",
+    seoDescription:
+      "White Speck Dab Pal is a portable dab cleaning kit and swab holder for Puffco Peak, Pro, Proxy, e-rigs, and quartz bangers.",
     image: "/dab-pal/product-front-white.jpg",
     price: "From $25",
     badge: "Ready to ship",

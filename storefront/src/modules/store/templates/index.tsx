@@ -56,9 +56,9 @@ const StoreTemplate = ({
               One kit. Pick your finish.
             </h1>
             <p className="mt-5 text-base small:text-lg leading-relaxed text-gray-600">
-              Pocket Q-tip and iso storage with a clean/dirty slider. Choose
-              Black Speck or White Speck, then pick Single, 3-Pack, or 6-Pack on
-              the product page.
+              Pocket Q-tip, iso, and dab swab storage with a clean/dirty slider.
+              Choose Black Speck or White Speck, then pick Single, 3-Pack, or
+              6-Pack on the product page.
             </p>
 
             <div className="mt-8">

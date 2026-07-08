@@ -24,15 +24,22 @@ const StructuredData = () => {
     url,
     logo: `${url}/icon-512.png`,
     description:
-      "Dab Pal makes portable cleaning kits for Puffco dab rigs and quartz bangers. Made to order in NY.",
+      "Dab Pal makes portable Puffco cleaning kits, dab swab cases, and quartz banger cleaning gear. Made to order in NY.",
   }
 
   const product = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: "Dab Pal Q-tip and Iso Case",
+    name: "Dab Pal Puffco Cleaning Kit",
+    alternateName: [
+      "Dab Pal Q-tip and Iso Case",
+      "Dab Swab Case",
+      "Puffco Swab Holder",
+      "Portable Banger Cleaner",
+    ],
     description:
-      "Slim, portable cleaning kit for Puffco Peak / Pro / Proxy and quartz bangers. Holds 30 regular Q-tips and a 1oz iso bottle, with a built-in slider for used vs. fresh swabs.",
+      "Slim, portable dab cleaning kit for Puffco Peak / Pro / Proxy, e-rigs, and quartz bangers. Holds 30 regular Q-tips and a 1oz iso bottle, with a built-in slider for used vs. fresh swabs.",
+    category: "Puffco cleaning kit",
     image: [
       `${url}/dab-pal/product-front.png`,
       `${url}/dab-pal/lineup.png`,
@@ -42,6 +49,18 @@ const StructuredData = () => {
       "@type": "Brand",
       name: "Dab Pal",
     },
+    additionalProperty: [
+      {
+        "@type": "PropertyValue",
+        name: "Use",
+        value: "Puffco bowl cleaning, e-rig cleaning, quartz banger cleaning",
+      },
+      {
+        "@type": "PropertyValue",
+        name: "Storage",
+        value: "Q-tips, cotton swabs, dab swabs, 1oz iso bottle",
+      },
+    ],
     sku: "DABPAL",
     offers: {
       "@type": "AggregateOffer",

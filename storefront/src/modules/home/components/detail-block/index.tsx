@@ -6,9 +6,15 @@ const specs = [
   { label: "Internal slider", value: "Separates used from unused swabs" },
   { label: "Weight", value: "~4 oz packaged" },
   { label: "Colors", value: "Black Speck or White Speck" },
-  { label: "Construction", value: "3D printed in a strong speckled polymer, hand-finished" },
-  { label: "Made in", value: "Astoria, NY — made to order" },
-  { label: "Compatible with", value: "Puffco Peak, Pro, Proxy, traditional quartz bangers" },
+  {
+    label: "Construction",
+    value: "3D printed in a strong speckled polymer, hand-finished",
+  },
+  { label: "Made in", value: "Astoria, NY, made to order" },
+  {
+    label: "Compatible with",
+    value: "Puffco Peak, Pro, Proxy, e-rigs, traditional quartz bangers",
+  },
 ]
 
 export default function DetailBlock() {
@@ -34,7 +40,8 @@ export default function DetailBlock() {
                 Everything your Puffco needs. Nothing it doesn't.
               </h2>
               <p className="text-white/70 mt-4 max-w-md leading-relaxed">
-                Built for daily Puffco and quartz banger users who care about a clean dab and want their gear organized, at home or on the move.
+                Built for daily Puffco, e-rig, and quartz banger users who care
+                about a clean dab and want swabs, iso, and gear organized.
               </p>
             </div>
             <dl className="divide-y divide-white/10 border-t border-white/10">
@@ -49,7 +56,8 @@ export default function DetailBlock() {
               ))}
             </dl>
             <p className="text-xs text-white/40 leading-relaxed">
-              Each Dab Pal is 3D printed and hand-finished, so small variations in texture or layer detail are normal and expected.
+              Each Dab Pal is 3D printed and hand-finished, so small variations
+              in texture or layer detail are normal and expected.
             </p>
           </div>
         </div>

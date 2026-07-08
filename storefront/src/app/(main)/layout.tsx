@@ -6,9 +6,9 @@ import { getBaseURL } from "@lib/util/env"
 
 const SITE_NAME = "Dab Pal"
 const SITE_URL = getBaseURL()
-const TAGLINE = "The clean banger kit you can actually carry."
+const TAGLINE = "Puffco cleaning kit and dab swab case."
 const DESCRIPTION =
-  "Portable dab cleaning kit. 30 Q-tips, a 1oz iso bottle, and a built-in slider for used vs. fresh swabs. Fits Puffco Peak, Pro, Proxy, and any quartz banger setup. Made to order in NY."
+  "Dab Pal is a portable Puffco cleaning kit and dab swab case with 30 Q-tips, a 1oz iso bottle, and clean/dirty swab storage. Made for Puffco Peak, Pro, Proxy, e-rigs, and quartz bangers."
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -24,10 +24,19 @@ export const metadata: Metadata = {
     "dab pal",
     "puffco cleaning kit",
     "puffco q-tips holder",
+    "puffco swab holder",
+    "puffco peak cleaning kit",
     "dab cleaning kit",
+    "dab swab case",
+    "dab swab holder",
+    "heady swab case",
+    "heady swabs",
     "portable banger cleaner",
+    "banger cleaning kit",
+    "banger swab holder",
     "puffco peak accessories",
     "iso q-tips travel case",
+    "isopropyl swab kit",
     "quartz banger cleaning",
     "e-rig accessories",
   ],
