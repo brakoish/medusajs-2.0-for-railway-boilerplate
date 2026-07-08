@@ -1,3 +1,5 @@
+import Image from "next/image"
+
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { BlogArticle, blogArticles } from "./articles"
 
@@ -8,6 +10,45 @@ const formatDate = (value: string) =>
     year: "numeric",
     timeZone: "UTC",
   }).format(new Date(`${value}T00:00:00Z`))
+
+const fallbackImages: Record<string, { src: string; alt: string }> = {
+  "how-to-clean-puffco-peak-pro-proxy": {
+    src: "/dab-pal/lineup.png",
+    alt: "Dab Pal cleaning kit with black and white finishes",
+  },
+  "how-to-clean-a-quartz-banger": {
+    src: "/dab-pal/product-front.png",
+    alt: "Black Speck Dab Pal with swab and iso storage",
+  },
+  "clean-vs-dirty-dab-swabs": {
+    src: "/dab-pal/product-front.png",
+    alt: "Dab Pal clean and dirty swab storage case",
+  },
+  "how-to-keep-dab-gear-clean-while-traveling": {
+    src: "/dab-pal/lineup.png",
+    alt: "Portable Dab Pal travel cleaning kit finishes",
+  },
+}
+
+const getArticleImage = (article: BlogArticle) =>
+  article.image ??
+  fallbackImages[article.slug] ?? {
+    src: "/dab-pal/product-front-white.jpg",
+    alt: "White Speck Dab Pal cleaning kit",
+  }
+
+const getRelatedArticles = (article: BlogArticle) =>
+  blogArticles
+    .filter((item) => item.slug !== article.slug)
+    .map((item) => ({
+      article: item,
+      score: item.keywords.filter((keyword) =>
+        article.keywords.includes(keyword)
+      ).length,
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 4)
+    .map((item) => item.article)
 
 export const BlogIndexTemplate = () => {
   return (
@@ -36,21 +77,32 @@ export const BlogIndexTemplate = () => {
             <LocalizedClientLink
               key={article.slug}
               href={`/blog/${article.slug}`}
-              className="group max-w-[20rem] small:max-w-none rounded-lg border border-gray-200 bg-white p-5 small:p-6 transition hover:border-amber-300 hover:shadow-elevation-card-rest"
+              className="group max-w-[20rem] small:max-w-none rounded-lg border border-gray-200 bg-white transition hover:border-amber-300 hover:shadow-elevation-card-rest"
             >
-              <span className="text-xs uppercase tracking-[0.22em] text-amber-700">
-                {article.eyebrow}
-              </span>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-gray-950 group-hover:text-amber-800">
-                {article.title}
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-gray-600">
-                {article.description}
-              </p>
-              <div className="mt-5 flex items-center gap-3 text-xs text-gray-500">
-                <span>{formatDate(article.updatedAt)}</span>
-                <span aria-hidden>•</span>
-                <span>{article.readingMinutes} min read</span>
+              <div className="relative aspect-[16/10] overflow-hidden rounded-t-lg bg-zinc-50">
+                <Image
+                  src={getArticleImage(article).src}
+                  alt={getArticleImage(article).alt}
+                  fill
+                  sizes="(max-width: 800px) 100vw, 50vw"
+                  className="object-contain p-5 transition-transform duration-300 group-hover:scale-[1.03]"
+                />
+              </div>
+              <div className="p-5 small:p-6">
+                <span className="text-xs uppercase tracking-[0.22em] text-amber-700">
+                  {article.eyebrow}
+                </span>
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-gray-950 group-hover:text-amber-800">
+                  {article.title}
+                </h2>
+                <p className="mt-3 text-sm leading-relaxed text-gray-600">
+                  {article.description}
+                </p>
+                <div className="mt-5 flex items-center gap-3 text-xs text-gray-500">
+                  <span>{formatDate(article.updatedAt)}</span>
+                  <span aria-hidden>•</span>
+                  <span>{article.readingMinutes} min read</span>
+                </div>
               </div>
             </LocalizedClientLink>
           ))}
@@ -61,9 +113,8 @@ export const BlogIndexTemplate = () => {
 }
 
 export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
-  const related = blogArticles
-    .filter((item) => item.slug !== article.slug)
-    .slice(0, 3)
+  const related = getRelatedArticles(article)
+  const image = getArticleImage(article)
 
   return (
     <main className="bg-white">
@@ -102,6 +153,40 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
                 <p key={paragraph}>{paragraph}</p>
               ))}
             </div>
+
+            <div className="relative mt-8 aspect-[16/10] overflow-hidden rounded-lg bg-zinc-50">
+              <Image
+                src={image.src}
+                alt={image.alt}
+                fill
+                priority
+                sizes="(max-width: 800px) 100vw, 760px"
+                className="object-contain p-6 small:p-10"
+              />
+            </div>
+
+            {article.howTo && (
+              <section className="mt-10 rounded-lg border border-gray-200 bg-zinc-50 p-5 small:p-6">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-2xl font-semibold tracking-tight text-gray-950">
+                    Quick steps
+                  </h2>
+                  <span className="text-sm text-gray-500">
+                    {article.howTo.steps.length} steps
+                  </span>
+                </div>
+                <ol className="mt-5 grid gap-4">
+                  {article.howTo.steps.map((step, index) => (
+                    <li key={step} className="flex gap-3 text-sm leading-6">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-xs font-semibold text-gray-700 shadow-borders-base">
+                        {index + 1}
+                      </span>
+                      <span className="text-gray-700">{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
 
             <div className="mt-10 space-y-10">
               {article.sections.map((section) => (
@@ -161,12 +246,20 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
                 Dab Pal holds 30 Q-tips, a 1oz iso bottle, and a slider for
                 clean vs dirty swabs.
               </p>
-              <LocalizedClientLink
-                href="/store"
-                className="mt-4 inline-flex rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800"
-              >
-                Shop Dab Pal
-              </LocalizedClientLink>
+              <div className="mt-4 grid gap-2">
+                <LocalizedClientLink
+                  href="/store/black-speck"
+                  className="inline-flex rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800"
+                >
+                  Shop Black Speck
+                </LocalizedClientLink>
+                <LocalizedClientLink
+                  href="/store/white-speck"
+                  className="inline-flex rounded-full border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-950 transition hover:border-amber-300"
+                >
+                  Shop White Speck
+                </LocalizedClientLink>
+              </div>
             </div>
 
             <div className="rounded-lg border border-gray-200 p-5">

@@ -15,6 +15,11 @@ export type BlogHowTo = {
   steps: string[]
 }
 
+export type BlogImage = {
+  src: string
+  alt: string
+}
+
 export type BlogArticle = {
   slug: string
   title: string
@@ -26,6 +31,7 @@ export type BlogArticle = {
   keywords: string[]
   sourceLabel?: string
   sourceUrl?: string
+  image?: BlogImage
   howTo?: BlogHowTo
   intro: string[]
   sections: BlogSection[]
