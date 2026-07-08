@@ -9,6 +9,7 @@ import PalMap from "@modules/home/components/pal-map"
 import Reviews from "@modules/home/components/reviews"
 import FAQ from "@modules/home/components/faq"
 import StructuredData from "@modules/home/components/structured-data"
+import BreadcrumbSchema from "@modules/common/components/breadcrumb-schema"
 
 export const metadata: Metadata = {
   title: "Dab Pal | Puffco Cleaning Kit and Dab Swab Case",
@@ -23,6 +24,7 @@ export default async function Home() {
   return (
     <>
       <StructuredData />
+      <BreadcrumbSchema items={[{ name: "Home", path: "" }]} />
       <Hero />
       <ProductFamilyGallery />
       <FeatureTrio />

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { getBaseURL } from "@lib/util/env"
 import { blogArticles, getBlogArticle } from "@modules/blog/articles"
 import { BlogArticleTemplate } from "@modules/blog/templates"
+import BreadcrumbSchema from "@modules/common/components/breadcrumb-schema"
 
 type Props = {
   params: { slug: string }
@@ -88,6 +89,13 @@ export default function ArticlePage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", path: "" },
+          { name: "Guides", path: "/blog" },
+          { name: article.title, path: `/blog/${article.slug}` },
+        ]}
       />
       <BlogArticleTemplate article={article} />
     </>

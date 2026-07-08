@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 
 import { getBaseURL } from "@lib/util/env"
+import BreadcrumbSchema from "@modules/common/components/breadcrumb-schema"
 import { BlogIndexTemplate } from "@modules/blog/templates"
 
 const base = getBaseURL()
@@ -21,5 +22,15 @@ export const metadata: Metadata = {
 }
 
 export default function BlogPage() {
-  return <BlogIndexTemplate />
+  return (
+    <>
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", path: "" },
+          { name: "Guides", path: "/blog" },
+        ]}
+      />
+      <BlogIndexTemplate />
+    </>
+  )
 }

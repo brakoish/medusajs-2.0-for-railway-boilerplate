@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { getBaseURL } from "@lib/util/env"
+import BreadcrumbSchema from "@modules/common/components/breadcrumb-schema"
 import FinishProductTemplate from "@modules/store/templates/finish-product"
 import {
   getShopProduct,
@@ -45,5 +46,19 @@ export default async function FinishPage({ params }: Props) {
   const product = getShopProduct(params.finish)
   if (!product) notFound()
 
-  return <FinishProductTemplate product={product} countryCode="us" />
+  return (
+    <>
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", path: "" },
+          { name: "Shop", path: "/store" },
+          {
+            name: `${product.title} Dab Pal`,
+            path: `/store/${product.handle}`,
+          },
+        ]}
+      />
+      <FinishProductTemplate product={product} countryCode="us" />
+    </>
+  )
 }

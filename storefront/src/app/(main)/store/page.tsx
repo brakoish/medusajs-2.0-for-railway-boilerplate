@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 
 import { getBaseURL } from "@lib/util/env"
+import BreadcrumbSchema from "@modules/common/components/breadcrumb-schema"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import StoreTemplate from "@modules/store/templates"
 
@@ -31,5 +32,15 @@ type Params = {
 export default async function StorePage({ searchParams }: Params) {
   const { sortBy, page } = searchParams
 
-  return <StoreTemplate sortBy={sortBy} page={page} countryCode="us" />
+  return (
+    <>
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", path: "" },
+          { name: "Shop", path: "/store" },
+        ]}
+      />
+      <StoreTemplate sortBy={sortBy} page={page} countryCode="us" />
+    </>
+  )
 }
