@@ -8,6 +8,13 @@ export type BlogFAQ = {
   a: string
 }
 
+export type BlogHowTo = {
+  totalTime: string
+  supplies: string[]
+  tools: string[]
+  steps: string[]
+}
+
 export type BlogArticle = {
   slug: string
   title: string
@@ -19,6 +26,7 @@ export type BlogArticle = {
   keywords: string[]
   sourceLabel?: string
   sourceUrl?: string
+  howTo?: BlogHowTo
   intro: string[]
   sections: BlogSection[]
   faq: BlogFAQ[]
@@ -188,6 +196,17 @@ export const blogArticles: BlogArticle[] = [
       "iso q tips for banger",
       "portable banger cleaner",
     ],
+    howTo: {
+      totalTime: "PT5M",
+      supplies: ["Cotton swabs", "Isopropyl alcohol"],
+      tools: ["Dab Pal or another swab case"],
+      steps: [
+        "Let the quartz banger cool until it is warm, not scorching hot.",
+        "Use a dry cotton swab to lift leftover residue.",
+        "Use a lightly dipped iso swab on spots that need more help.",
+        "Move used swabs to the dirty side of your kit.",
+      ],
+    },
     intro: [
       "Quartz bangers stay nicer when you clean them before residue has a chance to bake on. The routine is small, but timing matters.",
       "You do not need a huge setup. You need swabs, isopropyl alcohol, and a place to put the used swabs when you are done.",
@@ -472,6 +491,18 @@ export const blogArticles: BlogArticle[] = [
     sourceLabel: "Puffco Peak Pro cleaning guidance",
     sourceUrl:
       "https://puffco.zendesk.com/hc/en-us/articles/360057955453-How-do-I-clean-my-Peak-Pro",
+    howTo: {
+      totalTime: "PT30M",
+      supplies: ["90%+ isopropyl alcohol", "Cotton swabs", "Clean towel"],
+      tools: ["Dab Pal or another Puffco cleaning kit"],
+      steps: [
+        "Let the Peak Pro cool before removing the chamber and glass.",
+        "Swab the chamber with a cotton swab dampened with 90%+ iso.",
+        "For deeper cleaning, submerge the chamber in 90%+ iso for 20 minutes.",
+        "Clean the gold threads and airpath with a controlled iso swab.",
+        "Let all parts fully dry before reassembly.",
+      ],
+    },
     intro: [
       "The Peak Pro is easiest to keep clean when you treat cleanup as part of the session, not a project for later.",
       "Puffco's Peak Pro guidance points to cotton swabs, 90%+ isopropyl alcohol, dry electronics, and fully dried parts before reassembly.",
@@ -547,6 +578,18 @@ export const blogArticles: BlogArticle[] = [
     sourceLabel: "Puffco Peak cleaning guidance",
     sourceUrl:
       "https://puffco.zendesk.com/hc/en-us/articles/360055108754-How-do-I-clean-my-Peak",
+    howTo: {
+      totalTime: "PT30M",
+      supplies: ["99% isopropyl alcohol", "Cotton swabs", "Clean towel"],
+      tools: ["Dab Pal or another Puffco cleaning kit"],
+      steps: [
+        "Let the Peak cool before removing the glass and atomizer.",
+        "Soak the glass and carb cap in isopropyl alcohol, then rinse and dry the glass.",
+        "Soak the atomizer in isopropyl alcohol, but do not rinse it with water.",
+        "Clean the base connector pin and atomizer bottom with an iso-dipped swab.",
+        "Let the atomizer fully dry before reassembly.",
+      ],
+    },
     intro: [
       "The original Peak needs the same basic discipline as any e-rig: cool it down, clean residue early, keep the base dry, and let parts fully dry before use.",
       "Puffco's Peak guidance says 99% isopropyl alcohol is preferred for the atomizer and glass, with no water rinse on the atomizer.",
@@ -622,6 +665,18 @@ export const blogArticles: BlogArticle[] = [
     sourceLabel: "Puffco Proxy cleaning guidance",
     sourceUrl:
       "https://puffco.zendesk.com/hc/en-us/articles/6771963837211-How-do-I-clean-my-Puffco-Proxy",
+    howTo: {
+      totalTime: "PT30M",
+      supplies: ["90%+ isopropyl alcohol", "Cotton swabs", "Clean towel"],
+      tools: ["Dab Pal or another Puffco cleaning kit"],
+      steps: [
+        "Let the Proxy cool before removing the glass and chamber.",
+        "Swab the chamber and gold contact points with 90%+ iso.",
+        "For deeper cleaning, submerge the chamber in 90%+ iso for 20 to 30 minutes.",
+        "Clean the base contact points and airpath with an iso-dipped swab.",
+        "Let the chamber and glass fully dry before reassembly.",
+      ],
+    },
     intro: [
       "The Proxy is modular, which makes cleaning straightforward as long as you separate chamber, base, and glass care.",
       "Puffco's Proxy guidance calls for 90%+ isopropyl alcohol for chamber cleaning, careful swabbing around contact points, and a fully dry chamber before use.",
@@ -697,6 +752,18 @@ export const blogArticles: BlogArticle[] = [
     sourceLabel: "Puffco Pivot cleaning guidance",
     sourceUrl:
       "https://puffco.zendesk.com/hc/en-us/articles/45237725674779-How-do-I-clean-the-Pivot",
+    howTo: {
+      totalTime: "PT30M",
+      supplies: ["90%+ isopropyl alcohol", "Cotton swabs", "Clean towel"],
+      tools: ["Dab Pal or another Puffco cleaning kit"],
+      steps: [
+        "Remove the chamber from the Pivot mouthpiece.",
+        "Submerge the chamber in 90%+ iso for 20 to 30 minutes.",
+        "Clean the base threading and connection area with an iso-dipped swab.",
+        "Soak the mouthpiece or glass adapter separately when needed.",
+        "Let all parts fully dry before use.",
+      ],
+    },
     intro: [
       "The Pivot has small parts, so cleaning works best when you keep chamber, mouthpiece, base, and adapter steps separate.",
       "Puffco's Pivot guidance uses 90%+ isopropyl alcohol for chamber and mouthpiece cleaning, plus cotton swabs for the base threading and connection.",
@@ -772,6 +839,18 @@ export const blogArticles: BlogArticle[] = [
     sourceLabel: "Puffco Plus cleaning guidance",
     sourceUrl:
       "https://puffco.zendesk.com/hc/en-us/articles/360056926433-How-do-I-clean-my-Puffco-Plus",
+    howTo: {
+      totalTime: "PT10M",
+      supplies: ["ISO", "Tightly wound cotton swabs"],
+      tools: ["Dab Pal or another swab case"],
+      steps: [
+        "Warm the Plus chamber by running one Sesh Mode cycle.",
+        "Unscrew the mouthpiece and swab the chamber and Dart.",
+        "Clean threading with a cotton swab dipped in ISO.",
+        "Wipe gunmetal parts with an ISO-dipped swab, but do not soak them.",
+        "Let cleaned parts dry before use.",
+      ],
+    },
     intro: [
       "The Puffco Plus is smaller than a Peak or Proxy, but it still benefits from cleaning right after use.",
       "Puffco's Plus guidance focuses on cotton swabs, ISO, threading, the Dart, and one important caution: do not soak gunmetal parts in rubbing alcohol.",

@@ -79,6 +79,30 @@ export default function ArticlePage({ params }: Props) {
       },
     })),
   }
+  const howToSchema = article.howTo
+    ? {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        name: article.title,
+        description: article.description,
+        totalTime: article.howTo.totalTime,
+        mainEntityOfPage: url,
+        supply: article.howTo.supplies.map((name) => ({
+          "@type": "HowToSupply",
+          name,
+        })),
+        tool: article.howTo.tools.map((name) => ({
+          "@type": "HowToTool",
+          name,
+        })),
+        step: article.howTo.steps.map((text, index) => ({
+          "@type": "HowToStep",
+          position: index + 1,
+          name: text,
+          text,
+        })),
+      }
+    : null
 
   return (
     <>
@@ -90,6 +114,12 @@ export default function ArticlePage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
+      {howToSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+        />
+      )}
       <BreadcrumbSchema
         items={[
           { name: "Home", path: "" },
