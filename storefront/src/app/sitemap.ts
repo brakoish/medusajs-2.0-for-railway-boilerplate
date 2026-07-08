@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next"
 import { getBaseURL } from "@lib/util/env"
+import { blogArticles } from "@modules/blog/articles"
 
 /**
  * Sitemap. Keep transactional/account routes out, but include the public
@@ -8,7 +9,7 @@ import { getBaseURL } from "@lib/util/env"
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = getBaseURL()
   const now = new Date()
-  return [
+  const coreRoutes: MetadataRoute.Sitemap = [
     {
       url: base,
       lastModified: now,
@@ -33,5 +34,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.85,
     },
+  ]
+
+  return [
+    ...coreRoutes,
+    {
+      url: `${base}/blog`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    ...blogArticles.map((article) => ({
+      url: `${base}/blog/${article.slug}`,
+      lastModified: new Date(`${article.updatedAt}T00:00:00Z`),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
   ]
 }

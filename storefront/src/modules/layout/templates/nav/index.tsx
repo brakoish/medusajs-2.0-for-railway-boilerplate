@@ -52,17 +52,24 @@ export default function Nav() {
               mid-bar regardless of logo/cart widths. */}
           <div className="hidden small:flex items-center gap-x-8 absolute left-1/2 -translate-x-1/2">
             <NavLink href="/store">Shop</NavLink>
+            <NavLink href="/blog">Guides</NavLink>
             <NavLink href="/#reviews">Reviews</NavLink>
             <NavLink href="/#faq">FAQ</NavLink>
           </div>
 
           {/* MOBILE-ONLY: Shop + Reviews + FAQ. */}
-          <div className="flex small:hidden flex-1 items-center justify-center gap-x-5">
+          <div className="flex small:hidden flex-1 items-center justify-center gap-x-4">
             <LocalizedClientLink
               href="/store"
               className="text-xs text-ui-fg-subtle hover:text-ui-fg-base"
             >
               Shop
+            </LocalizedClientLink>
+            <LocalizedClientLink
+              href="/blog"
+              className="text-xs text-ui-fg-subtle hover:text-ui-fg-base"
+            >
+              Guides
             </LocalizedClientLink>
             <LocalizedClientLink
               href="/#reviews"

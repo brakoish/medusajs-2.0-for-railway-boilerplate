@@ -17,7 +17,8 @@ export default async function Footer() {
               <DabPalLogoStacked className="h-16 w-auto" />
             </LocalizedClientLink>
             <Text className="text-ui-fg-subtle txt-small mt-2">
-              Portable Q-tip and isopropyl alcohol case for cleaning Puffco and quartz bangers. Made to order in NY.
+              Portable Q-tip and isopropyl alcohol case for cleaning Puffco and
+              quartz bangers. Made to order in NY.
             </Text>
           </div>
           <div className="flex flex-col gap-y-2">
@@ -45,6 +46,35 @@ export default async function Footer() {
                   className="hover:text-ui-fg-base"
                 >
                   Cart
+                </LocalizedClientLink>
+              </li>
+            </ul>
+          </div>
+          <div className="flex flex-col gap-y-2">
+            <span className="txt-small-plus txt-ui-fg-base">Learn</span>
+            <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
+              <li>
+                <LocalizedClientLink
+                  href="/blog"
+                  className="hover:text-ui-fg-base"
+                >
+                  Cleaning guides
+                </LocalizedClientLink>
+              </li>
+              <li>
+                <LocalizedClientLink
+                  href="/blog/how-to-clean-puffco-peak-pro-proxy"
+                  className="hover:text-ui-fg-base"
+                >
+                  Puffco cleaning
+                </LocalizedClientLink>
+              </li>
+              <li>
+                <LocalizedClientLink
+                  href="/blog/how-to-clean-a-quartz-banger"
+                  className="hover:text-ui-fg-base"
+                >
+                  Banger cleaning
                 </LocalizedClientLink>
               </li>
             </ul>
