@@ -17,9 +17,6 @@ import { useSetSelectedVariantId } from "@modules/products/contexts/variant-cont
 import { HttpTypes } from "@medusajs/types"
 
 const COUNTRY = "us"
-const BATCH_TIME_ZONE = "America/New_York"
-const BATCH_CLOSE_HOUR = 17
-const BATCH_OPEN_HOUR = 9
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -30,168 +27,27 @@ type ProductActionsProps = {
 }
 
 const optionsAsKeymap = (variantOptions: any) => {
-  return variantOptions?.reduce((acc: Record<string, string | undefined>, varopt: any) => {
-    if (varopt.option && varopt.value !== null && varopt.value !== undefined) {
-      acc[varopt.option.title] = varopt.value
-    }
-    return acc
-  }, {})
-}
-
-type ZonedParts = {
-  year: number
-  month: number
-  day: number
-  hour: number
-  minute: number
-  second: number
-  weekday: number
-}
-
-const formatParts = new Intl.DateTimeFormat("en-US", {
-  timeZone: BATCH_TIME_ZONE,
-  weekday: "short",
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-  hour12: false,
-})
-
-const weekdayIndex: Record<string, number> = {
-  Sun: 0,
-  Mon: 1,
-  Tue: 2,
-  Wed: 3,
-  Thu: 4,
-  Fri: 5,
-  Sat: 6,
-}
-
-const getZonedParts = (date: Date): ZonedParts => {
-  const parts = Object.fromEntries(
-    formatParts.formatToParts(date).map((part) => [part.type, part.value])
-  )
-
-  return {
-    year: Number(parts.year),
-    month: Number(parts.month),
-    day: Number(parts.day),
-    hour: Number(parts.hour),
-    minute: Number(parts.minute),
-    second: Number(parts.second),
-    weekday: weekdayIndex[parts.weekday] ?? 0,
-  }
-}
-
-const getTimeZoneOffsetMs = (date: Date) => {
-  const parts = getZonedParts(date)
-  const zonedAsUtc = Date.UTC(
-    parts.year,
-    parts.month - 1,
-    parts.day,
-    parts.hour,
-    parts.minute,
-    parts.second
-  )
-
-  return zonedAsUtc - date.getTime()
-}
-
-const zonedTimeToUtc = (
-  year: number,
-  month: number,
-  day: number,
-  hour: number
-) => {
-  const guess = new Date(Date.UTC(year, month - 1, day, hour, 0, 0))
-  const offset = getTimeZoneOffsetMs(guess)
-
-  return new Date(guess.getTime() - offset)
-}
-
-const addDays = (date: Date, days: number) => {
-  const next = new Date(date)
-  next.setUTCDate(next.getUTCDate() + days)
-  return next
-}
-
-const getNextBusinessDay = (parts: ZonedParts) => {
-  let candidate = zonedTimeToUtc(
-    parts.year,
-    parts.month,
-    parts.day,
-    BATCH_OPEN_HOUR
-  )
-
-  do {
-    candidate = addDays(candidate, 1)
-  } while ([0, 6].includes(getZonedParts(candidate).weekday))
-
-  return candidate
-}
-
-const formatDuration = (ms: number) => {
-  const totalMinutes = Math.max(0, Math.ceil(ms / 60000))
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
-
-  if (hours <= 0) return `${minutes}m`
-  return `${hours}h ${minutes.toString().padStart(2, "0")}m`
-}
-
-const getBatchUrgency = (now: Date) => {
-  const parts = getZonedParts(now)
-  const isBusinessDay = parts.weekday >= 1 && parts.weekday <= 5
-
-  if (isBusinessDay && parts.hour < BATCH_CLOSE_HOUR) {
-    const closesAt = zonedTimeToUtc(
-      parts.year,
-      parts.month,
-      parts.day,
-      BATCH_CLOSE_HOUR
-    )
-
-    return {
-      label: "Today's small-batch queue closes in",
-      duration: formatDuration(closesAt.getTime() - now.getTime()),
-      note: "Orders are made to order in NY.",
-    }
-  }
-
-  const opensAt = getNextBusinessDay(parts)
-
-  return {
-    label: "Next small-batch queue opens in",
-    duration: formatDuration(opensAt.getTime() - now.getTime()),
-    note: "Orders are made to order in NY.",
-  }
-}
-
-const BatchUrgency = () => {
-  const [now, setNow] = useState(() => new Date())
-
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 60000)
-    return () => clearInterval(timer)
-  }, [])
-
-  const urgency = useMemo(() => getBatchUrgency(now), [now])
-
-  return (
-    <div className="rounded-lg border border-amber-200 bg-amber-50/70 px-3 py-2 text-sm text-gray-900">
-      <div className="flex items-center justify-between gap-3">
-        <span>{urgency.label}</span>
-        <time className="font-semibold tabular-nums text-amber-800">
-          {urgency.duration}
-        </time>
-      </div>
-      <p className="mt-1 text-xs text-gray-600">{urgency.note}</p>
-    </div>
+  return variantOptions?.reduce(
+    (acc: Record<string, string | undefined>, varopt: any) => {
+      if (
+        varopt.option &&
+        varopt.value !== null &&
+        varopt.value !== undefined
+      ) {
+        acc[varopt.option.title] = varopt.value
+      }
+      return acc
+    },
+    {}
   )
 }
+
+const FulfillmentNote = () => (
+  <div className="rounded-lg border border-gray-200 bg-zinc-50 px-3 py-2 text-sm text-gray-800">
+    <span className="font-medium text-gray-950">Made in NY.</span>{" "}
+    <span>Most orders ship in 1 to 2 business days.</span>
+  </div>
+)
 
 export default function ProductActions({
   product,
@@ -200,14 +56,16 @@ export default function ProductActions({
   hideMobileActions,
   initialVariantSku = "DABPAL-BLK-SINGLE",
 }: ProductActionsProps) {
-  const [options, setOptions] = useState<Record<string, string | undefined>>(() => {
-    // Pre-compute defaults so there's no "Select variant" flash on first render.
-    if (!product.variants?.length) return {}
-    const preferred =
-      product.variants.find((v) => v.sku === initialVariantSku) ??
-      product.variants[0]
-    return optionsAsKeymap(preferred.options) ?? {}
-  })
+  const [options, setOptions] = useState<Record<string, string | undefined>>(
+    () => {
+      // Pre-compute defaults so there's no "Select variant" flash on first render.
+      if (!product.variants?.length) return {}
+      const preferred =
+        product.variants.find((v) => v.sku === initialVariantSku) ??
+        product.variants[0]
+      return optionsAsKeymap(preferred.options) ?? {}
+    }
+  )
   const [isAdding, setIsAdding] = useState(false)
   const [btnReady, setBtnReady] = useState(false)
   const prevVariantIdRef = useRef<string | undefined>(undefined)
@@ -375,13 +233,15 @@ export default function ProductActions({
 
         <ProductPrice product={product} variant={selectedVariant} />
 
-        <BatchUrgency />
+        <FulfillmentNote />
 
         <Button
           onClick={handleAddToCart}
           disabled={!inStock || !selectedVariant || !!disabled || isAdding}
           variant="primary"
-          className={`w-full h-10 rounded-lg transition-shadow${btnReady ? " animate-btn-ready" : ""}`}
+          className={`w-full h-10 rounded-lg transition-shadow${
+            btnReady ? " animate-btn-ready" : ""
+          }`}
           isLoading={isAdding}
           data-testid="add-product-button"
         >
