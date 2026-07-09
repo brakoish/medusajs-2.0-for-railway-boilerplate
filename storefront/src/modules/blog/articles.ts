@@ -57,7 +57,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/puffco-peak-pro-proxy-cleaning.webp",
-      alt: "Dab Pal cleaning kit with clean e-rig devices for Puffco-style care",
+      alt: "Cotton swabs, iso bottle, glass attachment, towel, and closed amber jar",
     },
     sourceLabel: "Puffco Proxy cleaning guidance",
     sourceUrl:
@@ -136,7 +136,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/dab-cleaning-kit-checklist.webp",
-      alt: "Dab Pal cleaning kit packed with cotton swabs and a small iso bottle",
+      alt: "Cotton swabs, iso bottle, quartz banger, towel, and closed amber jar",
     },
     intro: [
       "A good dab cleaning kit is not complicated. It just needs to make the clean thing easy to do every time.",
@@ -212,7 +212,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/quartz-banger-cleaning.webp",
-      alt: "Quartz banger beside a Dab Pal kit, cotton swabs, and iso bottle",
+      alt: "Quartz banger with cotton swabs, iso bottle, and closed amber jar",
     },
     howTo: {
       totalTime: "PT5M",
@@ -299,7 +299,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/best-swabs-for-dabs.webp",
-      alt: "Clean cotton swabs arranged beside a white Dab Pal cleaning kit",
+      alt: "Clean cotton swabs arranged with iso bottle and closed amber jar",
     },
     intro: [
       "People use a lot of names for the same job: Q-tips, cotton swabs, dab swabs, heady swabs. The point is simple. You need something clean, absorbent, and easy to grab right after a session.",
@@ -375,7 +375,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/clean-vs-dirty-dab-swabs.webp",
-      alt: "Dab Pal kit separating clean cotton swabs from used swabs",
+      alt: "Clean cotton swabs separated from lightly used swabs in a dish",
     },
     intro: [
       "The overlooked part of dab cleanup is what happens after the swab is used. A dirty swab is sticky, smelly, and very good at finding the clean side of your bag.",
@@ -444,7 +444,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/travel-dab-cleaning-kit.webp",
-      alt: "Portable Dab Pal cleaning kit packed beside a travel pouch",
+      alt: "Travel pouch with cotton swabs, iso bottle, quartz piece, cloth, and closed amber jar",
     },
     intro: [
       "Travel is where cleanup gets messy. At home, everything has a spot. In a car, hotel room, backpack, or dab bag, the little stuff starts moving around.",
@@ -520,7 +520,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/puffco-peak-pro-cleaning.webp",
-      alt: "Dab Pal cleaning kit with a Peak Pro-style e-rig device",
+      alt: "Ceramic chamber cup, contact plate, cotton swabs, iso bottle, towel, and closed amber jar",
     },
     sourceLabel: "Puffco Peak Pro cleaning guidance",
     sourceUrl:
@@ -611,7 +611,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/puffco-peak-cleaning.webp",
-      alt: "Dab Pal cleaning kit with an original Peak-style e-rig device",
+      alt: "Ceramic chamber cup and contact plate with cotton swabs, iso bottle, and towel",
     },
     sourceLabel: "Puffco Peak cleaning guidance",
     sourceUrl:
@@ -702,7 +702,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/puffco-proxy-cleaning.webp",
-      alt: "Dab Pal cleaning kit with a compact Proxy-style device",
+      alt: "Compact glass attachment, ceramic cup, cotton swabs, iso bottle, towel, and closed amber jar",
     },
     sourceLabel: "Puffco Proxy cleaning guidance",
     sourceUrl:
@@ -793,7 +793,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/puffco-pivot-cleaning.webp",
-      alt: "Dab Pal cleaning kit with a slim Pivot-style pen device",
+      alt: "Unbranded pen-style device parts with cotton swabs, iso bottle, towel, and closed amber jar",
     },
     sourceLabel: "Puffco Pivot cleaning guidance",
     sourceUrl:
@@ -884,7 +884,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/puffco-plus-cleaning.webp",
-      alt: "Dab Pal cleaning kit with a disassembled Plus-style pen device",
+      alt: "Unbranded pen-style device parts with cotton swabs, iso bottle, towel, and closed amber jar",
     },
     sourceLabel: "Puffco Plus cleaning guidance",
     sourceUrl:
