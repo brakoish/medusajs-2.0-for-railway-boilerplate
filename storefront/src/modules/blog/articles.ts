@@ -55,6 +55,10 @@ export const blogArticles: BlogArticle[] = [
       "puffco proxy cleaning kit",
       "puffco swab holder",
     ],
+    image: {
+      src: "/dab-pal/blog/puffco-peak-pro-proxy-cleaning.webp",
+      alt: "Dab Pal cleaning kit with clean e-rig devices for Puffco-style care",
+    },
     sourceLabel: "Puffco Proxy cleaning guidance",
     sourceUrl:
       "https://puffco.zendesk.com/hc/en-us/articles/45364120003227-How-do-I-clean-my-Puffco-Proxy",
@@ -130,6 +134,10 @@ export const blogArticles: BlogArticle[] = [
       "dab kit organizer",
       "isopropyl swab kit",
     ],
+    image: {
+      src: "/dab-pal/blog/dab-cleaning-kit-checklist.webp",
+      alt: "Dab Pal cleaning kit packed with cotton swabs and a small iso bottle",
+    },
     intro: [
       "A good dab cleaning kit is not complicated. It just needs to make the clean thing easy to do every time.",
       "The basics are cotton swabs, isopropyl alcohol, a small bottle, and a way to keep clean swabs separate from the ones you already used.",
@@ -202,6 +210,10 @@ export const blogArticles: BlogArticle[] = [
       "iso q tips for banger",
       "portable banger cleaner",
     ],
+    image: {
+      src: "/dab-pal/blog/quartz-banger-cleaning.webp",
+      alt: "Quartz banger beside a Dab Pal kit, cotton swabs, and iso bottle",
+    },
     howTo: {
       totalTime: "PT5M",
       supplies: ["Cotton swabs", "Isopropyl alcohol"],
@@ -285,6 +297,10 @@ export const blogArticles: BlogArticle[] = [
       "q tip holder for dabs",
       "cotton swabs for dabs",
     ],
+    image: {
+      src: "/dab-pal/blog/best-swabs-for-dabs.webp",
+      alt: "Clean cotton swabs arranged beside a white Dab Pal cleaning kit",
+    },
     intro: [
       "People use a lot of names for the same job: Q-tips, cotton swabs, dab swabs, heady swabs. The point is simple. You need something clean, absorbent, and easy to grab right after a session.",
       "The best swab is the one you actually have nearby when it is time to clean.",
@@ -357,6 +373,10 @@ export const blogArticles: BlogArticle[] = [
       "used q tip holder",
       "dab q tip holder",
     ],
+    image: {
+      src: "/dab-pal/blog/clean-vs-dirty-dab-swabs.webp",
+      alt: "Dab Pal kit separating clean cotton swabs from used swabs",
+    },
     intro: [
       "The overlooked part of dab cleanup is what happens after the swab is used. A dirty swab is sticky, smelly, and very good at finding the clean side of your bag.",
       "Keeping clean and dirty swabs separate is a small design detail that makes a daily cleaning kit much less annoying.",
@@ -422,6 +442,10 @@ export const blogArticles: BlogArticle[] = [
       "q tips travel case",
       "iso bottle case",
     ],
+    image: {
+      src: "/dab-pal/blog/travel-dab-cleaning-kit.webp",
+      alt: "Portable Dab Pal cleaning kit packed beside a travel pouch",
+    },
     intro: [
       "Travel is where cleanup gets messy. At home, everything has a spot. In a car, hotel room, backpack, or dab bag, the little stuff starts moving around.",
       "That is why the kit should stay small. Not clever. Not overbuilt. Just swabs, iso, and a place for used cotton.",
@@ -494,6 +518,10 @@ export const blogArticles: BlogArticle[] = [
       "puffco peak pro swab holder",
       "90% iso puffco peak pro",
     ],
+    image: {
+      src: "/dab-pal/blog/puffco-peak-pro-cleaning.webp",
+      alt: "Dab Pal cleaning kit with a Peak Pro-style e-rig device",
+    },
     sourceLabel: "Puffco Peak Pro cleaning guidance",
     sourceUrl:
       "https://puffco.zendesk.com/hc/en-us/articles/360057955453-How-do-I-clean-my-Peak-Pro",
@@ -581,6 +609,10 @@ export const blogArticles: BlogArticle[] = [
       "puffco peak swab holder",
       "99% iso puffco peak",
     ],
+    image: {
+      src: "/dab-pal/blog/puffco-peak-cleaning.webp",
+      alt: "Dab Pal cleaning kit with an original Peak-style e-rig device",
+    },
     sourceLabel: "Puffco Peak cleaning guidance",
     sourceUrl:
       "https://puffco.zendesk.com/hc/en-us/articles/360055108754-How-do-I-clean-my-Peak",
@@ -668,6 +700,10 @@ export const blogArticles: BlogArticle[] = [
       "puffco proxy swab holder",
       "90% iso puffco proxy",
     ],
+    image: {
+      src: "/dab-pal/blog/puffco-proxy-cleaning.webp",
+      alt: "Dab Pal cleaning kit with a compact Proxy-style device",
+    },
     sourceLabel: "Puffco Proxy cleaning guidance",
     sourceUrl:
       "https://puffco.zendesk.com/hc/en-us/articles/6771963837211-How-do-I-clean-my-Puffco-Proxy",
@@ -755,6 +791,10 @@ export const blogArticles: BlogArticle[] = [
       "puffco pivot swab holder",
       "90% iso puffco pivot",
     ],
+    image: {
+      src: "/dab-pal/blog/puffco-pivot-cleaning.webp",
+      alt: "Dab Pal cleaning kit with a slim Pivot-style pen device",
+    },
     sourceLabel: "Puffco Pivot cleaning guidance",
     sourceUrl:
       "https://puffco.zendesk.com/hc/en-us/articles/45237725674779-How-do-I-clean-the-Pivot",
@@ -842,6 +882,10 @@ export const blogArticles: BlogArticle[] = [
       "puffco plus dart cleaning",
       "puffco plus swab holder",
     ],
+    image: {
+      src: "/dab-pal/blog/puffco-plus-cleaning.webp",
+      alt: "Dab Pal cleaning kit with a disassembled Plus-style pen device",
+    },
     sourceLabel: "Puffco Plus cleaning guidance",
     sourceUrl:
       "https://puffco.zendesk.com/hc/en-us/articles/360056926433-How-do-I-clean-my-Puffco-Plus",

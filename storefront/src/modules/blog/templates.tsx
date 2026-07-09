@@ -11,28 +11,8 @@ const formatDate = (value: string) =>
     timeZone: "UTC",
   }).format(new Date(`${value}T00:00:00Z`))
 
-const fallbackImages: Record<string, { src: string; alt: string }> = {
-  "how-to-clean-puffco-peak-pro-proxy": {
-    src: "/dab-pal/lineup.png",
-    alt: "Dab Pal cleaning kit with black and white finishes",
-  },
-  "how-to-clean-a-quartz-banger": {
-    src: "/dab-pal/product-front.png",
-    alt: "Black Speck Dab Pal with swab and iso storage",
-  },
-  "clean-vs-dirty-dab-swabs": {
-    src: "/dab-pal/product-front.png",
-    alt: "Dab Pal clean and dirty swab storage case",
-  },
-  "how-to-keep-dab-gear-clean-while-traveling": {
-    src: "/dab-pal/lineup.png",
-    alt: "Portable Dab Pal travel cleaning kit finishes",
-  },
-}
-
 const getArticleImage = (article: BlogArticle) =>
-  article.image ??
-  fallbackImages[article.slug] ?? {
+  article.image ?? {
     src: "/dab-pal/product-front-white.jpg",
     alt: "White Speck Dab Pal cleaning kit",
   }
@@ -85,7 +65,7 @@ export const BlogIndexTemplate = () => {
                   alt={getArticleImage(article).alt}
                   fill
                   sizes="(max-width: 800px) 100vw, 50vw"
-                  className="object-contain p-5 transition-transform duration-300 group-hover:scale-[1.03]"
+                  className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                 />
               </div>
               <div className="p-5 small:p-6">
@@ -161,7 +141,7 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
                 fill
                 priority
                 sizes="(max-width: 800px) 100vw, 760px"
-                className="object-contain p-6 small:p-10"
+                className="object-cover"
               />
             </div>
 
