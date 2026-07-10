@@ -1,42 +1,28 @@
-/**
- * Announcement bar — thin strip above the main nav.
- *
- * Why it's here:
- *   - Free-shipping/value bars above the nav correlate with one of the
- *     biggest cart-completion lifts (~30%, Baymard) because buyers see
- *     the threshold before they bounce.
- *   - Stating origin + lead time builds trust on a small DTC brand
- *     without forcing the buyer into an "About" page.
- *
- * Design:
- *   - Black background with off-white text, amber dots as separators.
- *     Provides a high-contrast frame that makes the white nav below
- *     pop without piling extra borders on the page.
- *   - Three rotating-friendly slots (we just render them inline for now;
- *     trivial to upgrade to a tiny carousel later).
- */
-
-const items = [
-  "Made in NY",
-  "Ships in 1–2 days",
-  "14-day returns",
-]
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 const AnnouncementBar = () => {
   return (
-    <div className="bg-black text-white text-[11px] small:text-xs">
-      <div className="content-container flex items-center justify-center gap-x-3 small:gap-x-5 h-8 small:h-9 overflow-hidden whitespace-nowrap">
-        {items.map((text, i) => (
-          <span key={text} className="flex items-center gap-x-3 small:gap-x-5">
-            {i > 0 && (
-              <span
-                aria-hidden
-                className="w-[3px] h-[3px] rounded-full bg-amber-400/90"
-              />
-            )}
-            <span className="tracking-wide">{text}</span>
+    <div className="bg-[#111111] text-white text-[11px] small:text-xs">
+      <div className="content-container flex h-9 items-center justify-center gap-x-2 overflow-hidden whitespace-nowrap small:h-10 small:gap-x-4">
+        <span className="hidden rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-black small:inline-flex">
+          710 sale
+        </span>
+        <span className="font-medium tracking-wide">
+          $7.10 off through Sunday
+        </span>
+        <span aria-hidden className="h-1 w-1 rounded-full bg-amber-400/90" />
+        <span className="tracking-wide text-white/78">
+          Use code{" "}
+          <span className="font-bold tracking-[0.12em] text-amber-300">
+            PAL710
           </span>
-        ))}
+        </span>
+        <LocalizedClientLink
+          href="/store"
+          className="ml-1 hidden rounded-full border border-white/16 px-3 py-1 font-semibold uppercase tracking-[0.12em] text-white transition hover:border-amber-300 hover:text-amber-200 small:inline-flex"
+        >
+          Shop
+        </LocalizedClientLink>
       </div>
     </div>
   )
