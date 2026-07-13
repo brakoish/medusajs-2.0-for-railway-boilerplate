@@ -2,16 +2,11 @@ import { Suspense } from "react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { DabPalLogoLong } from "@modules/common/components/dab-pal-logo"
-import AnnouncementBar from "@modules/layout/components/announcement-bar"
 import CartButton from "@modules/layout/components/cart-button"
 import NavShell from "@modules/layout/components/nav-shell"
 
 /**
  * Top-of-app navigation.
- *
- * Layout:
- *   1. Announcement bar (free shipping / Made in NY / lead time) — black
- *   2. Sticky main nav — translucent over hero, solid on scroll
  *
  * Decisions worth remembering:
  *   - No hamburger menu: this is a 1-product store, hidden nav adds a
@@ -31,7 +26,6 @@ import NavShell from "@modules/layout/components/nav-shell"
 export default function Nav() {
   return (
     <div className="sticky top-0 inset-x-0 z-50">
-      <AnnouncementBar />
       <NavShell>
         <nav className="content-container relative flex items-center w-full h-full">
           {/* LEFT — wordmark.
