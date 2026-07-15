@@ -2,13 +2,12 @@
 
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls, useGLTF } from "@react-three/drei"
-import { Suspense, useEffect, useMemo, useState } from "react"
+import { Suspense, useEffect, useMemo, useRef, useState } from "react"
 import * as THREE from "three"
 import type { GLTF } from "three-stdlib"
 import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js"
 
 type PartName = "body" | "lid" | "slider"
-type ViewName = "iso" | "side" | "top"
 
 type Swatch = {
   name: string
@@ -53,31 +52,42 @@ const partLabels: Record<PartName, string> = {
   slider: "Slider",
 }
 
-const viewLabels: Record<ViewName, string> = {
-  iso: "Iso",
-  side: "Side",
-  top: "Top",
-}
-
-const viewRotations: Record<ViewName, [number, number, number]> = {
-  iso: [1.12, 0, -0.48],
-  side: [1.52, 0, -1.57],
-  top: [0, Math.PI, -0.05],
-}
-
+const defaultViewRotation: [number, number, number] = [0, Math.PI, -0.05]
 const layerHeightMm = 0.2
 const hingePivot = new THREE.Vector3(73.8, 71.8, -12.3)
 const modelCenter = new THREE.Vector3(39.19, 40.5, -12.32)
 
 const CustomizerPreview = () => {
   const [colors, setColors] = useState(initialColors)
-  const [view, setView] = useState<ViewName>("top")
   const [isOpen, setIsOpen] = useState(false)
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (tapTimerRef.current) {
+        clearTimeout(tapTimerRef.current)
+      }
+    }
+  }, [])
+
+  const handleModelTap = () => {
+    if (tapTimerRef.current) {
+      clearTimeout(tapTimerRef.current)
+      tapTimerRef.current = null
+      setIsOpen(false)
+      return
+    }
+
+    tapTimerRef.current = setTimeout(() => {
+      setIsOpen((value) => !value)
+      tapTimerRef.current = null
+    }, 220)
+  }
 
   return (
     <section className="bg-white text-zinc-950">
       <div className="content-container grid min-h-[calc(100vh-160px)] grid-cols-1 gap-6 py-5 small:grid-cols-[minmax(0,1fr)_22rem] small:gap-10 small:py-10">
-        <div className="min-h-[27rem] overflow-hidden bg-white small:min-h-[calc(100vh-240px)]">
+        <div className="min-h-[27rem] cursor-pointer overflow-hidden bg-white small:min-h-[calc(100vh-240px)]">
           <Canvas
             camera={{ position: [0, 0, 8], fov: 34 }}
             gl={{ antialias: true, alpha: false }}
@@ -91,8 +101,7 @@ const CustomizerPreview = () => {
               <DabPalModel
                 colors={colors}
                 isOpen={isOpen}
-                onToggleOpen={() => setIsOpen((value) => !value)}
-                view={view}
+                onTap={handleModelTap}
               />
             </Suspense>
             <OrbitControls
@@ -118,31 +127,6 @@ const CustomizerPreview = () => {
               get a made-to-order case printed in NY.
             </p>
           </div>
-
-          <div className="mt-5 grid grid-cols-3 gap-2 rounded-full bg-zinc-100 p-1">
-            {(Object.keys(viewLabels) as ViewName[]).map((viewName) => (
-              <button
-                key={viewName}
-                type="button"
-                onClick={() => setView(viewName)}
-                className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
-                  view === viewName
-                    ? "bg-zinc-950 text-white shadow-sm"
-                    : "text-zinc-500 hover:text-zinc-950"
-                }`}
-              >
-                {viewLabels[viewName]}
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setIsOpen((value) => !value)}
-            className="mt-3 w-full rounded-full bg-zinc-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800"
-          >
-            {isOpen ? "Close preview" : "Open preview"}
-          </button>
 
           <div className="mt-6 grid gap-5">
             {(Object.keys(palettes) as PartName[]).map((part) => (
@@ -205,13 +189,11 @@ const CustomizerPreview = () => {
 const DabPalModel = ({
   colors,
   isOpen,
-  onToggleOpen,
-  view,
+  onTap,
 }: {
   colors: Record<PartName, string>
   isOpen: boolean
-  onToggleOpen: () => void
-  view: ViewName
+  onTap: () => void
 }) => {
   const gltf = useGLTF(MODEL_URL) as GLTF
   const customScene = useMemo(() => {
@@ -273,10 +255,10 @@ const DabPalModel = ({
     <group
       onClick={(event) => {
         event.stopPropagation()
-        onToggleOpen()
+        onTap()
       }}
       position={isOpen ? [0, -0.55, 0] : [0, 0, 0]}
-      rotation={viewRotations[view]}
+      rotation={defaultViewRotation}
       scale={isOpen ? 0.027 : 0.036}
     >
       <group position={modelCenter.clone().multiplyScalar(-1)}>
