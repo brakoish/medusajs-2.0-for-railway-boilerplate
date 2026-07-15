@@ -72,6 +72,7 @@ const modelCenter = new THREE.Vector3(39.19, 40.5, -12.32)
 const CustomizerPreview = () => {
   const [colors, setColors] = useState(initialColors)
   const [view, setView] = useState<ViewName>("top")
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
     <section className="bg-white text-zinc-950">
@@ -87,7 +88,12 @@ const CustomizerPreview = () => {
             <directionalLight position={[3, -4, 7]} intensity={0.65} />
             <directionalLight position={[-5, 4, 4]} intensity={0.28} />
             <Suspense fallback={null}>
-              <DabPalModel colors={colors} view={view} />
+              <DabPalModel
+                colors={colors}
+                isOpen={isOpen}
+                onToggleOpen={() => setIsOpen((value) => !value)}
+                view={view}
+              />
             </Suspense>
             <OrbitControls
               enableDamping
@@ -129,6 +135,14 @@ const CustomizerPreview = () => {
               </button>
             ))}
           </div>
+
+          <button
+            type="button"
+            onClick={() => setIsOpen((value) => !value)}
+            className="mt-3 w-full rounded-full bg-zinc-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800"
+          >
+            {isOpen ? "Close preview" : "Open preview"}
+          </button>
 
           <div className="mt-6 grid gap-5">
             {(Object.keys(palettes) as PartName[]).map((part) => (
@@ -190,9 +204,13 @@ const CustomizerPreview = () => {
 
 const DabPalModel = ({
   colors,
+  isOpen,
+  onToggleOpen,
   view,
 }: {
   colors: Record<PartName, string>
+  isOpen: boolean
+  onToggleOpen: () => void
   view: ViewName
 }) => {
   const gltf = useGLTF(MODEL_URL) as GLTF
@@ -246,13 +264,21 @@ const DabPalModel = ({
       }
       if (part === "lid") {
         mesh.material = materials.lid
-        mesh.rotation.set(0, 0, 0)
+        mesh.rotation.set(0, 0, isOpen ? -1.05 : 0)
       }
     })
-  }, [customScene, materials.body, materials.lid, materials.slider])
+  }, [customScene, isOpen, materials.body, materials.lid, materials.slider])
 
   return (
-    <group rotation={viewRotations[view]} scale={0.036}>
+    <group
+      onClick={(event) => {
+        event.stopPropagation()
+        onToggleOpen()
+      }}
+      position={isOpen ? [0, -0.55, 0] : [0, 0, 0]}
+      rotation={viewRotations[view]}
+      scale={isOpen ? 0.027 : 0.036}
+    >
       <group position={modelCenter.clone().multiplyScalar(-1)}>
         <primitive object={customScene} />
       </group>
