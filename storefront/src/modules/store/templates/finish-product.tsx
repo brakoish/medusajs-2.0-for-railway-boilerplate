@@ -8,6 +8,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import ProductActions from "@modules/products/components/product-actions"
 import { VariantProvider } from "@modules/products/contexts/variant-context"
 import ProductActionsWrapper from "@modules/products/templates/product-actions-wrapper"
+import CustomizerPreview from "@modules/store/components/customizer-preview"
 import { ShopProduct } from "./shop-products"
 
 const VIDEO_URL =
@@ -203,6 +204,10 @@ const ProductMedia = ({ product }: { product: ShopProduct }) => {
 }
 
 const ComingSoonProduct = ({ product }: { product: ShopProduct }) => {
+  if (product.handle === "custom") {
+    return <CustomizerPreview />
+  }
+
   return (
     <main className="bg-zinc-950 text-white">
       <section className="content-container grid min-h-[calc(100vh-160px)] grid-cols-1 small:grid-cols-[0.9fr_1.1fr] gap-8 small:gap-16 items-center py-12 small:py-20">

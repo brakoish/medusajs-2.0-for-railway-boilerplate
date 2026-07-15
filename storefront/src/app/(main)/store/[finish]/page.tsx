@@ -10,7 +10,7 @@ import {
 } from "@modules/store/templates/shop-products"
 
 type Props = {
-  params: { finish: string }
+  params: Promise<{ finish: string }>
 }
 
 export function generateStaticParams() {
@@ -19,8 +19,9 @@ export function generateStaticParams() {
   }))
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  const product = getShopProduct(params.finish)
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { finish } = await params
+  const product = getShopProduct(finish)
   if (!product) notFound()
 
   const url = `${getBaseURL()}/store/${product.handle}`
@@ -43,7 +44,8 @@ export function generateMetadata({ params }: Props): Metadata {
 }
 
 export default async function FinishPage({ params }: Props) {
-  const product = getShopProduct(params.finish)
+  const { finish } = await params
+  const product = getShopProduct(finish)
   if (!product) notFound()
 
   return (
