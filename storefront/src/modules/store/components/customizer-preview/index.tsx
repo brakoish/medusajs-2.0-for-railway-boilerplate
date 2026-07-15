@@ -75,8 +75,8 @@ const CustomizerPreview = () => {
 
   return (
     <section className="bg-white text-zinc-950">
-      <div className="content-container grid min-h-[calc(100vh-160px)] grid-cols-1 gap-6 py-5 small:grid-cols-[minmax(0,1fr)_22rem] small:gap-8 small:py-10">
-        <div className="min-h-[27rem] overflow-hidden rounded-lg border border-zinc-200 bg-white small:min-h-[calc(100vh-240px)]">
+      <div className="content-container grid min-h-[calc(100vh-160px)] grid-cols-1 gap-6 py-5 small:grid-cols-[minmax(0,1fr)_22rem] small:gap-10 small:py-10">
+        <div className="min-h-[27rem] overflow-hidden bg-white small:min-h-[calc(100vh-240px)]">
           <Canvas
             camera={{ position: [0, 0, 8], fov: 34 }}
             gl={{ antialias: true, alpha: false }}
@@ -99,14 +99,18 @@ const CustomizerPreview = () => {
           </Canvas>
         </div>
 
-        <aside className="self-start rounded-lg border border-zinc-200 bg-white p-4 shadow-sm small:sticky small:top-24 small:p-5">
+        <aside className="self-start bg-white p-4 small:sticky small:top-24 small:p-5">
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-amber-600">
-              Custom preview
+              Coming soon
             </p>
             <h1 className="mt-2 text-2xl font-semibold tracking-tight">
-              Build a Dab Pal
+              Design your Dab Pal
             </h1>
+            <p className="mt-3 text-sm leading-6 text-zinc-600">
+              Choose the body, lid, and slider colors, preview the build, and
+              get a made-to-order case printed in NY.
+            </p>
           </div>
 
           <div className="mt-5 grid grid-cols-3 gap-2 rounded-full bg-zinc-100 p-1">
@@ -174,6 +178,9 @@ const CustomizerPreview = () => {
                 </div>
               ))}
             </dl>
+            <p className="mt-4 text-sm font-medium text-zinc-600">
+              Custom color ordering opens soon.
+            </p>
           </div>
         </aside>
       </div>
