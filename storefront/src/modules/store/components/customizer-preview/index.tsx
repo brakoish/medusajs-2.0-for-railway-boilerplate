@@ -293,13 +293,12 @@ const createEdgeOverlay = (geometry: THREE.BufferGeometry, part: PartName) => {
 }
 
 const createPrintedMaterial = (color: string, part: PartName) => {
-  const isBlackSpeck = color === "#252525"
-  const isWhiteSpeck = color === "#f6f6f3"
-  const displayColor = isBlackSpeck ? "#343330" : isWhiteSpeck ? "#f0efeb" : color
+  const isBlack = color === "#252525"
+  const displayColor = isBlack ? "#343330" : color
   const material = new THREE.MeshStandardMaterial({
     color: displayColor,
-    emissive: isBlackSpeck ? "#141312" : "#000000",
-    emissiveIntensity: isBlackSpeck ? 0.18 : 0,
+    emissive: isBlack ? "#141312" : "#000000",
+    emissiveIntensity: isBlack ? 0.18 : 0,
     roughness: 0.94,
     metalness: 0,
   })
@@ -339,19 +338,8 @@ float layerCoord = vPrintPosition.y / ${layerHeightMm.toFixed(1)};
 float layerDistance = abs(fract(layerCoord) - 0.5);
 float layerLine = 1.0 - smoothstep(0.025, 0.18, layerDistance);
 float printGrain = fract(sin(dot(vPrintPosition.xy, vec2(12.9898, 78.233))) * 43758.5453);
-vec3 speckleCoord = vPrintPosition * 0.9;
-vec3 speckleCell = floor(speckleCoord);
-vec3 speckleLocal = fract(speckleCoord) - 0.5;
-float speckleNoise = fract(sin(dot(speckleCell, vec3(12.9898, 78.233, 37.719))) * 43758.5453);
-float speckleDot = 1.0 - smoothstep(0.16, 0.28, length(speckleLocal.xy));
-float speckle = step(0.88, speckleNoise) * speckleDot;
 diffuseColor.rgb *= 1.0 - (layerLine * 0.075);
 diffuseColor.rgb += (printGrain - 0.5) * 0.008;
-diffuseColor.rgb = mix(
-  diffuseColor.rgb,
-  vec3(${isBlackSpeck ? "0.78, 0.76, 0.70" : isWhiteSpeck ? "0.12, 0.11, 0.10" : "0.0, 0.0, 0.0"}),
-  speckle * ${isBlackSpeck ? "0.34" : isWhiteSpeck ? "0.34" : "0.0"}
-);
 `
       )
   }
