@@ -62,7 +62,7 @@ const viewLabels: Record<ViewName, string> = {
 const viewRotations: Record<ViewName, [number, number, number]> = {
   iso: [1.12, 0, -0.48],
   side: [1.52, 0, -1.57],
-  top: [0, 0, -0.05],
+  top: [0, Math.PI, -0.05],
 }
 
 const layerHeightMm = 0.2
@@ -71,7 +71,7 @@ const modelCenter = new THREE.Vector3(39.19, 40.5, -12.32)
 
 const CustomizerPreview = () => {
   const [colors, setColors] = useState(initialColors)
-  const [view, setView] = useState<ViewName>("iso")
+  const [view, setView] = useState<ViewName>("top")
 
   return (
     <section className="bg-zinc-950 text-white">
