@@ -74,18 +74,18 @@ const CustomizerPreview = () => {
   const [view, setView] = useState<ViewName>("top")
 
   return (
-    <section className="bg-zinc-950 text-white">
+    <section className="bg-white text-zinc-950">
       <div className="content-container grid min-h-[calc(100vh-160px)] grid-cols-1 gap-6 py-5 small:grid-cols-[minmax(0,1fr)_22rem] small:gap-8 small:py-10">
-        <div className="min-h-[27rem] overflow-hidden rounded-lg border border-white/10 bg-[radial-gradient(circle_at_34%_18%,rgba(237,143,31,0.08),transparent_35%),#0d0d0f] small:min-h-[calc(100vh-240px)]">
+        <div className="min-h-[27rem] overflow-hidden rounded-lg border border-zinc-200 bg-white small:min-h-[calc(100vh-240px)]">
           <Canvas
             camera={{ position: [0, 0, 8], fov: 34 }}
             gl={{ antialias: true, alpha: false }}
           >
-            <color attach="background" args={["#0d0d0f"]} />
-            <ambientLight intensity={1.35} />
-            <hemisphereLight args={["#ffffff", "#3a342c", 0.85]} />
-            <directionalLight position={[3, -4, 7]} intensity={0.8} />
-            <directionalLight position={[-5, 4, 4]} intensity={0.35} />
+            <color attach="background" args={["#ffffff"]} />
+            <ambientLight intensity={1.45} />
+            <hemisphereLight args={["#ffffff", "#d8d4cc", 0.75]} />
+            <directionalLight position={[3, -4, 7]} intensity={0.65} />
+            <directionalLight position={[-5, 4, 4]} intensity={0.28} />
             <Suspense fallback={null}>
               <DabPalModel colors={colors} view={view} />
             </Suspense>
@@ -99,9 +99,9 @@ const CustomizerPreview = () => {
           </Canvas>
         </div>
 
-        <aside className="self-start rounded-lg border border-white/10 bg-white/[0.04] p-4 small:sticky small:top-24 small:p-5">
+        <aside className="self-start rounded-lg border border-zinc-200 bg-white p-4 shadow-sm small:sticky small:top-24 small:p-5">
           <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-amber-300">
+            <p className="text-xs uppercase tracking-[0.22em] text-amber-600">
               Custom preview
             </p>
             <h1 className="mt-2 text-2xl font-semibold tracking-tight">
@@ -109,7 +109,7 @@ const CustomizerPreview = () => {
             </h1>
           </div>
 
-          <div className="mt-5 grid grid-cols-3 gap-2 rounded-full bg-white/[0.06] p-1">
+          <div className="mt-5 grid grid-cols-3 gap-2 rounded-full bg-zinc-100 p-1">
             {(Object.keys(viewLabels) as ViewName[]).map((viewName) => (
               <button
                 key={viewName}
@@ -117,8 +117,8 @@ const CustomizerPreview = () => {
                 onClick={() => setView(viewName)}
                 className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
                   view === viewName
-                    ? "bg-white text-zinc-950"
-                    : "text-white/65 hover:text-white"
+                    ? "bg-zinc-950 text-white shadow-sm"
+                    : "text-zinc-500 hover:text-zinc-950"
                 }`}
               >
                 {viewLabels[viewName]}
@@ -129,7 +129,7 @@ const CustomizerPreview = () => {
           <div className="mt-6 grid gap-5">
             {(Object.keys(palettes) as PartName[]).map((part) => (
               <fieldset key={part} className="min-w-0">
-                <legend className="text-sm font-semibold text-white">
+                <legend className="text-sm font-semibold text-zinc-950">
                   {partLabels[part]}
                 </legend>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -151,7 +151,7 @@ const CustomizerPreview = () => {
                         className={`h-9 w-9 rounded-full border transition ${
                           isSelected
                             ? "border-amber-300 ring-2 ring-amber-300/35"
-                            : "border-white/20 hover:border-white/50"
+                            : "border-zinc-300 hover:border-zinc-500"
                         }`}
                         style={{ backgroundColor: swatch.value }}
                       />
@@ -162,12 +162,12 @@ const CustomizerPreview = () => {
             ))}
           </div>
 
-          <div className="mt-6 border-t border-white/10 pt-5">
+          <div className="mt-6 border-t border-zinc-200 pt-5">
             <dl className="grid grid-cols-3 gap-2 text-xs">
               {(Object.keys(colors) as PartName[]).map((part) => (
                 <div key={part} className="min-w-0">
-                  <dt className="text-white/45">{partLabels[part]}</dt>
-                  <dd className="mt-1 truncate font-medium text-white">
+                  <dt className="text-zinc-500">{partLabels[part]}</dt>
+                  <dd className="mt-1 truncate font-medium text-zinc-950">
                     {palettes[part].find((swatch) => swatch.value === colors[part])
                       ?.name ?? "Custom"}
                   </dd>
