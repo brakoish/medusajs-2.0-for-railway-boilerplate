@@ -1,12 +1,14 @@
 "use client"
 
-import { Canvas, useFrame } from "@react-three/fiber"
+import { Canvas } from "@react-three/fiber"
 import { OrbitControls, useGLTF } from "@react-three/drei"
-import { Suspense, useEffect, useMemo, useRef, useState } from "react"
+import { Suspense, useEffect, useMemo, useState } from "react"
 import * as THREE from "three"
 import type { GLTF } from "three-stdlib"
+import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js"
 
 type PartName = "body" | "lid" | "slider"
+type ViewName = "iso" | "side" | "top"
 
 type Swatch = {
   name: string
@@ -51,12 +53,25 @@ const partLabels: Record<PartName, string> = {
   slider: "Slider",
 }
 
+const viewLabels: Record<ViewName, string> = {
+  iso: "Iso",
+  side: "Side",
+  top: "Top",
+}
+
+const viewRotations: Record<ViewName, [number, number, number]> = {
+  iso: [1.12, 0, -0.48],
+  side: [1.52, 0, -1.57],
+  top: [0, 0, -0.05],
+}
+
 const hingePivot = new THREE.Vector3(73.8, 71.8, -12.3)
 const modelCenter = new THREE.Vector3(39.19, 40.5, -12.32)
 
 const CustomizerPreview = () => {
   const [colors, setColors] = useState(initialColors)
   const [isOpen, setIsOpen] = useState(false)
+  const [view, setView] = useState<ViewName>("iso")
 
   return (
     <section className="bg-zinc-950 text-white">
@@ -67,15 +82,14 @@ const CustomizerPreview = () => {
             gl={{ antialias: true, alpha: false }}
           >
             <color attach="background" args={["#09090b"]} />
-            <ambientLight intensity={1.35} />
-            <directionalLight position={[4, -5, 8]} intensity={3.1} />
-            <directionalLight position={[-5, 4, 4]} intensity={1.1} />
+            <ambientLight intensity={0.85} />
+            <hemisphereLight args={["#ffffff", "#18181b", 1.1]} />
+            <directionalLight position={[4, -5, 8]} intensity={1.55} />
+            <directionalLight position={[-5, 4, 4]} intensity={0.45} />
             <Suspense fallback={null}>
-              <DabPalModel colors={colors} isOpen={isOpen} />
+              <DabPalModel colors={colors} isOpen={isOpen} view={view} />
             </Suspense>
             <OrbitControls
-              autoRotate
-              autoRotateSpeed={0.65}
               enableDamping
               enablePan={false}
               target={[0, 0, 0]}
@@ -102,6 +116,23 @@ const CustomizerPreview = () => {
             >
               {isOpen ? "Closed" : "Open"}
             </button>
+          </div>
+
+          <div className="mt-5 grid grid-cols-3 gap-2 rounded-full bg-white/[0.06] p-1">
+            {(Object.keys(viewLabels) as ViewName[]).map((viewName) => (
+              <button
+                key={viewName}
+                type="button"
+                onClick={() => setView(viewName)}
+                className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
+                  view === viewName
+                    ? "bg-white text-zinc-950"
+                    : "text-white/65 hover:text-white"
+                }`}
+              >
+                {viewLabels[viewName]}
+              </button>
+            ))}
           </div>
 
           <div className="mt-6 grid gap-5">
@@ -162,12 +193,13 @@ const CustomizerPreview = () => {
 const DabPalModel = ({
   colors,
   isOpen,
+  view,
 }: {
   colors: Record<PartName, string>
   isOpen: boolean
+  view: ViewName
 }) => {
   const gltf = useGLTF(MODEL_URL) as GLTF
-  const groupRef = useRef<THREE.Group>(null)
   const customScene = useMemo(() => {
     const scene = gltf.scene.clone(true)
     const orderedParts: PartName[] = ["body", "slider", "lid"]
@@ -180,7 +212,7 @@ const DabPalModel = ({
       const part = getPartName(mesh.name) ?? orderedParts[meshIndex]
       mesh.userData.customizerPart = part
       meshIndex += 1
-      mesh.geometry = mesh.geometry.clone()
+      mesh.geometry = toCreasedNormals(mesh.geometry.clone(), Math.PI / 5)
       mesh.castShadow = true
       mesh.receiveShadow = true
 
@@ -188,6 +220,8 @@ const DabPalModel = ({
         mesh.geometry.translate(-hingePivot.x, -hingePivot.y, -hingePivot.z)
         mesh.position.copy(hingePivot)
       }
+
+      mesh.add(createEdgeOverlay(mesh.geometry, part))
     })
 
     return scene
@@ -197,28 +231,22 @@ const DabPalModel = ({
     () => ({
       body: new THREE.MeshStandardMaterial({
         color: colors.body,
-        roughness: 0.66,
+        roughness: 0.82,
         metalness: 0,
       }),
       lid: new THREE.MeshStandardMaterial({
         color: colors.lid,
-        roughness: 0.64,
+        roughness: 0.8,
         metalness: 0,
       }),
       slider: new THREE.MeshStandardMaterial({
         color: colors.slider,
-        roughness: 0.62,
+        roughness: 0.82,
         metalness: 0,
       }),
     }),
     [colors.body, colors.lid, colors.slider]
   )
-
-  useFrame((_, delta) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.z += delta * 0.08
-    }
-  })
 
   useEffect(() => {
     customScene.traverse((object) => {
@@ -240,7 +268,7 @@ const DabPalModel = ({
   }, [customScene, isOpen, materials.body, materials.lid, materials.slider])
 
   return (
-    <group ref={groupRef} rotation={[1.28, 0, -0.38]} scale={0.036}>
+    <group rotation={viewRotations[view]} scale={0.036}>
       <group position={modelCenter.clone().multiplyScalar(-1)}>
         <primitive object={customScene} />
       </group>
@@ -254,6 +282,18 @@ const getPartName = (name: string): PartName | null => {
   if (name.includes("Top")) return "lid"
 
   return null
+}
+
+const createEdgeOverlay = (geometry: THREE.BufferGeometry, part: PartName) => {
+  const edges = new THREE.EdgesGeometry(geometry, 32)
+  const material = new THREE.LineBasicMaterial({
+    color: part === "lid" ? "#fff7df" : "#ffffff",
+    transparent: true,
+    opacity: part === "body" ? 0.18 : 0.14,
+    depthWrite: false,
+  })
+
+  return new THREE.LineSegments(edges, material)
 }
 
 useGLTF.preload(MODEL_URL)
