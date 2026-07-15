@@ -70,7 +70,6 @@ const modelCenter = new THREE.Vector3(39.19, 40.5, -12.32)
 
 const CustomizerPreview = () => {
   const [colors, setColors] = useState(initialColors)
-  const [isOpen, setIsOpen] = useState(false)
   const [view, setView] = useState<ViewName>("iso")
 
   return (
@@ -87,7 +86,7 @@ const CustomizerPreview = () => {
             <directionalLight position={[4, -5, 8]} intensity={1.55} />
             <directionalLight position={[-5, 4, 4]} intensity={0.45} />
             <Suspense fallback={null}>
-              <DabPalModel colors={colors} isOpen={isOpen} view={view} />
+              <DabPalModel colors={colors} view={view} />
             </Suspense>
             <OrbitControls
               enableDamping
@@ -100,22 +99,13 @@ const CustomizerPreview = () => {
         </div>
 
         <aside className="self-start rounded-lg border border-white/10 bg-white/[0.04] p-4 small:sticky small:top-24 small:p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-amber-300">
-                Custom preview
-              </p>
-              <h1 className="mt-2 text-2xl font-semibold tracking-tight">
-                Build a Dab Pal
-              </h1>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsOpen((value) => !value)}
-              className="shrink-0 rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-white hover:border-amber-300 hover:text-amber-200"
-            >
-              {isOpen ? "Closed" : "Open"}
-            </button>
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-amber-300">
+              Custom preview
+            </p>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight">
+              Build a Dab Pal
+            </h1>
           </div>
 
           <div className="mt-5 grid grid-cols-3 gap-2 rounded-full bg-white/[0.06] p-1">
@@ -192,11 +182,9 @@ const CustomizerPreview = () => {
 
 const DabPalModel = ({
   colors,
-  isOpen,
   view,
 }: {
   colors: Record<PartName, string>
-  isOpen: boolean
   view: ViewName
 }) => {
   const gltf = useGLTF(MODEL_URL) as GLTF
@@ -262,10 +250,10 @@ const DabPalModel = ({
       }
       if (part === "lid") {
         mesh.material = materials.lid
-        mesh.rotation.set(isOpen ? -1.18 : 0, 0, isOpen ? -0.18 : 0)
+        mesh.rotation.set(0, 0, 0)
       }
     })
-  }, [customScene, isOpen, materials.body, materials.lid, materials.slider])
+  }, [customScene, materials.body, materials.lid, materials.slider])
 
   return (
     <group rotation={viewRotations[view]} scale={0.036}>
