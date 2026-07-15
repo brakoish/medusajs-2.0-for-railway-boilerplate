@@ -65,6 +65,7 @@ const viewRotations: Record<ViewName, [number, number, number]> = {
   top: [0, 0, -0.05],
 }
 
+const layerHeightMm = 0.2
 const hingePivot = new THREE.Vector3(73.8, 71.8, -12.3)
 const modelCenter = new THREE.Vector3(39.19, 40.5, -12.32)
 
@@ -75,16 +76,16 @@ const CustomizerPreview = () => {
   return (
     <section className="bg-zinc-950 text-white">
       <div className="content-container grid min-h-[calc(100vh-160px)] grid-cols-1 gap-6 py-5 small:grid-cols-[minmax(0,1fr)_22rem] small:gap-8 small:py-10">
-        <div className="min-h-[27rem] overflow-hidden rounded-lg border border-white/10 bg-[radial-gradient(circle_at_32%_18%,rgba(237,143,31,0.18),transparent_34%),#09090b] small:min-h-[calc(100vh-240px)]">
+        <div className="min-h-[27rem] overflow-hidden rounded-lg border border-white/10 bg-[radial-gradient(circle_at_34%_18%,rgba(237,143,31,0.08),transparent_35%),#0d0d0f] small:min-h-[calc(100vh-240px)]">
           <Canvas
             camera={{ position: [0, 0, 8], fov: 34 }}
             gl={{ antialias: true, alpha: false }}
           >
-            <color attach="background" args={["#09090b"]} />
-            <ambientLight intensity={0.85} />
-            <hemisphereLight args={["#ffffff", "#18181b", 1.1]} />
-            <directionalLight position={[4, -5, 8]} intensity={1.55} />
-            <directionalLight position={[-5, 4, 4]} intensity={0.45} />
+            <color attach="background" args={["#0d0d0f"]} />
+            <ambientLight intensity={1.35} />
+            <hemisphereLight args={["#ffffff", "#3a342c", 0.85]} />
+            <directionalLight position={[3, -4, 7]} intensity={0.8} />
+            <directionalLight position={[-5, 4, 4]} intensity={0.35} />
             <Suspense fallback={null}>
               <DabPalModel colors={colors} view={view} />
             </Suspense>
@@ -217,21 +218,9 @@ const DabPalModel = ({
 
   const materials = useMemo(
     () => ({
-      body: new THREE.MeshStandardMaterial({
-        color: colors.body,
-        roughness: 0.82,
-        metalness: 0,
-      }),
-      lid: new THREE.MeshStandardMaterial({
-        color: colors.lid,
-        roughness: 0.8,
-        metalness: 0,
-      }),
-      slider: new THREE.MeshStandardMaterial({
-        color: colors.slider,
-        roughness: 0.82,
-        metalness: 0,
-      }),
+      body: createPrintedMaterial(colors.body, "body"),
+      lid: createPrintedMaterial(colors.lid, "lid"),
+      slider: createPrintedMaterial(colors.slider, "slider"),
     }),
     [colors.body, colors.lid, colors.slider]
   )
@@ -277,11 +266,67 @@ const createEdgeOverlay = (geometry: THREE.BufferGeometry, part: PartName) => {
   const material = new THREE.LineBasicMaterial({
     color: part === "lid" ? "#fff7df" : "#ffffff",
     transparent: true,
-    opacity: part === "body" ? 0.18 : 0.14,
+    opacity: part === "body" ? 0.1 : 0.09,
     depthWrite: false,
   })
 
   return new THREE.LineSegments(edges, material)
+}
+
+const createPrintedMaterial = (color: string, part: PartName) => {
+  const displayColor = color === "#252525" ? "#343330" : color
+  const material = new THREE.MeshStandardMaterial({
+    color: displayColor,
+    emissive: color === "#252525" ? "#141312" : "#000000",
+    emissiveIntensity: color === "#252525" ? 0.18 : 0,
+    roughness: 0.94,
+    metalness: 0,
+  })
+
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader
+      .replace(
+        "void main() {",
+        `
+varying vec3 vPrintPosition;
+
+void main() {
+`
+      )
+      .replace(
+        "#include <begin_vertex>",
+        `
+#include <begin_vertex>
+vPrintPosition = position;
+`
+      )
+
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        "void main() {",
+        `
+varying vec3 vPrintPosition;
+
+void main() {
+`
+      )
+      .replace(
+        "#include <color_fragment>",
+        `
+#include <color_fragment>
+float layerCoord = vPrintPosition.y / ${layerHeightMm.toFixed(1)};
+float layerDistance = abs(fract(layerCoord) - 0.5);
+float layerLine = 1.0 - smoothstep(0.025, 0.18, layerDistance);
+float printGrain = fract(sin(dot(vPrintPosition.xy, vec2(12.9898, 78.233))) * 43758.5453);
+diffuseColor.rgb *= 1.0 - (layerLine * 0.075);
+diffuseColor.rgb += (printGrain - 0.5) * 0.008;
+`
+      )
+  }
+
+  material.customProgramCacheKey = () => `dab-pal-printed-${part}-${color}`
+
+  return material
 }
 
 useGLTF.preload(MODEL_URL)
