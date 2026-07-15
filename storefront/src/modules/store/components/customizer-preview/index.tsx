@@ -87,7 +87,7 @@ const CustomizerPreview = () => {
   return (
     <section className="bg-white text-zinc-950">
       <div className="content-container grid min-h-[calc(100vh-160px)] grid-cols-1 gap-6 py-5 small:grid-cols-[minmax(0,1fr)_22rem] small:gap-10 small:py-10">
-        <div className="min-h-[27rem] cursor-pointer overflow-hidden bg-white small:min-h-[calc(100vh-240px)]">
+        <div className="order-2 min-h-[27rem] cursor-pointer overflow-hidden bg-white small:order-none small:min-h-[calc(100vh-240px)]">
           <Canvas
             camera={{ position: [0, 0, 8], fov: 34 }}
             gl={{ antialias: true, alpha: false }}
@@ -114,7 +114,7 @@ const CustomizerPreview = () => {
           </Canvas>
         </div>
 
-        <aside className="self-start bg-white p-4 small:sticky small:top-24 small:p-5">
+        <aside className="order-1 self-start bg-white p-4 small:order-none small:sticky small:top-24 small:p-5">
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-amber-600">
               Coming soon
@@ -144,12 +144,16 @@ const CustomizerPreview = () => {
                         type="button"
                         aria-label={`${partLabels[part]} ${swatch.name}`}
                         title={swatch.name}
-                        onClick={() =>
+                        onClick={() => {
                           setColors((current) => ({
                             ...current,
                             [part]: swatch.value,
                           }))
-                        }
+
+                          if (part === "slider") {
+                            setIsOpen(true)
+                          }
+                        }}
                         className={`h-9 w-9 rounded-full border transition ${
                           isSelected
                             ? "border-amber-300 ring-2 ring-amber-300/35"
