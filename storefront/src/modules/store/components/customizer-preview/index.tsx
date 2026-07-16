@@ -74,6 +74,7 @@ const CustomizerPreview = ({
   const [colors, setColors] = useState(initialColors)
   const [isOpen, setIsOpen] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
+  const [activePart, setActivePart] = useState<PartName | null>(null)
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const customVariant =
     ordersEnabled
@@ -126,6 +127,17 @@ const CustomizerPreview = ({
     }
   }
 
+  const setPartColor = (part: PartName, value: string) => {
+    setColors((current) => ({
+      ...current,
+      [part]: value,
+    }))
+
+    if (part === "slider") {
+      setIsOpen(true)
+    }
+  }
+
   return (
     <section className="bg-white text-zinc-950">
       <div className="content-container grid min-h-[calc(100vh-160px)] grid-cols-1 gap-6 py-5 small:grid-cols-[minmax(0,1fr)_22rem] small:gap-10 small:py-10">
@@ -170,7 +182,99 @@ const CustomizerPreview = ({
             </p>
           </div>
 
-          <div className="mt-6 grid gap-5">
+          <div className="relative mt-5 small:hidden">
+            <div className="grid grid-cols-3 gap-2">
+              {(Object.keys(palettes) as PartName[]).map((part) => {
+                const selected = getSwatchByValue(part, colors[part])
+                const isActive = activePart === part
+
+                return (
+                  <button
+                    key={part}
+                    type="button"
+                    onClick={() =>
+                      setActivePart((current) =>
+                        current === part ? null : part
+                      )
+                    }
+                    className={`min-w-0 rounded-lg border px-2 py-2 text-left transition ${
+                      isActive
+                        ? "border-amber-400 bg-amber-50"
+                        : "border-zinc-200 bg-white"
+                    }`}
+                    aria-expanded={isActive}
+                  >
+                    <span className="flex min-w-0 items-center gap-2">
+                      <span
+                        aria-hidden
+                        className="h-5 w-5 shrink-0 rounded-full border border-zinc-300"
+                        style={{ backgroundColor: selected.value }}
+                      />
+                      <span className="min-w-0">
+                        <span className="block truncate text-[11px] font-semibold text-zinc-950">
+                          {partLabels[part]}
+                        </span>
+                        <span className="block truncate text-[11px] text-zinc-500">
+                          {selected.name}
+                        </span>
+                      </span>
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {activePart && (
+              <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-20 rounded-lg border border-zinc-200 bg-white p-3 shadow-lg">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <span className="text-sm font-semibold text-zinc-950">
+                    {partLabels[activePart]}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setActivePart(null)}
+                    className="text-xs font-medium text-zinc-500"
+                  >
+                    Close
+                  </button>
+                </div>
+                <div className="grid grid-cols-5 gap-2">
+                  {palettes[activePart].map((swatch) => {
+                    const isSelected = colors[activePart] === swatch.value
+
+                    return (
+                      <button
+                        key={swatch.name}
+                        type="button"
+                        aria-label={`${partLabels[activePart]} ${swatch.name}`}
+                        title={swatch.name}
+                        onClick={() => {
+                          setPartColor(activePart, swatch.value)
+                          setActivePart(null)
+                        }}
+                        className={`grid gap-1 rounded-md border p-2 text-center transition ${
+                          isSelected
+                            ? "border-amber-400 bg-amber-50"
+                            : "border-zinc-200 bg-white"
+                        }`}
+                      >
+                        <span
+                          aria-hidden
+                          className="mx-auto h-8 w-8 rounded-full border border-zinc-300"
+                          style={{ backgroundColor: swatch.value }}
+                        />
+                        <span className="truncate text-[10px] font-medium text-zinc-700">
+                          {swatch.name}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-6 hidden gap-5 small:grid">
             {(Object.keys(palettes) as PartName[]).map((part) => (
               <fieldset key={part} className="min-w-0">
                 <legend className="text-sm font-semibold text-zinc-950">
@@ -186,16 +290,7 @@ const CustomizerPreview = ({
                         type="button"
                         aria-label={`${partLabels[part]} ${swatch.name}`}
                         title={swatch.name}
-                        onClick={() => {
-                          setColors((current) => ({
-                            ...current,
-                            [part]: swatch.value,
-                          }))
-
-                          if (part === "slider") {
-                            setIsOpen(true)
-                          }
-                        }}
+                        onClick={() => setPartColor(part, swatch.value)}
                         className={`h-9 w-9 rounded-full border transition ${
                           isSelected
                             ? "border-amber-300 ring-2 ring-amber-300/35"
