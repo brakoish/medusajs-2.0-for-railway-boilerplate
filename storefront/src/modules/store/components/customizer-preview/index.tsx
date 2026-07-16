@@ -77,6 +77,7 @@ const CustomizerPreview = ({
   const [activePart, setActivePart] = useState<PartName | null>(null)
   const [isCoarsePointer, setIsCoarsePointer] = useState(false)
   const [modelDragRotation, setModelDragRotation] = useState(0)
+  const [focusedPart, setFocusedPart] = useState<PartName | null>(null)
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const customVariant =
@@ -154,7 +155,11 @@ const CustomizerPreview = ({
 
     if (part === "slider") {
       setIsOpen(true)
+      setFocusedPart("slider")
+      return
     }
+
+    setFocusedPart(null)
   }
 
   return (
@@ -181,6 +186,7 @@ const CustomizerPreview = ({
             <Suspense fallback={null}>
               <DabPalModel
                 dragRotation={modelDragRotation}
+                focusedPart={focusedPart}
                 colors={colors}
                 isDragEnabled={isCoarsePointer}
                 isOpen={isOpen}
@@ -410,6 +416,7 @@ const BuildSummary = ({
 
 const DabPalModel = ({
   dragRotation,
+  focusedPart,
   colors,
   isDragEnabled,
   isOpen,
@@ -417,6 +424,7 @@ const DabPalModel = ({
   onTap,
 }: {
   dragRotation: number
+  focusedPart: PartName | null
   colors: Record<PartName, string>
   isDragEnabled: boolean
   isOpen: boolean
@@ -458,11 +466,15 @@ const DabPalModel = ({
 
   const materials = useMemo(
     () => ({
-      body: createPrintedMaterial(colors.body, "body"),
+      body: createPrintedMaterial(
+        colors.body,
+        "body",
+        focusedPart === "slider" ? 0.32 : 1
+      ),
       lid: createPrintedMaterial(colors.lid, "lid"),
       slider: createPrintedMaterial(colors.slider, "slider"),
     }),
-    [colors.body, colors.lid, colors.slider]
+    [colors.body, colors.lid, colors.slider, focusedPart]
   )
 
   useEffect(() => {
@@ -483,6 +495,8 @@ const DabPalModel = ({
       }
     })
   }, [customScene, isOpen, materials.body, materials.lid, materials.slider])
+
+  const isSliderFocused = focusedPart === "slider"
 
   return (
     <group
@@ -536,13 +550,15 @@ const DabPalModel = ({
       onPointerCancel={() => {
         dragRef.current = null
       }}
-      position={isOpen ? [0, -0.55, 0] : [0, 0, 0]}
+      position={
+        isSliderFocused ? [0, -0.45, 0] : isOpen ? [0, -0.55, 0] : [0, 0, 0]
+      }
       rotation={[
-        defaultViewRotation[0],
+        isSliderFocused ? -1.05 : defaultViewRotation[0],
         defaultViewRotation[1] + dragRotation,
         defaultViewRotation[2],
       ]}
-      scale={isOpen ? 0.027 : 0.036}
+      scale={isSliderFocused ? 0.028 : isOpen ? 0.027 : 0.036}
     >
       <group position={modelCenter.clone().multiplyScalar(-1)}>
         <primitive object={customScene} />
@@ -586,7 +602,11 @@ const createEdgeOverlay = (geometry: THREE.BufferGeometry, part: PartName) => {
   return new THREE.LineSegments(edges, material)
 }
 
-const createPrintedMaterial = (color: string, part: PartName) => {
+const createPrintedMaterial = (
+  color: string,
+  part: PartName,
+  opacity = 1
+) => {
   const isBlack = color === "#252525"
   const displayColor = isBlack ? "#343330" : color
   const material = new THREE.MeshStandardMaterial({
@@ -595,6 +615,9 @@ const createPrintedMaterial = (color: string, part: PartName) => {
     emissiveIntensity: isBlack ? 0.18 : 0,
     roughness: 0.94,
     metalness: 0,
+    transparent: opacity < 1,
+    opacity,
+    depthWrite: opacity === 1,
   })
 
   material.onBeforeCompile = (shader) => {
