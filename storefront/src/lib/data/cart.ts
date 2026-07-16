@@ -11,6 +11,18 @@ import { getProductsById } from "./products"
 import { getRegion } from "./regions"
 import { expandPromotionCodes } from "@lib/util/promotion-codes"
 
+export type CustomColorSelection = {
+  body: { name: string; value: string }
+  lid: { name: string; value: string }
+  slider: { name: string; value: string }
+}
+
+export type LineItemMetadata = {
+  custom_build?: "dab-pal"
+  custom_colors?: CustomColorSelection
+  custom_color_summary?: string
+}
+
 export async function retrieveCartById(cartId: string) {
   return await sdk.store.cart
     .retrieve(cartId, {}, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
@@ -235,10 +247,12 @@ export async function addToCart({
   variantId,
   quantity,
   countryCode,
+  metadata,
 }: {
   variantId: string
   quantity: number
   countryCode: string
+  metadata?: LineItemMetadata
 }) {
   if (!variantId) {
     throw new Error("Missing variant ID when adding to cart")
@@ -255,6 +269,7 @@ export async function addToCart({
       {
         variant_id: variantId,
         quantity,
+        ...(metadata ? { metadata } : {}),
       },
       {},
       await getAuthHeaders()

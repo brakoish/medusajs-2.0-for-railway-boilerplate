@@ -51,6 +51,16 @@ const FinishProductTemplate = async ({
   product: ShopProduct
   countryCode: string
 }) => {
+  if (product.handle === "custom") {
+    const region = await getRegion(countryCode)
+    if (!region) notFound()
+    const medusaProduct = product.medusaHandle
+      ? await getProductByHandle(product.medusaHandle, region.id)
+      : null
+
+    return <CustomizerPreview product={medusaProduct} />
+  }
+
   if (!product.available || !product.sku || !product.medusaHandle) {
     return <ComingSoonProduct product={product} />
   }

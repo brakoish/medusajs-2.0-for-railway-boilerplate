@@ -36,6 +36,7 @@ type Order = {
     title: string
     variant_sku?: string
     quantity: number
+    metadata?: Record<string, unknown> | null
     detail?: { fulfilled_quantity?: number }
   }[]
 }
@@ -333,13 +334,40 @@ export default function BulkFulfillPage() {
       })
   }
 
+  const customColorSummary = (metadata?: Record<string, unknown> | null) => {
+    const explicit = metadata?.custom_color_summary
+    if (typeof explicit === "string" && explicit.trim()) {
+      return explicit
+    }
+
+    const colors = metadata?.custom_colors as
+      | Record<string, { name?: string; value?: string }>
+      | undefined
+    if (!colors) return ""
+
+    const part = (name: string) =>
+      [colors[name]?.name, colors[name]?.value ? `(${colors[name].value})` : ""]
+        .filter(Boolean)
+        .join(" ")
+
+    return [
+      ["Body", part("body")],
+      ["Lid", part("lid")],
+      ["Slider", part("slider")],
+    ]
+      .filter(([, value]) => value)
+      .map(([name, value]) => `${name}: ${value}`)
+      .join(", ")
+  }
+
   const itemSummary = (order: Order) => {
     return order.items
       .map((i) => {
         const fulfilled = i.detail?.fulfilled_quantity ?? 0
         const qty = i.quantity - fulfilled
         const sku = i.variant_sku || i.title
-        return `${qty}x ${sku}`
+        const custom = customColorSummary(i.metadata)
+        return [`${qty}x ${sku}`, custom].filter(Boolean).join(" · ")
       })
       .join(", ")
   }

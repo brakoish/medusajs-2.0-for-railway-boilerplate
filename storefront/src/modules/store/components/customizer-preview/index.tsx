@@ -2,10 +2,14 @@
 
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls, useGLTF } from "@react-three/drei"
+import { Button } from "@medusajs/ui"
+import { HttpTypes } from "@medusajs/types"
 import { Suspense, useEffect, useMemo, useRef, useState } from "react"
 import * as THREE from "three"
 import type { GLTF } from "three-stdlib"
 import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js"
+import { addToCart } from "@lib/data/cart"
+import { dispatchCartChange } from "@lib/util/cart-events"
 
 type PartName = "body" | "lid" | "slider"
 
@@ -57,10 +61,23 @@ const layerHeightMm = 0.2
 const hingePivot = new THREE.Vector3(73.8, 71.8, -12.3)
 const modelCenter = new THREE.Vector3(39.19, 40.5, -12.32)
 
-const CustomizerPreview = () => {
+const CUSTOM_SKU = "DABPAL-CUSTOM-SINGLE"
+const COUNTRY = "us"
+
+const CustomizerPreview = ({
+  product,
+}: {
+  product?: HttpTypes.StoreProduct | null
+}) => {
   const [colors, setColors] = useState(initialColors)
   const [isOpen, setIsOpen] = useState(false)
+  const [isAdding, setIsAdding] = useState(false)
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const customVariant =
+    product?.variants?.find((variant) => variant.sku === CUSTOM_SKU) ??
+    product?.variants?.[0]
+  const selectedColors = getSelectedColors(colors)
+  const colorSummary = formatColorSummary(selectedColors)
 
   useEffect(() => {
     return () => {
@@ -82,6 +99,27 @@ const CustomizerPreview = () => {
       setIsOpen((value) => !value)
       tapTimerRef.current = null
     }, 220)
+  }
+
+  const handleAddToCart = async () => {
+    if (!customVariant?.id) return
+
+    setIsAdding(true)
+    try {
+      await addToCart({
+        variantId: customVariant.id,
+        quantity: 1,
+        countryCode: COUNTRY,
+        metadata: {
+          custom_build: "dab-pal",
+          custom_colors: selectedColors,
+          custom_color_summary: colorSummary,
+        },
+      })
+      dispatchCartChange()
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   return (
@@ -117,7 +155,7 @@ const CustomizerPreview = () => {
         <aside className="order-1 self-start bg-white p-4 small:order-none small:sticky small:top-24 small:p-5">
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-amber-600">
-              Coming soon
+              Custom color
             </p>
             <h1 className="mt-2 text-2xl font-semibold tracking-tight">
               Design your Dab Pal
@@ -181,8 +219,26 @@ const CustomizerPreview = () => {
               ))}
             </dl>
             <p className="mt-4 text-sm font-medium text-zinc-600">
-              Custom color ordering opens soon.
+              {colorSummary}
             </p>
+            <div className="mt-5 grid gap-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium text-zinc-950">
+                  Custom Dab Pal
+                </span>
+                <span className="font-semibold text-zinc-950">$35</span>
+              </div>
+              <Button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={!customVariant?.id || isAdding}
+                isLoading={isAdding}
+                variant="primary"
+                className="h-10 w-full rounded-lg"
+              >
+                {customVariant?.id ? "Add custom to cart" : "Customs opening soon"}
+              </Button>
+            </div>
           </div>
         </aside>
       </div>
@@ -279,6 +335,21 @@ const getPartName = (name: string): PartName | null => {
 
   return null
 }
+
+const getSwatchByValue = (part: PartName, value: string) =>
+  palettes[part].find((swatch) => swatch.value === value) ?? {
+    name: "Custom",
+    value,
+  }
+
+const getSelectedColors = (colors: Record<PartName, string>) => ({
+  body: getSwatchByValue("body", colors.body),
+  lid: getSwatchByValue("lid", colors.lid),
+  slider: getSwatchByValue("slider", colors.slider),
+})
+
+const formatColorSummary = (colors: ReturnType<typeof getSelectedColors>) =>
+  `Body: ${colors.body.name} (${colors.body.value}), Lid: ${colors.lid.name} (${colors.lid.value}), Slider: ${colors.slider.name} (${colors.slider.value})`
 
 const createEdgeOverlay = (geometry: THREE.BufferGeometry, part: PartName) => {
   const edges = new THREE.EdgesGeometry(geometry, 32)

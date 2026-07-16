@@ -83,7 +83,11 @@ const Item = ({ item, type = "full" }: ItemProps) => {
         >
           Dab Pal
         </Text>
-        <LineItemOptions variant={item.variant} data-testid="product-variant" />
+        <LineItemOptions
+          variant={item.variant}
+          metadata={item.metadata}
+          data-testid="product-variant"
+        />
       </Table.Cell>
 
       {type === "full" && (

@@ -4,8 +4,10 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import { shopProducts } from "./shop-products"
 
-const availableFinishes = shopProducts.filter((product) => product.available)
-const customProduct = shopProducts.find((product) => !product.available)
+const availableFinishes = shopProducts.filter(
+  (product) => product.available && product.handle !== "custom"
+)
+const customProduct = shopProducts.find((product) => product.handle === "custom")
 
 const StoreTemplate = ({
   countryCode,
@@ -57,8 +59,8 @@ const StoreTemplate = ({
             </h1>
             <p className="mt-5 text-base small:text-lg leading-relaxed text-gray-600">
               Pocket Q-tip, iso, and dab swab storage with a clean/dirty slider.
-              Choose Black Speck or White Speck, then pick Single, 3-Pack, or
-              6-Pack on the product page.
+              Choose Black Speck or White Speck, or build a custom colorway
+              from the customizer.
             </p>
 
             <div className="mt-8">
@@ -112,12 +114,12 @@ const StoreTemplate = ({
                           Custom
                         </span>
                         <span className="block text-sm text-gray-500">
-                          Coming soon
+                          Made to order
                         </span>
                       </span>
                     </span>
-                    <span className="text-sm font-semibold text-gray-500">
-                      Preview
+                    <span className="text-sm font-semibold text-amber-700">
+                      Customize $35
                     </span>
                   </LocalizedClientLink>
                 )}
