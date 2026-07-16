@@ -305,47 +305,80 @@ const CustomizerPreview = ({
             ))}
           </div>
 
-          <div className="mt-6 border-t border-zinc-200 pt-5">
-            <dl className="grid grid-cols-3 gap-2 text-xs">
-              {(Object.keys(colors) as PartName[]).map((part) => (
-                <div key={part} className="min-w-0">
-                  <dt className="text-zinc-500">{partLabels[part]}</dt>
-                  <dd className="mt-1 truncate font-medium text-zinc-950">
-                    {palettes[part].find((swatch) => swatch.value === colors[part])
-                      ?.name ?? "Custom"}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-            <p className="mt-4 text-sm font-medium text-zinc-600">
-              {colorSummary}
-            </p>
-            <div className="mt-5 grid gap-3">
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-zinc-950">
-                  Custom Dab Pal
-                </span>
-                <span className="font-semibold text-zinc-950">$35</span>
-              </div>
-              <Button
-                type="button"
-                onClick={handleAddToCart}
-                disabled={!ordersEnabled || !customVariant?.id || isAdding}
-                isLoading={isAdding}
-                variant="primary"
-                className="h-10 w-full rounded-lg"
-              >
-                {ordersEnabled && customVariant?.id
-                  ? "Add custom to cart"
-                  : "Customs opening soon"}
-              </Button>
-            </div>
+          <div className="hidden small:block">
+            <BuildSummary
+              colors={colors}
+              colorSummary={colorSummary}
+              customVariant={customVariant}
+              isAdding={isAdding}
+              onAddToCart={handleAddToCart}
+              ordersEnabled={ordersEnabled}
+            />
           </div>
         </aside>
+
+        <div className="order-3 small:hidden">
+          <BuildSummary
+            colors={colors}
+            colorSummary={colorSummary}
+            customVariant={customVariant}
+            isAdding={isAdding}
+            onAddToCart={handleAddToCart}
+            ordersEnabled={ordersEnabled}
+          />
+        </div>
       </div>
     </section>
   )
 }
+
+const BuildSummary = ({
+  colors,
+  colorSummary,
+  customVariant,
+  isAdding,
+  onAddToCart,
+  ordersEnabled,
+}: {
+  colors: Record<PartName, string>
+  colorSummary: string
+  customVariant?: HttpTypes.StoreProductVariant
+  isAdding: boolean
+  onAddToCart: () => void
+  ordersEnabled: boolean
+}) => (
+  <div className="mt-6 border-t border-zinc-200 pt-5">
+    <dl className="grid grid-cols-3 gap-2 text-xs">
+      {(Object.keys(colors) as PartName[]).map((part) => (
+        <div key={part} className="min-w-0">
+          <dt className="text-zinc-500">{partLabels[part]}</dt>
+          <dd className="mt-1 truncate font-medium text-zinc-950">
+            {getSwatchByValue(part, colors[part]).name}
+          </dd>
+        </div>
+      ))}
+    </dl>
+    <p className="mt-4 text-sm font-medium text-zinc-600">{colorSummary}</p>
+    <div className="mt-5 grid gap-3">
+      <div className="flex items-center justify-between text-sm">
+        <span className="font-medium text-zinc-950">Custom Dab Pal</span>
+        <span className="font-semibold text-zinc-950">$35</span>
+      </div>
+      <Button
+        type="button"
+        onClick={onAddToCart}
+        disabled={!ordersEnabled || !customVariant?.id || isAdding}
+        isLoading={isAdding}
+        variant="primary"
+        className="h-10 w-full rounded-lg"
+      >
+        {ordersEnabled && customVariant?.id
+          ? "Add custom to cart"
+          : "Customs opening soon"}
+      </Button>
+    </div>
+  </div>
+)
 
 const DabPalModel = ({
   colors,
