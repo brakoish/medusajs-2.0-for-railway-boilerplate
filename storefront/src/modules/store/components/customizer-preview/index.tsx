@@ -56,7 +56,7 @@ const partLabels: Record<PartName, string> = {
   slider: "Slider",
 }
 
-const defaultViewRotation: [number, number, number] = [0, Math.PI, -0.05]
+const defaultViewRotation: [number, number, number] = [0, Math.PI, 0]
 const layerHeightMm = 0.2
 const hingePivot = new THREE.Vector3(73.8, 71.8, -12.3)
 const modelCenter = new THREE.Vector3(39.19, 40.5, -12.32)
