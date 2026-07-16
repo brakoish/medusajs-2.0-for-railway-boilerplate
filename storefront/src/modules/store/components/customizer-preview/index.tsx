@@ -159,7 +159,7 @@ const CustomizerPreview = ({
 
   return (
     <section className="bg-white text-zinc-950">
-      <div className="content-container grid min-h-[calc(100vh-160px)] grid-cols-1 gap-6 py-5 small:grid-cols-[minmax(0,1fr)_22rem] small:gap-10 small:py-10">
+      <div className="content-container grid min-h-[calc(100vh-160px)] grid-cols-1 gap-4 py-3 small:grid-cols-[minmax(0,1fr)_22rem] small:gap-10 small:py-10">
         <div className="order-2 min-h-[27rem] cursor-pointer overflow-hidden bg-white small:order-none small:min-h-[calc(100vh-240px)]">
           <Canvas
             className="dab-pal-customizer-canvas"
@@ -199,21 +199,18 @@ const CustomizerPreview = ({
           </Canvas>
         </div>
 
-        <aside className="order-1 self-start bg-white p-4 small:order-none small:sticky small:top-24 small:p-5">
+        <aside className="order-1 self-start bg-white py-1 small:order-none small:sticky small:top-24 small:p-5">
           <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-amber-600">
-              Custom color
-            </p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight">
+            <h1 className="text-2xl font-semibold tracking-tight">
               Design your Dab Pal
             </h1>
-            <p className="mt-3 text-sm leading-6 text-zinc-600">
+            <p className="mt-2 text-sm leading-6 text-zinc-600">
               Choose the body, lid, and slider colors, preview the build, and
               get a made-to-order case printed in NY.
             </p>
           </div>
 
-          <div className="relative mt-5 small:hidden">
+          <div className="relative mt-4 small:hidden">
             <div className="grid grid-cols-3 gap-2">
               {(Object.keys(palettes) as PartName[]).map((part) => {
                 const selected = getSwatchByValue(part, colors[part])
