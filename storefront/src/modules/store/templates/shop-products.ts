@@ -49,18 +49,18 @@ export const shopProducts: ShopProduct[] = [
   {
     handle: "custom",
     title: "Custom",
-    subtitle: "Made to order",
+    subtitle: "Coming soon",
     description:
       "Pick the body, lid, and slider colors for a made-to-order Dab Pal printed in NY.",
     seoDescription:
       "Custom Dab Pal lets you choose body, lid, and slider colors for a made-to-order Puffco cleaning kit and dab swab case.",
     image: "/dab-pal/lineup.png",
     price: "$35",
-    badge: "Custom",
-    cta: "Customize",
+    badge: "Preview",
+    cta: "Preview",
     medusaHandle: "dab-pal-custom",
     sku: "DABPAL-CUSTOM-SINGLE",
-    available: true,
+    available: false,
   },
 ]
 

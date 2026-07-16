@@ -59,8 +59,8 @@ const StoreTemplate = ({
             </h1>
             <p className="mt-5 text-base small:text-lg leading-relaxed text-gray-600">
               Pocket Q-tip, iso, and dab swab storage with a clean/dirty slider.
-              Choose Black Speck or White Speck, or build a custom colorway
-              from the customizer.
+              Choose Black Speck or White Speck, or preview the custom color
+              builder before customs open.
             </p>
 
             <div className="mt-8">
@@ -114,12 +114,12 @@ const StoreTemplate = ({
                           Custom
                         </span>
                         <span className="block text-sm text-gray-500">
-                          Made to order
+                          Coming soon
                         </span>
                       </span>
                     </span>
-                    <span className="text-sm font-semibold text-amber-700">
-                      Customize $35
+                    <span className="text-sm font-semibold text-gray-500">
+                      Preview
                     </span>
                   </LocalizedClientLink>
                 )}

@@ -58,7 +58,12 @@ const FinishProductTemplate = async ({
       ? await getProductByHandle(product.medusaHandle, region.id)
       : null
 
-    return <CustomizerPreview product={medusaProduct} />
+    return (
+      <CustomizerPreview
+        product={medusaProduct}
+        ordersEnabled={product.available}
+      />
+    )
   }
 
   if (!product.available || !product.sku || !product.medusaHandle) {

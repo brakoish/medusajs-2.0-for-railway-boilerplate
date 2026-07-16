@@ -66,16 +66,20 @@ const COUNTRY = "us"
 
 const CustomizerPreview = ({
   product,
+  ordersEnabled = false,
 }: {
   product?: HttpTypes.StoreProduct | null
+  ordersEnabled?: boolean
 }) => {
   const [colors, setColors] = useState(initialColors)
   const [isOpen, setIsOpen] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const customVariant =
-    product?.variants?.find((variant) => variant.sku === CUSTOM_SKU) ??
-    product?.variants?.[0]
+    ordersEnabled
+      ? product?.variants?.find((variant) => variant.sku === CUSTOM_SKU) ??
+        product?.variants?.[0]
+      : undefined
   const selectedColors = getSelectedColors(colors)
   const colorSummary = formatColorSummary(selectedColors)
 
@@ -231,12 +235,14 @@ const CustomizerPreview = ({
               <Button
                 type="button"
                 onClick={handleAddToCart}
-                disabled={!customVariant?.id || isAdding}
+                disabled={!ordersEnabled || !customVariant?.id || isAdding}
                 isLoading={isAdding}
                 variant="primary"
                 className="h-10 w-full rounded-lg"
               >
-                {customVariant?.id ? "Add custom to cart" : "Customs opening soon"}
+                {ordersEnabled && customVariant?.id
+                  ? "Add custom to cart"
+                  : "Customs opening soon"}
               </Button>
             </div>
           </div>

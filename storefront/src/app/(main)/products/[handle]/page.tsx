@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 
 import ProductTemplate from "@modules/products/templates"
 import { getRegion } from "@lib/data/regions"
@@ -38,6 +38,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProductPage({ params }: Props) {
+  if (params.handle === "dab-pal-custom") {
+    redirect("/store/custom")
+  }
+
   const region = await getRegion(COUNTRY)
   if (!region) notFound()
 
