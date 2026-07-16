@@ -75,7 +75,10 @@ const CustomizerPreview = ({
   const [isOpen, setIsOpen] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
   const [activePart, setActivePart] = useState<PartName | null>(null)
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false)
+  const [modelDragRotation, setModelDragRotation] = useState(0)
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const customVariant =
     ordersEnabled
       ? product?.variants?.find((variant) => variant.sku === CUSTOM_SKU) ??
@@ -91,6 +94,22 @@ const CustomizerPreview = ({
       }
     }
   }, [])
+
+  useEffect(() => {
+    const media = window.matchMedia("(pointer: coarse)")
+    const update = () => setIsCoarsePointer(media.matches)
+
+    update()
+    media.addEventListener("change", update)
+
+    return () => media.removeEventListener("change", update)
+  }, [])
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      canvasRef.current.style.touchAction = isCoarsePointer ? "pan-y" : "auto"
+    }
+  }, [isCoarsePointer])
 
   const handleModelTap = () => {
     if (tapTimerRef.current) {
@@ -143,8 +162,16 @@ const CustomizerPreview = ({
       <div className="content-container grid min-h-[calc(100vh-160px)] grid-cols-1 gap-6 py-5 small:grid-cols-[minmax(0,1fr)_22rem] small:gap-10 small:py-10">
         <div className="order-2 min-h-[27rem] cursor-pointer overflow-hidden bg-white small:order-none small:min-h-[calc(100vh-240px)]">
           <Canvas
+            className="dab-pal-customizer-canvas"
             camera={{ position: [0, 0, 8], fov: 34 }}
             gl={{ antialias: true, alpha: false }}
+            onCreated={({ gl }) => {
+              canvasRef.current = gl.domElement
+              gl.domElement.style.touchAction = isCoarsePointer
+                ? "pan-y"
+                : "auto"
+            }}
+            style={{ touchAction: isCoarsePointer ? "pan-y" : "none" }}
           >
             <color attach="background" args={["#ffffff"]} />
             <ambientLight intensity={1.45} />
@@ -153,12 +180,16 @@ const CustomizerPreview = ({
             <directionalLight position={[-5, 4, 4]} intensity={0.28} />
             <Suspense fallback={null}>
               <DabPalModel
+                dragRotation={modelDragRotation}
                 colors={colors}
+                isDragEnabled={isCoarsePointer}
                 isOpen={isOpen}
+                onDrag={(delta) => setModelDragRotation((value) => value + delta)}
                 onTap={handleModelTap}
               />
             </Suspense>
             <OrbitControls
+              enabled={!isCoarsePointer}
               enableDamping
               enablePan={false}
               target={[0, 0, 0]}
@@ -381,15 +412,26 @@ const BuildSummary = ({
 )
 
 const DabPalModel = ({
+  dragRotation,
   colors,
+  isDragEnabled,
   isOpen,
+  onDrag,
   onTap,
 }: {
+  dragRotation: number
   colors: Record<PartName, string>
+  isDragEnabled: boolean
   isOpen: boolean
+  onDrag: (delta: number) => void
   onTap: () => void
 }) => {
   const gltf = useGLTF(MODEL_URL) as GLTF
+  const dragRef = useRef<{
+    lastX: number
+    moved: boolean
+    pointerId: number
+  } | null>(null)
   const customScene = useMemo(() => {
     const scene = gltf.scene.clone(true)
     const orderedParts: PartName[] = ["body", "slider", "lid"]
@@ -448,11 +490,61 @@ const DabPalModel = ({
   return (
     <group
       onClick={(event) => {
+        if (isDragEnabled) return
         event.stopPropagation()
         onTap()
       }}
+      onPointerDown={(event) => {
+        if (!isDragEnabled) return
+        event.stopPropagation()
+        dragRef.current = {
+          lastX: event.clientX,
+          moved: false,
+          pointerId: event.pointerId,
+        }
+
+        const target = event.target as HTMLElement & {
+          setPointerCapture?: (pointerId: number) => void
+        }
+        target.setPointerCapture?.(event.pointerId)
+      }}
+      onPointerMove={(event) => {
+        if (!isDragEnabled || !dragRef.current) return
+        event.stopPropagation()
+
+        const deltaX = event.clientX - dragRef.current.lastX
+        if (Math.abs(deltaX) > 2) {
+          dragRef.current.moved = true
+          dragRef.current.lastX = event.clientX
+          onDrag(deltaX * 0.012)
+        }
+      }}
+      onPointerUp={(event) => {
+        if (!isDragEnabled || !dragRef.current) return
+        event.stopPropagation()
+
+        const wasDrag = dragRef.current.moved
+        const pointerId = dragRef.current.pointerId
+        dragRef.current = null
+
+        const target = event.target as HTMLElement & {
+          releasePointerCapture?: (pointerId: number) => void
+        }
+        target.releasePointerCapture?.(pointerId)
+
+        if (!wasDrag) {
+          onTap()
+        }
+      }}
+      onPointerCancel={() => {
+        dragRef.current = null
+      }}
       position={isOpen ? [0, -0.55, 0] : [0, 0, 0]}
-      rotation={defaultViewRotation}
+      rotation={[
+        defaultViewRotation[0],
+        defaultViewRotation[1] + dragRotation,
+        defaultViewRotation[2],
+      ]}
       scale={isOpen ? 0.027 : 0.036}
     >
       <group position={modelCenter.clone().multiplyScalar(-1)}>

@@ -25,6 +25,12 @@ body {
   overflow-x: hidden;
 }
 
+@media (pointer: coarse) {
+  .dab-pal-customizer-canvas {
+    touch-action: pan-y !important;
+  }
+}
+
 @layer utilities {
   /* Cart-badge bounce when count changes (subtle pop, not chaotic). */
   @keyframes cart-pop {
