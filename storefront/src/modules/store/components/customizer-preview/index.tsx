@@ -183,6 +183,7 @@ const CustomizerPreview = ({
             <hemisphereLight args={["#ffffff", "#d8d4cc", 0.75]} />
             <directionalLight position={[3, -4, 7]} intensity={0.65} />
             <directionalLight position={[-5, 4, 4]} intensity={0.28} />
+            <directionalLight position={[0, -6, 5]} intensity={0.38} />
             <Suspense fallback={null}>
               <DabPalModel
                 dragRotation={modelDragRotation}
@@ -589,9 +590,9 @@ const formatColorSummary = (colors: ReturnType<typeof getSelectedColors>) =>
 const createEdgeOverlay = (geometry: THREE.BufferGeometry, part: PartName) => {
   const edges = new THREE.EdgesGeometry(geometry, 32)
   const material = new THREE.LineBasicMaterial({
-    color: part === "lid" ? "#fff7df" : "#ffffff",
+    color: part === "body" ? "#c8c0b5" : part === "lid" ? "#fff7df" : "#ffffff",
     transparent: true,
-    opacity: part === "body" ? 0.1 : 0.09,
+    opacity: part === "body" ? 0.18 : 0.09,
     depthWrite: false,
   })
 
@@ -600,12 +601,12 @@ const createEdgeOverlay = (geometry: THREE.BufferGeometry, part: PartName) => {
 
 const createPrintedMaterial = (color: string, part: PartName) => {
   const isBlack = color === "#252525"
-  const displayColor = isBlack ? "#343330" : color
+  const displayColor = isBlack ? "#383631" : color
   const material = new THREE.MeshStandardMaterial({
     color: displayColor,
     emissive: isBlack ? "#141312" : "#000000",
-    emissiveIntensity: isBlack ? 0.18 : 0,
-    roughness: 0.94,
+    emissiveIntensity: isBlack ? 0.08 : 0,
+    roughness: 0.9,
     metalness: 0,
   })
 
