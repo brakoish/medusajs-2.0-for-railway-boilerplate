@@ -467,11 +467,19 @@ const DabPalModel = ({
 
   const materials = useMemo(
     () => ({
-      body: createPrintedMaterial(colors.body, "body"),
-      lid: createPrintedMaterial(colors.lid, "lid"),
+      body: createPrintedMaterial(
+        colors.body,
+        "body",
+        focusedPart === "slider" ? 0.48 : 1
+      ),
+      lid: createPrintedMaterial(
+        colors.lid,
+        "lid",
+        focusedPart === "slider" ? 0.42 : 1
+      ),
       slider: createPrintedMaterial(colors.slider, "slider"),
     }),
-    [colors.body, colors.lid, colors.slider]
+    [colors.body, colors.lid, colors.slider, focusedPart]
   )
 
   useEffect(() => {
@@ -548,14 +556,14 @@ const DabPalModel = ({
         dragRef.current = null
       }}
       position={
-        isSliderFocused ? [0, -0.42, 0] : isOpen ? [0, -0.55, 0] : [0, 0, 0]
+        isSliderFocused ? [0, -0.32, 0] : isOpen ? [0, -0.55, 0] : [0, 0, 0]
       }
       rotation={[
-        isSliderFocused ? -0.95 : defaultViewRotation[0],
-        defaultViewRotation[1] + dragRotation,
+        isSliderFocused ? -0.35 : defaultViewRotation[0],
+        defaultViewRotation[1] + (isSliderFocused ? -0.65 : 0) + dragRotation,
         defaultViewRotation[2],
       ]}
-      scale={isSliderFocused ? 0.032 : isOpen ? 0.027 : 0.036}
+      scale={isSliderFocused ? 0.034 : isOpen ? 0.027 : 0.036}
     >
       <group position={modelCenter.clone().multiplyScalar(-1)}>
         <primitive object={customScene} />
@@ -599,7 +607,11 @@ const createEdgeOverlay = (geometry: THREE.BufferGeometry, part: PartName) => {
   return new THREE.LineSegments(edges, material)
 }
 
-const createPrintedMaterial = (color: string, part: PartName) => {
+const createPrintedMaterial = (
+  color: string,
+  part: PartName,
+  opacity = 1
+) => {
   const isBlack = color === "#252525"
   const displayColor = isBlack ? "#383631" : color
   const material = new THREE.MeshStandardMaterial({
@@ -608,6 +620,9 @@ const createPrintedMaterial = (color: string, part: PartName) => {
     emissiveIntensity: isBlack ? 0.08 : 0,
     roughness: 0.9,
     metalness: 0,
+    transparent: opacity < 1,
+    opacity,
+    depthWrite: opacity === 1,
   })
 
   material.onBeforeCompile = (shader) => {
