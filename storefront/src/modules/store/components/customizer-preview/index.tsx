@@ -548,10 +548,10 @@ const DabPalModel = ({
         dragRef.current = null
       }}
       position={
-        isSliderFocused ? [0, -0.42, 0] : isOpen ? [0, -0.55, 0] : [0, 0, 0]
+        isSliderFocused ? [0, -0.32, 0] : isOpen ? [0, -0.55, 0] : [0, 0, 0]
       }
       rotation={[
-        isSliderFocused ? -0.95 : defaultViewRotation[0],
+        isSliderFocused ? 0.65 : defaultViewRotation[0],
         defaultViewRotation[1] + dragRotation,
         defaultViewRotation[2],
       ]}
