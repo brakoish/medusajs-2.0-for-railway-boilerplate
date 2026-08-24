@@ -103,13 +103,17 @@ export async function POST(
     (fdata.tracking_number as string | undefined) ||
     ((latest?.tracking_numbers as string[] | undefined)?.[0])
 
-  if (latest?.id && trackingNumber && !latest.shipped_at) {
+  if (latest?.id) {
     const fulfillmentModuleService: IFulfillmentModuleService = req.scope.resolve(
       Modules.FULFILLMENT
     )
 
     await fulfillmentModuleService.updateFulfillment(latest.id as string, {
-      shipped_at: new Date(),
+      ...(trackingNumber && !latest.shipped_at ? { shipped_at: new Date() } : {}),
+      data: {
+        ...fdata,
+        order_id: orderId,
+      },
     })
   }
 

@@ -4,6 +4,7 @@ import { IFulfillmentModuleService } from "@medusajs/framework/types"
 import { markFulfillmentAsDeliveredWorkflow } from "@medusajs/medusa/core-flows"
 import { ShippoClient } from "../../../../modules/shippo/client"
 import { ShippoBatchShipment, ShippoTransaction } from "../../../../modules/shippo/types"
+import { sendTrackingEmailForFulfillment } from "../../../../lib/tracking-email"
 
 /**
  * Shippo webhook receiver.
@@ -155,6 +156,16 @@ async function updateFulfillmentFromTransaction(
       ...(tx.servicelevel?.name ? { service: tx.servicelevel.name } : {}),
     },
   })
+
+  if (hasTracking) {
+    const result = await sendTrackingEmailForFulfillment(
+      req.scope,
+      fulfillmentId
+    )
+    logger.info(
+      `[shippo webhook] tracking email ${result} for fulfillment ${fulfillmentId}`
+    )
+  }
 
   return true
 }

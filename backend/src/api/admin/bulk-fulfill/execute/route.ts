@@ -291,7 +291,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       const { data: fulfillments } = await query.graph({
         entity: "fulfillment",
         filters: { order_id: item.order_id },
-        fields: ["id", "created_at"],
+        fields: ["id", "data", "created_at"],
       })
 
       const latest = (fulfillments || [])
@@ -310,6 +310,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         })
         continue
       }
+
+      await fulfillmentModuleService.updateFulfillment(latest.id, {
+        data: {
+          ...(((latest as { data?: Record<string, unknown> }).data ||
+            {}) as Record<string, unknown>),
+          order_id: item.order_id,
+        },
+      })
 
       batchShipments.push({
         carrier_account: item.carrier_account,
