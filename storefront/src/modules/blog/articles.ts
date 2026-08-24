@@ -57,7 +57,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/puffco-peak-pro-proxy-cleaning.webp",
-      alt: "Open Dab Pal kit with swabs, iso bottle, and Peak, Peak Pro, and Proxy-style devices",
+      alt: "Peak, Peak Pro, and Proxy-style devices with cotton swabs and iso bottle",
     },
     sourceLabel: "Puffco Proxy cleaning guidance",
     sourceUrl:
@@ -212,7 +212,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/quartz-banger-cleaning.webp",
-      alt: "Quartz banger on a towel with cotton swabs, iso bottle, and open black Dab Pal kit",
+      alt: "Quartz banger on a towel with cotton swabs and iso bottle",
     },
     howTo: {
       totalTime: "PT5M",
@@ -520,7 +520,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/puffco-peak-pro-cleaning.webp",
-      alt: "Peak Pro-style device beside an open White Speck Dab Pal kit, cotton swabs, and iso bottle",
+      alt: "Peak Pro-style device beside cotton swabs and iso bottle",
     },
     sourceLabel: "Puffco Peak Pro cleaning guidance",
     sourceUrl:
@@ -611,7 +611,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/puffco-peak-cleaning.webp",
-      alt: "Peak-style device beside an open black Dab Pal kit, cotton swabs, iso bottle, and towel",
+      alt: "Peak-style device beside cotton swabs, iso bottle, and towel",
     },
     sourceLabel: "Puffco Peak cleaning guidance",
     sourceUrl:
@@ -702,7 +702,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/puffco-proxy-cleaning.webp",
-      alt: "Proxy-style device beside an open black Dab Pal kit, cotton swabs, and iso bottle",
+      alt: "Proxy-style device beside cotton swabs and iso bottle",
     },
     sourceLabel: "Puffco Proxy cleaning guidance",
     sourceUrl:
@@ -793,7 +793,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/puffco-pivot-cleaning.webp",
-      alt: "Pivot-style pen device with chamber part beside an open black Dab Pal kit, swabs, and iso bottle",
+      alt: "Pivot-style pen device with chamber part beside cotton swabs and iso bottle",
     },
     sourceLabel: "Puffco Pivot cleaning guidance",
     sourceUrl:
@@ -884,7 +884,7 @@ export const blogArticles: BlogArticle[] = [
     ],
     image: {
       src: "/dab-pal/blog/puffco-plus-cleaning.webp",
-      alt: "Plus-style pen device with separated chamber parts beside an open White Speck Dab Pal kit and swabs",
+      alt: "Plus-style pen device with separated chamber parts beside cotton swabs",
     },
     sourceLabel: "Puffco Plus cleaning guidance",
     sourceUrl:
