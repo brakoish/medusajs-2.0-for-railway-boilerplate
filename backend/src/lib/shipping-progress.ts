@@ -9,6 +9,7 @@ export type ShippingStage =
 export type ShippingFulfillment = {
   id: string
   data?: Record<string, any> | null
+  labels?: { tracking_number?: string; tracking_url?: string; label_url?: string }[]
   tracking_numbers?: (string | { tracking_number?: string })[]
   created_at?: string | Date
   shipped_at?: string | Date | null
@@ -26,7 +27,8 @@ export function shippingProgress(fulfillment: ShippingFulfillment) {
   const tracking = data.tracking_status?.status
   const batch = data.batch_status?.status
   const transaction = data.transaction_status?.status
-  const first = fulfillment.tracking_numbers?.[0]
+  const first = fulfillment.tracking_numbers?.[0] || fulfillment.labels?.[0]
+  const labelUrl = data.label_url || fulfillment.labels?.[0]?.label_url
   const trackingNumber =
     data.tracking_number ||
     (typeof first === "string" ? first : first?.tracking_number) ||
@@ -55,7 +57,7 @@ export function shippingProgress(fulfillment: ShippingFulfillment) {
     stage = "in_transit"
     message =
       data.tracking_status?.status_details || "The carrier has the parcel."
-  } else if (data.label_url) {
+  } else if (labelUrl) {
     stage = "label_ready"
     message =
       "Print the label and hand the parcel to the carrier. Awaiting a carrier scan."
@@ -91,9 +93,9 @@ export function shippingProgress(fulfillment: ShippingFulfillment) {
       stage === "canceled" ||
       ["ERROR", "REFUNDED", "REFUNDPENDING"].includes(transaction)
         ? null
-        : data.label_url || null,
+        : labelUrl || null,
     tracking_number: trackingNumber,
-    tracking_url: data.tracking_url || null,
+    tracking_url: data.tracking_url || fulfillment.labels?.[0]?.tracking_url || null,
     carrier: data.carrier || null,
     service: data.service || null,
     batch_id: data.batch_id || null,

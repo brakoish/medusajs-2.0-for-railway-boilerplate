@@ -79,11 +79,12 @@ export async function POST(
   }
 
   // Pull back the fulfillment to return label data to the widget
-  const { data: fulfillments } = await query.graph({
-    entity: "fulfillment",
-    filters: { order_id: orderId },
-    fields: ["id", "data", "tracking_numbers", "created_at", "shipped_at"],
+  const { data: updatedOrders } = await query.graph({
+    entity: "order",
+    filters: { id: orderId },
+    fields: ["fulfillments.id", "fulfillments.data", "fulfillments.created_at"],
   })
+  const fulfillments = updatedOrders?.[0]?.fulfillments
 
   const latest = fulfillments
     ?.slice()

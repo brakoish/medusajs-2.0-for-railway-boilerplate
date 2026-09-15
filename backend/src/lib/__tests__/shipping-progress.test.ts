@@ -150,3 +150,8 @@ test("queue includes unfinished work beyond the first page", async () => {
   expect(graph).toHaveBeenCalledTimes(2)
   expect(result.progress[0].order_id).toBe("order_old")
 })
+
+
+test("Medusa label relationships supply tracking and print links", () => {
+  expect(shippingProgress({ id: "ful_1", labels: [{ tracking_number: "123", tracking_url: "https://track.test", label_url: "https://label.test" }] })).toMatchObject({ stage: "label_ready", tracking_number: "123", tracking_url: "https://track.test", label_url: "https://label.test" })
+})

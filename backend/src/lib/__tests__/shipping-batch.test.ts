@@ -42,13 +42,10 @@ function setup() {
       postal_code: "10001",
     },
   }
-  const graph = jest.fn(async ({ entity, fields }) => ({
-    data:
-      entity === "fulfillment"
-        ? [fulfillment]
-        : fields.includes("fulfillments.id")
-          ? [{ id: "order_1", fulfillments: [] }]
-          : [order],
+  const graph = jest.fn(async ({ fields }) => ({
+    data: fields.includes("fulfillments.data")
+      ? [{ id: "order_1", fulfillments: [fulfillment] }]
+      : fields.includes("fulfillments.id") ? [{ id: "order_1", fulfillments: [] }] : [order],
   }))
   const service = {
     retrieveFulfillment: async () => fulfillment,
