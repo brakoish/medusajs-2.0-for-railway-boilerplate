@@ -3,7 +3,9 @@ import { Modules } from "@medusajs/framework/utils"
 import { IFulfillmentModuleService } from "@medusajs/framework/types"
 import { markFulfillmentAsDeliveredWorkflow } from "@medusajs/medusa/core-flows"
 import { ShippoClient } from "../../../../modules/shippo/client"
-import { ShippoBatchShipment, ShippoTransaction } from "../../../../modules/shippo/types"
+import { updateFulfillmentFromTransaction, updateFromBatchShipment } from "../../../../lib/shippo-sync"
+import { withShippingLock } from "../../../../lib/shipping-attempts"
+import { carrierHasPossession } from "../../../../lib/shipping-progress"
 import { sendTrackingEmailForFulfillment } from "../../../../lib/tracking-email"
 
 /**
@@ -19,8 +21,7 @@ import { sendTrackingEmailForFulfillment } from "../../../../lib/tracking-email"
  *  - track_updated -> persists carrier scan status and marks delivered.
  *  - transaction_created / transaction_updated -> persists label purchase
  *    status, label URLs, tracking numbers, and errors onto the fulfillment.
- *  - batch_created / batch_purchased -> acknowledged and summarized. Full
- *    order mutation waits until bulk shipping uses Shippo's batch API.
+ *  - batch_created / batch_purchased -> reconciles each label and purchase result.
  */
 
 type ShippoTrackUpdatedPayload = {
@@ -100,147 +101,9 @@ type AnyShippoWebhook =
   | ShippoTxUpdatedPayload
   | ShippoBatchPayload
 
-const carrierHasPossession = (status?: string): boolean =>
-  status === "TRANSIT" ||
-  status === "OUT_FOR_DELIVERY" ||
-  status === "DELIVERED" ||
-  status === "FAILURE" ||
-  status === "RETURNED"
-
-const isFulfillmentId = (value?: string): value is string =>
-  typeof value === "string" && value.startsWith("ful_")
-
-async function updateFulfillmentFromTransaction(
-  req: MedusaRequest,
-  tx: ShippoTxUpdatedPayload["data"]
-): Promise<boolean> {
-  const logger = req.scope.resolve("logger")
-  const fulfillmentId = isFulfillmentId(tx.metadata) ? tx.metadata : undefined
-
-  if (!fulfillmentId) {
-    logger.info(
-      `[shippo webhook] transaction ${tx.object_id} has no fulfillment metadata; no order mutation`
-    )
-    return false
-  }
-
-  const fulfillmentModuleService: IFulfillmentModuleService = req.scope.resolve(
-    Modules.FULFILLMENT
-  )
-  const fulfillment = await fulfillmentModuleService.retrieveFulfillment(
-    fulfillmentId
-  )
-  const currentData = ((fulfillment as { data?: Record<string, unknown> })
-    .data || {}) as Record<string, unknown>
-  const shippedAt = (fulfillment as { shipped_at?: Date | string | null })
-    .shipped_at
-
-  const hasTracking = !!tx.tracking_number
-
-  await fulfillmentModuleService.updateFulfillment(fulfillmentId, {
-    ...(hasTracking && !shippedAt ? { shipped_at: new Date() } : {}),
-    data: {
-      ...currentData,
-      transaction_id: tx.object_id,
-      transaction_status: {
-        status: tx.status,
-        messages: tx.messages || [],
-        updated_at: new Date().toISOString(),
-      },
-      ...(tx.label_url ? { label_url: tx.label_url } : {}),
-      ...(tx.tracking_number ? { tracking_number: tx.tracking_number } : {}),
-      ...(tx.tracking_url_provider
-        ? { tracking_url: tx.tracking_url_provider }
-        : {}),
-      ...(tx.provider ? { carrier: tx.provider } : {}),
-      ...(tx.servicelevel?.name ? { service: tx.servicelevel.name } : {}),
-    },
-  })
-
-  if (hasTracking) {
-    const result = await sendTrackingEmailForFulfillment(
-      req.scope,
-      fulfillmentId
-    )
-    logger.info(
-      `[shippo webhook] tracking email ${result} for fulfillment ${fulfillmentId}`
-    )
-  }
-
-  return true
-}
-
 function batchIdFromPayload(payload: ShippoBatchPayload): string | undefined {
   if (typeof payload.data !== "string") return payload.data.object_id
   return payload.data.match(/[a-f0-9]{32}/i)?.[0]
-}
-
-async function updateFulfillmentBatchStatus(
-  req: MedusaRequest,
-  fulfillmentId: string,
-  batchId: string,
-  status: string,
-  messages?: { code?: string; text: string }[]
-): Promise<void> {
-  const fulfillmentModuleService: IFulfillmentModuleService = req.scope.resolve(
-    Modules.FULFILLMENT
-  )
-  const fulfillment = await fulfillmentModuleService.retrieveFulfillment(
-    fulfillmentId
-  )
-  const currentData = ((fulfillment as { data?: Record<string, unknown> })
-    .data || {}) as Record<string, unknown>
-
-  await fulfillmentModuleService.updateFulfillment(fulfillmentId, {
-    data: {
-      ...currentData,
-      batch_id: batchId,
-      batch_status: {
-        status,
-        messages: messages || [],
-        updated_at: new Date().toISOString(),
-      },
-    },
-  })
-}
-
-async function updateFromBatchShipment(
-  req: MedusaRequest,
-  client: ShippoClient,
-  batchId: string,
-  shipment: ShippoBatchShipment
-): Promise<void> {
-  const fulfillmentId = isFulfillmentId(shipment.metadata)
-    ? shipment.metadata
-    : undefined
-  if (!fulfillmentId) return
-
-  await updateFulfillmentBatchStatus(
-    req,
-    fulfillmentId,
-    batchId,
-    shipment.status,
-    shipment.messages
-  )
-
-  if (!shipment.transaction) return
-
-  const tx =
-    typeof shipment.transaction === "string"
-      ? await client.getTransaction(shipment.transaction)
-      : (shipment.transaction as ShippoTransaction)
-
-  await updateFulfillmentFromTransaction(req, {
-    object_id: tx.object_id,
-    status: tx.status,
-    metadata: fulfillmentId,
-    provider: tx.provider,
-    tracking_number: tx.tracking_number,
-    tracking_url_provider: tx.tracking_url_provider,
-    label_url: tx.label_url,
-    messages: tx.messages,
-    servicelevel: tx.servicelevel,
-  })
 }
 
 export async function POST(
@@ -284,39 +147,46 @@ export async function POST(
         `[shippo webhook] track_updated carrier=${carrier} tracking=${tracking_number} status=${status}`
       )
 
+      let accepted = false
       if (metadata) {
         try {
-          const fulfillmentModuleService: IFulfillmentModuleService = req.scope.resolve(Modules.FULFILLMENT)
-          const fulfillment = await fulfillmentModuleService.retrieveFulfillment(metadata)
-          const currentData = ((fulfillment as { data?: Record<string, unknown> }).data || {}) as Record<string, unknown>
-          const shippedAt = (fulfillment as { shipped_at?: Date | string | null }).shipped_at
+          await withShippingLock(`fulfillment:${metadata}`, async () => {
+            const fulfillmentModuleService: IFulfillmentModuleService = req.scope.resolve(Modules.FULFILLMENT)
+            const fulfillment = await fulfillmentModuleService.retrieveFulfillment(metadata)
+            const currentData = ((fulfillment as { data?: Record<string, unknown> }).data || {}) as Record<string, unknown>
+            const shippedAt = (fulfillment as { shipped_at?: Date | string | null }).shipped_at
 
-          await fulfillmentModuleService.updateFulfillment(metadata, {
-            ...(carrierHasPossession(status) && !shippedAt ? { shipped_at: new Date() } : {}),
-            data: {
-              ...currentData,
-              tracking_status: {
-                carrier,
-                tracking_number,
-                status,
-                status_details: tracking_status?.status_details,
-                status_date: tracking_status?.status_date,
-                location: tracking_status?.location,
-                updated_at: new Date().toISOString(),
+            const previous = currentData.tracking_status as { status?: string; status_date?: string } | undefined
+            if (previous?.status === "DELIVERED" && status !== "DELIVERED") return
+            if (previous?.status_date && tracking_status?.status_date && Date.parse(previous.status_date) > Date.parse(tracking_status.status_date)) return
+            if (carrierHasPossession(previous?.status) && ["UNKNOWN", "PRE_TRANSIT"].includes(status || "")) return
+            accepted = true
+            await fulfillmentModuleService.updateFulfillment(metadata, {
+              ...(carrierHasPossession(status) && !shippedAt ? { shipped_at: new Date() } : {}),
+              data: {
+                ...currentData,
+                tracking_status: {
+                  carrier,
+                  tracking_number,
+                  status,
+                  status_details: tracking_status?.status_details,
+                  status_date: tracking_status?.status_date,
+                  location: tracking_status?.location,
+                  updated_at: new Date().toISOString(),
+                },
+                tracking_history: (tracking_history || []).slice(0, 20),
               },
-              tracking_history: (tracking_history || []).slice(0, 20),
-            },
+            })
           })
+          if (accepted && carrierHasPossession(status)) await sendTrackingEmailForFulfillment(req.scope, metadata)
         } catch (e) {
-          logger.warn(
-            `[shippo webhook] failed to update tracking status for fulfillment ${metadata}: ${
-              (e as Error).message
-            }`
-          )
+          res.status(503).json({ error: "Tracking update needs retry" })
+          return
+
         }
       }
 
-      if (status === "DELIVERED" && metadata) {
+      if (accepted && status === "DELIVERED" && metadata) {
         // metadata is the Medusa fulfillment id we passed at /tracks register time.
         try {
           await markFulfillmentAsDeliveredWorkflow(req.scope).run({
@@ -331,6 +201,8 @@ export async function POST(
               (e as Error).message
             }`
           )
+          res.status(503).json({ error: "Delivery update needs retry" })
+          return
         }
       }
       break
@@ -343,11 +215,9 @@ export async function POST(
       try {
         await updateFulfillmentFromTransaction(req, payload.data)
       } catch (e) {
-        logger.warn(
-          `[shippo webhook] failed to update transaction ${payload.data.object_id}: ${
-            (e as Error).message
-          }`
-        )
+        logger.warn(`[shippo webhook] transaction update failed: ${(e as Error).message}`)
+        res.status(503).json({ error: "Transaction update needs retry" })
+        return
       }
       break
     }
@@ -364,7 +234,7 @@ export async function POST(
         break
       }
 
-      const client = new ShippoClient({ api_token: apiToken })
+      const client = new ShippoClient({ api_token: apiToken, api_url: process.env.SHIPPO_API_URL })
       const filters =
         payload.event === "batch_purchased"
           ? ["purchase_succeeded", "purchase_failed"]
@@ -372,23 +242,23 @@ export async function POST(
 
       for (const filter of filters) {
         try {
-          const batch = await client.getBatch(batchId, {
-            object_results: filter,
-            results: 100,
-          })
-          logger.info(
-            `[shippo webhook] ${payload.event} batch_id=${batch.object_id} status=${batch.status} ${filter}=${batch.batch_shipments?.results?.length || 0}`
-          )
+          for (let page = 1; ; page++) {
+            const batch = await client.getBatch(batchId, {
+              object_results: filter, results: 100, page,
+            })
+            logger.info(
+              `[shippo webhook] ${payload.event} batch_id=${batch.object_id} status=${batch.status} ${filter}=${batch.batch_shipments?.results?.length || 0}`
+            )
 
-          for (const shipment of batch.batch_shipments?.results || []) {
-            await updateFromBatchShipment(req, client, batch.object_id, shipment)
+            for (const shipment of batch.batch_shipments?.results || []) {
+              await updateFromBatchShipment(req, client, batch.object_id, shipment, batch.label_url)
+            }
+            if (!batch.batch_shipments?.next) break
           }
         } catch (e) {
-          logger.warn(
-            `[shippo webhook] failed to hydrate batch ${batchId} ${filter}: ${
-              (e as Error).message
-            }`
-          )
+          res.status(503).json({ error: "Batch update needs retry" })
+          return
+
         }
       }
       break

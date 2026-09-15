@@ -1,5 +1,7 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
+
+import ShippingProgress, { ProgressRow } from "../../components/shipping-progress"
 
 export const config = defineRouteConfig({
   label: "Bulk Fulfill",
@@ -198,25 +200,29 @@ export default function BulkFulfillPage() {
   const [executing, setExecuting] = useState(false)
   const [fulfillResults, setFulfillResults] = useState<FulfillResult[]>([])
 
-  // Load orders
-  useEffect(() => {
-    setLoadError(null)
-    fetch("/admin/bulk-fulfill/orders", { credentials: "include" })
-      .then((r) => {
-        if (!r.ok) {
-          throw new Error(r.status === 401 ? "Session expired. Log in again." : `Could not load orders (${r.status}).`)
-        }
-        return r.json()
-      })
-      .then((d) => {
-        setOrders(d.orders || [])
-        setLoading(false)
-      })
-      .catch((error) => {
-        setLoadError(error instanceof Error ? error.message : "Could not load orders.")
-        setLoading(false)
-      })
+  const [progress, setProgress] = useState<ProgressRow[]>([])
+  const [showDelivered, setShowDelivered] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const loadingQueue = useRef(false)
+  const loadQueue = useCallback(async () => {
+    if (loadingQueue.current) return
+    loadingQueue.current = true
+    try {
+      const response = await fetch("/admin/bulk-fulfill/orders", { credentials: "include" })
+      if (!response.ok) throw new Error(response.status === 401 ? "Session expired. Log in again." : "Could not refresh orders. Existing progress may be out of date.")
+      const data = await response.json()
+      setOrders(data.orders || [])
+      setProgress(data.progress || [])
+      setSelected((previous) => new Set([...previous].filter((id) => (data.orders || []).some((order: Order) => order.id === id))))
+      setLoadError(null)
+    } catch (error) { setLoadError((error as Error).message) }
+    finally { setLoading(false); loadingQueue.current = false }
   }, [])
+  useEffect(() => {
+    void loadQueue()
+    const timer = window.setInterval(() => void loadQueue(), 5000)
+    return () => window.clearInterval(timer)
+  }, [loadQueue])
 
   const toggleAll = useCallback(() => {
     if (selected.size === orders.length) setSelected(new Set())
@@ -233,6 +239,7 @@ export default function BulkFulfillPage() {
 
   const fetchRates = async () => {
     setFetchingRates(true)
+    setActionError(null)
     try {
       const res = await fetch("/admin/bulk-fulfill/rates", {
         method: "POST",
@@ -241,6 +248,7 @@ export default function BulkFulfillPage() {
         body: JSON.stringify({ order_ids: Array.from(selected) }),
       })
       const data = await res.json()
+      if (!res.ok) throw new Error(data.error || "Could not fetch rates")
       const results: RateResult[] = data.results || []
       setRateResults(results)
 
@@ -251,13 +259,15 @@ export default function BulkFulfillPage() {
       })
       setSelectedRates(autoRates)
       setStep("rates")
-    } finally {
+    } catch (error) { setActionError((error as Error).message) } finally {
       setFetchingRates(false)
     }
   }
 
   const execute = async () => {
+    if (executing) return
     setExecuting(true)
+    setActionError(null)
     try {
       const items = rateResults
         .filter((r) => selectedRates[r.order_id])
@@ -280,29 +290,15 @@ export default function BulkFulfillPage() {
         body: JSON.stringify({ items }),
       })
 
-      const contentType = res.headers.get("content-type") || ""
-
-      if (contentType.includes("application/pdf")) {
-        // Parse results from header before consuming body as blob
-        const resultsHeader = res.headers.get("X-Fulfill-Results")
-        if (resultsHeader) {
-          try {
-            setFulfillResults(JSON.parse(resultsHeader))
-          } catch {}
-        }
-        const blob = await res.blob()
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `dab-pal-labels-${Date.now()}.pdf`
-        a.click()
-        URL.revokeObjectURL(url)
-        setStep("done")
-      } else {
-        const data = await res.json()
-        setFulfillResults(data.results || [])
-        setStep("done")
-      }
+      const data = await res.json()
+      setFulfillResults(data.results || [])
+      if (!res.ok) setActionError(data.error || "Some labels need review. Check shipping progress below.")
+      setStep("done")
+      await loadQueue()
+    } catch (error) {
+      setActionError("The purchase result could not be confirmed. Check shipping progress and refresh from Shippo before taking another action.")
+      setStep("done")
+      await loadQueue()
     } finally {
       setExecuting(false)
     }
@@ -314,24 +310,8 @@ export default function BulkFulfillPage() {
     setRateResults([])
     setSelectedRates({})
     setFulfillResults([])
-    // Refresh order list
-    setLoading(true)
-    setLoadError(null)
-    fetch("/admin/bulk-fulfill/orders", { credentials: "include" })
-      .then((r) => {
-        if (!r.ok) {
-          throw new Error(r.status === 401 ? "Session expired. Log in again." : `Could not load orders (${r.status}).`)
-        }
-        return r.json()
-      })
-      .then((d) => {
-        setOrders(d.orders || [])
-        setLoading(false)
-      })
-      .catch((error) => {
-        setLoadError(error instanceof Error ? error.message : "Could not load orders.")
-        setLoading(false)
-      })
+    setActionError(null)
+    void loadQueue()
   }
 
   const customColorSummary = (metadata?: Record<string, unknown> | null) => {
@@ -390,13 +370,15 @@ export default function BulkFulfillPage() {
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
       <h1 style={S.heading}>Bulk Fulfill</h1>
-      <p style={S.sub}>Select orders, verify addresses, buy all labels at once.</p>
+      <p style={S.sub}>Review orders, buy labels, and follow each shipment through delivery.</p>
+      {actionError && <p role="alert" style={{ color: "#991b1b" }}>{actionError}</p>}
+      {loadError && <p role="alert" style={{ color: "#991b1b" }}>{loadError}</p>}
 
       {/* ── STEP 1: SELECT ORDERS ── */}
       {step === "select" && (
         <div style={S.card}>
           <div style={S.cardHead}>
-            <span style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>Unfulfilled orders {!loading && `(${orders.length})`}</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>Ready for a label {!loading && `(${orders.length})`}</span>
             <div style={S.row}>
               {selected.size > 0 && <span style={{ ...S.badge, ...S.amber }}>{selected.size} selected</span>}
               <button
@@ -418,13 +400,13 @@ export default function BulkFulfillPage() {
             ) : loadError ? (
               <div style={{ padding: 32, textAlign: "center", color: "#991b1b" }}>{loadError}</div>
             ) : orders.length === 0 ? (
-              <div style={{ padding: 32, textAlign: "center", color: "#9ca3af" }}>No unfulfilled orders.</div>
+              <div style={{ padding: 32, textAlign: "center", color: "#9ca3af" }}>No orders ready for a new label. Check shipping progress below for existing purchases.</div>
             ) : (
               <table style={S.table}>
                 <thead>
                   <tr>
                     <th style={{ ...S.th, width: 40 }}>
-                      <input type="checkbox" style={S.check} checked={selected.size === orders.length && orders.length > 0} onChange={toggleAll} />
+                      <input aria-label="Select all eligible orders" type="checkbox" style={S.check} checked={selected.size === orders.length && orders.length > 0} onChange={toggleAll} />
                     </th>
                     <th style={S.th}>Order</th>
                     <th style={S.th}>Customer + Address</th>
@@ -443,7 +425,7 @@ export default function BulkFulfillPage() {
                       onClick={() => toggle(order.id)}
                     >
                       <td style={S.td} onClick={(e) => e.stopPropagation()}>
-                        <input type="checkbox" style={S.check} checked={selected.has(order.id)} onChange={() => toggle(order.id)} />
+                        <input aria-label={`Select order ${order.display_id}`} type="checkbox" style={S.check} checked={selected.has(order.id)} onChange={() => toggle(order.id)} />
                       </td>
                       <td style={S.td}>
                         <span style={{ fontWeight: 600 }}>#{order.display_id}</span>
@@ -498,7 +480,7 @@ export default function BulkFulfillPage() {
                   <span style={S.spinner} /> Buying labels…
                 </span>
               ) : (
-                `Buy ${Object.keys(selectedRates).length} label${Object.keys(selectedRates).length !== 1 ? "s" : ""} + download PDF`
+                `Buy ${Object.keys(selectedRates).length} label${Object.keys(selectedRates).length !== 1 ? "s" : ""}`
               )}
             </button>
           </div>
@@ -598,59 +580,14 @@ export default function BulkFulfillPage() {
         </>
       )}
 
-      {/* ── STEP 3: DONE ── */}
-      {step === "done" && (
-        <div style={S.card}>
-          <div style={S.cardHead}>
-            <span style={{ fontSize: 14, fontWeight: 600 }}>Batch submitted</span>
-            <button style={{ ...S.btn, ...S.btnAmber }} onClick={reset}>
-              Fulfill more orders
-            </button>
-          </div>
-          <table style={S.table}>
-            <thead>
-              <tr>
-                <th style={S.th}>Order</th>
-                <th style={S.th}>Status</th>
-                <th style={S.th}>Tracking</th>
-                <th style={S.th}>Label</th>
-              </tr>
-            </thead>
-            <tbody>
-              {fulfillResults.map((r) => (
-                <tr key={r.order_id}>
-                  <td style={S.td}>#{r.display_id}</td>
-                  <td style={S.td}>
-                    <span style={{ ...S.badge, ...(r.success ? S.green : S.red) }}>{r.success ? r.status || "Submitted" : "Failed"}</span>
-                  </td>
-                  <td style={S.td}>{r.tracking || (r.error ? <span style={{ color: "#dc2626", fontSize: 12 }}>{r.error}</span> : "—")}</td>
-                  <td style={S.td}>
-                    {r.label_url ? (
-                      <a href={r.label_url} target="_blank" rel="noreferrer" style={{ color: "#d4a22a", fontSize: 12 }}>
-                        Print
-                      </a>
-                    ) : (
-                      "—"
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {fulfillResults.some((r) => r.success) && (
-            <div
-              style={{
-                padding: "12px 20px",
-                fontSize: 13,
-                color: "#6b7280",
-                borderTop: "1px solid #f3f4f6",
-              }}
-            >
-              Shippo is purchasing the batch. Labels will attach to each order as webhook updates arrive.
-            </div>
-          )}
-        </div>
-      )}
+      {step === "done" && <div style={S.card}>
+        <div style={S.cardHead}><strong>Purchase results — follow progress below</strong><button style={{ ...S.btn, ...S.btnAmber }} onClick={reset}>Back to orders</button></div>
+        {fulfillResults.filter((result) => !result.success).map((result) => <p role="alert" key={result.order_id} style={{ padding: "0 20px", color: "#991b1b" }}>Order #{result.display_id || result.order_id}: {result.error}</p>)}
+      </div>}
+      <section style={S.card} aria-label="Shipping progress">
+        <div style={S.cardHead}><strong>Shipping progress</strong><label style={{ fontSize: 13 }}><input type="checkbox" checked={showDelivered} onChange={(event) => setShowDelivered(event.target.checked)} /> Include delivered and canceled</label></div>
+        <ShippingProgress rows={progress.filter((row) => showDelivered || !["delivered", "canceled"].includes(row.stage))} onRefresh={loadQueue} />
+      </section>
     </div>
   )
 }

@@ -9,6 +9,7 @@ import {
   remainingShippableItems,
   ShippableOrder,
 } from "../../../../lib/shippable-orders"
+import { recordShippingAttempt, withShippingLock } from "../../../../lib/shipping-attempts"
 import { ShippoClient } from "../../../../modules/shippo/client"
 import { preSelectedRates } from "../../../../modules/shippo/pre-selected-rates"
 import { ShippoAddress, ShippoBatch, ShippoParcel } from "../../../../modules/shippo/types"
@@ -132,24 +133,29 @@ async function waitForValidBatch(client: ShippoClient, batchId: string): Promise
 async function markBatchStatus(
   fulfillmentModuleService: IFulfillmentModuleService,
   fulfillmentId: string,
-  batchId: string,
+  batchId: string | undefined,
   status: string,
   error?: string
 ) {
-  const fulfillment = await fulfillmentModuleService.retrieveFulfillment(fulfillmentId)
-  const currentData = ((fulfillment as { data?: Record<string, unknown> }).data ||
-    {}) as Record<string, unknown>
+  await withShippingLock(`fulfillment:${fulfillmentId}`, async () => {
+    const fulfillment = await fulfillmentModuleService.retrieveFulfillment(fulfillmentId)
+    const currentData = ((fulfillment as { data?: Record<string, unknown> }).data ||
+      {}) as Record<string, unknown>
 
-  await fulfillmentModuleService.updateFulfillment(fulfillmentId, {
-    data: {
-      ...currentData,
-      batch_id: batchId,
-      batch_status: {
-        status,
-        error,
-        updated_at: new Date().toISOString(),
+    await fulfillmentModuleService.updateFulfillment(fulfillmentId, {
+      data: {
+        ...currentData,
+        ...(batchId ? { batch_id: batchId } : {}),
+        batch_status: {
+          status,
+          error,
+          updated_at: new Date().toISOString(),
+        },
       },
-    },
+    })
+    if (currentData.order_id) await recordShippingAttempt(String(currentData.order_id), error ? "needs_attention" : "processing", {
+      ...(batchId ? { batch_id: batchId } : {}), ...(error ? { error } : {}),
+    })
   })
 }
 
@@ -163,7 +169,7 @@ async function markBatchStatus(
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const { items } = req.body as { items: FulfillItem[] }
-  if (!items?.length) return res.status(400).json({ error: "items required" })
+  if (!Array.isArray(items) || !items.length || items.length > 100) return res.status(400).json({ error: "Select between 1 and 100 orders" })
 
   const apiToken = process.env.SHIPPO_API_TOKEN
   if (!apiToken) return res.status(503).json({ error: "SHIPPO_API_TOKEN not configured" })
@@ -178,8 +184,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     })
   }
 
+  if (new Set(items.map((item) => item.order_id)).size !== items.length) return res.status(400).json({ error: "Each order may be selected only once" })
+
   const query = req.scope.resolve("query")
-  const client = new ShippoClient({ api_token: apiToken })
+  const client = new ShippoClient({ api_token: apiToken, api_url: process.env.SHIPPO_API_URL })
   const fulfillmentModuleService: IFulfillmentModuleService = req.scope.resolve(
     Modules.FULFILLMENT
   )
@@ -264,6 +272,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         continue
       }
 
+      const destination = toAddress(order)
+      const parcel = parcelForOrder(order.items || [])
       preSelectedRates.set(item.order_id, {
         mode: "batch_pending",
         rate_object_id: item.rate_object_id,
@@ -311,22 +321,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         continue
       }
 
-      await fulfillmentModuleService.updateFulfillment(latest.id, {
-        data: {
-          ...(((latest as { data?: Record<string, unknown> }).data ||
-            {}) as Record<string, unknown>),
-          order_id: item.order_id,
-        },
-      })
-
       batchShipments.push({
         carrier_account: item.carrier_account,
         servicelevel_token: item.servicelevel_token,
         metadata: latest.id,
         shipment: {
           address_from: fromAddress(),
-          address_to: toAddress(order),
-          parcels: [parcelForOrder(order.items || [])],
+          address_to: destination,
+          parcels: [parcel],
         },
       })
 
@@ -350,71 +352,89 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     return res.status(422).json({ error: "No fulfillments prepared", results })
   }
 
-  const first = batchShipments[0]
-  const batch = await client.createBatch({
-    default_carrier_account: first.carrier_account as string,
-    default_servicelevel_token: first.servicelevel_token as string,
-    label_filetype: "PDF_4x6",
-    metadata: `Dab Pal ${new Date().toISOString().slice(0, 16)}`,
-    batch_shipments: batchShipments,
-  })
+  let batchId: string | undefined
+  try {
+    const first = batchShipments[0]
+    const batch = await client.createBatch({
+      default_carrier_account: first.carrier_account as string,
+      default_servicelevel_token: first.servicelevel_token as string,
+      label_filetype: "PDF_4x6",
+      metadata: `Dab Pal ${new Date().toISOString().slice(0, 16)}`,
+      batch_shipments: batchShipments,
+    })
 
-  for (const result of results) {
-    if (result.success && result.fulfillment_id) {
-      await markBatchStatus(
-        fulfillmentModuleService,
-        result.fulfillment_id,
-        batch.object_id,
-        batch.status
-      )
-      result.batch_id = batch.object_id
-      result.status = batch.status
-    }
-  }
+    batchId = batch.object_id
 
-  const validated = await waitForValidBatch(client, batch.object_id)
-  if (validated.status !== "VALID") {
     for (const result of results) {
       if (result.success && result.fulfillment_id) {
         await markBatchStatus(
           fulfillmentModuleService,
           result.fulfillment_id,
           batch.object_id,
-          validated.status,
-          "Shippo batch validation failed"
+          batch.status
         )
-        result.status = validated.status
-        result.error = "Shippo batch validation failed"
+        result.batch_id = batch.object_id
+        result.status = batch.status
       }
     }
 
-    return res.status(422).json({
-      error: "Shippo batch validation failed",
+    const validated = await waitForValidBatch(client, batch.object_id)
+    if (validated.status !== "VALID") {
+      for (const result of results) {
+        if (result.success && result.fulfillment_id) {
+          await markBatchStatus(
+            fulfillmentModuleService,
+            result.fulfillment_id,
+            batch.object_id,
+            validated.status === "INVALID" ? "INVALID" : "VALIDATION_PENDING",
+            validated.status === "INVALID" ? "Shippo batch validation failed. Review the existing batch." : "Validation is still pending. Review this batch in Shippo before purchase."
+          )
+          result.success = false
+          result.status = validated.status
+          result.error = validated.status === "INVALID" ? "Shippo batch validation failed" : "Batch validation is still pending; no purchase was submitted"
+        }
+      }
+
+      return res.status(422).json({
+        error: validated.status === "INVALID" ? "Shippo batch validation failed" : "Batch validation is still pending; no purchase was submitted",
+        batch_id: batch.object_id,
+        status: validated.status,
+        object_results: validated.object_results,
+        results,
+      })
+    }
+
+    const purchased = await client.purchaseBatch(batch.object_id)
+    for (const result of results) {
+      if (result.success && result.fulfillment_id) {
+        await markBatchStatus(
+          fulfillmentModuleService,
+          result.fulfillment_id,
+          batch.object_id,
+          purchased.status
+        )
+        result.status = purchased.status
+      }
+    }
+
+    res.status(202).json({
       batch_id: batch.object_id,
-      status: validated.status,
-      object_results: validated.object_results,
+      status: purchased.status,
+      object_results: purchased.object_results,
+      label_urls: purchased.label_url || [],
       results,
     })
-  }
-
-  const purchased = await client.purchaseBatch(batch.object_id)
-  for (const result of results) {
-    if (result.success && result.fulfillment_id) {
-      await markBatchStatus(
-        fulfillmentModuleService,
-        result.fulfillment_id,
-        batch.object_id,
-        purchased.status
-      )
-      result.status = purchased.status
+  } catch (error) {
+    const message = `The batch result could not be confirmed. Refresh from Shippo before taking another action. ${(error as Error).message}`
+    for (const result of results) {
+      if (result.fulfillment_id) {
+        await markBatchStatus(fulfillmentModuleService, result.fulfillment_id, batchId, "REVIEW_REQUIRED", message)
+        result.success = false
+        result.error = message
+        result.status = "Needs attention"
+      }
     }
+    res.status(502).json({ error: message, results })
   }
 
-  res.status(202).json({
-    batch_id: batch.object_id,
-    status: purchased.status,
-    object_results: purchased.object_results,
-    label_urls: purchased.label_url || [],
-    results,
-  })
 }

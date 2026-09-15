@@ -49,7 +49,7 @@ export class ShippoClient {
       "Shippo-API-Version": this.apiVersion,
       ...((init.headers as Record<string, string>) || {}),
     }
-    const res = await fetch(url, { ...init, headers })
+    const res = await fetch(url, { ...init, headers, signal: init.signal || AbortSignal.timeout(30000) })
 
     if (!res.ok) {
       let body: unknown

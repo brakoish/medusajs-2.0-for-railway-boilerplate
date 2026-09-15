@@ -1,8 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { IFulfillmentModuleService } from "@medusajs/framework/types"
-import { Modules } from "@medusajs/framework/utils"
 import { createOrderFulfillmentWorkflow } from "@medusajs/medusa/core-flows"
 import { preSelectedRates } from "../../../../../modules/shippo/pre-selected-rates"
+import { remainingShippableItems, isCanceledOrder, isRefundedOrder, ShippableOrder } from "../../../../../lib/shippable-orders"
 
 /**
  * POST /admin/orders/:id/fulfill
@@ -33,8 +32,11 @@ export async function POST(
     fields: [
       "id",
       "status",
+      "canceled_at",
+      "fulfillments.id",
       "items.id",
       "items.quantity",
+      "items.requires_shipping",
       "items.detail.fulfilled_quantity",
       "items.detail.quantity",
     ],
@@ -46,19 +48,12 @@ export async function POST(
     return
   }
 
-  // Build items list — pass all items with full quantity and let the workflow
-  // figure out what's already fulfilled. The detail.fulfilled_quantity path
-  // may not resolve in all graph contexts so we don't filter on it.
-  const rawItems = (order.items as Record<string, unknown>[]) || []
-  const items = rawItems
-    .map((item) => {
-      const detail = item.detail as Record<string, unknown> | undefined
-      const fulfilled = Number(detail?.fulfilled_quantity ?? 0)
-      const total = Number(item.quantity ?? 0)
-      const remaining = Math.max(0, total - fulfilled)
-      return { id: item.id as string, quantity: remaining > 0 ? remaining : total }
-    })
-    .filter((i) => i.quantity > 0)
+  const shippingOrder = order as ShippableOrder
+  if (isCanceledOrder(shippingOrder) || isRefundedOrder(shippingOrder) || shippingOrder.fulfillments?.length) {
+    res.status(409).json({ error: "This order is not available for a new label. Review its shipping progress." })
+    return
+  }
+  const items = remainingShippableItems(shippingOrder)
 
   if (!items.length) {
     res.status(400).json({ error: "No items found on this order" })
@@ -99,24 +94,6 @@ export async function POST(
     })[0] as Record<string, unknown> | undefined
 
   const fdata = (latest?.data || {}) as Record<string, unknown>
-  const trackingNumber =
-    (fdata.tracking_number as string | undefined) ||
-    ((latest?.tracking_numbers as string[] | undefined)?.[0])
-
-  if (latest?.id) {
-    const fulfillmentModuleService: IFulfillmentModuleService = req.scope.resolve(
-      Modules.FULFILLMENT
-    )
-
-    await fulfillmentModuleService.updateFulfillment(latest.id as string, {
-      ...(trackingNumber && !latest.shipped_at ? { shipped_at: new Date() } : {}),
-      data: {
-        ...fdata,
-        order_id: orderId,
-      },
-    })
-  }
-
   res.status(200).json({
     fulfillment_id: latest?.id,
     label_url: fdata.label_url,

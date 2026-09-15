@@ -16,6 +16,7 @@ import {
 } from "@medusajs/framework/types"
 import { ShippoClient, ShippoClientOptions } from "./client"
 import { preSelectedRates } from "./pre-selected-rates"
+import { claimShippingAttempt, recordShippingAttempt } from "../../lib/shipping-attempts"
 import {
   ShippoAddress,
   ShippoAddressWithValidation,
@@ -413,6 +414,26 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
    */
   async createFulfillment(
     data: Record<string, unknown>,
+    items: Record<string, unknown>[],
+    order: Record<string, unknown> | undefined,
+    fulfillment: Record<string, unknown>
+  ): Promise<CreateFulfillmentResult> {
+    if (!order?.id) throw new Error("An order is required before purchasing a shipping label")
+    const orderId = String(order.id)
+    await claimShippingAttempt(orderId, fulfillment.id as string | undefined)
+    try {
+      const result = await this.createReservedFulfillment(data, items, order, fulfillment)
+      result.data = { ...result.data, order_id: orderId }
+      await recordShippingAttempt(orderId, result.data?.label_url ? "label_ready" : "processing", result.data || {})
+      return result
+    } catch (error) {
+      await recordShippingAttempt(orderId, "needs_attention", { error: (error as Error).message })
+      throw error
+    }
+  }
+
+  private async createReservedFulfillment(
+    data: Record<string, unknown>,
     _items: Record<string, unknown>[],
     order: Record<string, unknown> | undefined,
     fulfillment: Record<string, unknown>
@@ -448,6 +469,7 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
         rate: preSelectedRateId,
         metadata: fulfillment.id as string | undefined,
       })
+      await recordShippingAttempt(orderId!, "processing", { transaction_id: tx.object_id, transaction_status: { status: tx.status, messages: tx.messages || [] } })
       if (tx.status === "ERROR") {
         const msg = (tx.messages || []).map((m) => m.text).join("; ")
         throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, `Shippo label purchase failed: ${msg || "no message"}`)
@@ -585,6 +607,7 @@ class ShippoProviderService extends AbstractFulfillmentProviderService {
       rate: rate.object_id,
       metadata: fulfillment.id as string | undefined,
     })
+    await recordShippingAttempt(orderId!, "processing", { transaction_id: tx.object_id, transaction_status: { status: tx.status, messages: tx.messages || [] } })
     if (tx.status === "ERROR") {
       const msg = (tx.messages || []).map((m) => m.text).join("; ")
       throw new MedusaError(

@@ -7,6 +7,8 @@ import {
 import { Modules } from "@medusajs/framework/utils"
 import { EmailTemplates } from "../modules/email-notifications/templates"
 import { getEmailConfig } from "./email-config"
+import { carrierHasPossession } from "./shipping-progress"
+import { withShippingLock } from "./shipping-attempts"
 
 type Scope = MedusaRequest["scope"]
 
@@ -43,7 +45,11 @@ const trackingFromFulfillment = (fulfillment: {
 export async function sendTrackingEmailForFulfillment(
   scope: Scope,
   fulfillmentId: string
-): Promise<"sent" | "already_sent" | "missing_data"> {
+) {
+  return withShippingLock(`email:${fulfillmentId}`, () => sendOnce(scope, fulfillmentId))
+}
+
+async function sendOnce(scope: Scope, fulfillmentId: string): Promise<"sent" | "already_sent" | "missing_data" | "waiting_for_carrier" | "needs_attention"> {
   const fulfillmentModuleService: IFulfillmentModuleService = scope.resolve(
     Modules.FULFILLMENT
   )
@@ -54,6 +60,8 @@ export async function sendTrackingEmailForFulfillment(
     {}) as Record<string, unknown>
 
   if (data.tracking_email_sent_at) return "already_sent"
+  const tracking = data.tracking_status as { status?: string } | undefined
+  if (!carrierHasPossession(tracking?.status)) return "waiting_for_carrier"
 
   const { trackingNumber, trackingUrl, carrier } = trackingFromFulfillment(
     fulfillment as {
@@ -81,31 +89,58 @@ export async function sendTrackingEmailForFulfillment(
     Modules.NOTIFICATION
   )
   const emailConfig = await getEmailConfig(EmailTemplates.ORDER_SHIPPED)
+  const idempotencyKey = `dabpal-shipped:${fulfillmentId}`
+  const save = async (patch: Record<string, unknown>) => {
+    await withShippingLock(`fulfillment:${fulfillmentId}`, async () => {
+      const latest = await fulfillmentModuleService.retrieveFulfillment(fulfillmentId)
+      await fulfillmentModuleService.updateFulfillment(fulfillmentId, { data: { ...(latest.data || {}), ...patch } })
+    })
+  }
+  if (data.tracking_email_started_at) {
+    const notifications = await notificationModuleService.listNotifications({ resource_id: fulfillmentId, template: EmailTemplates.ORDER_SHIPPED })
+    if (notifications.some((notification) => notification.status === "success")) {
+      await save({ tracking_email_sent_at: new Date().toISOString(), tracking_email_error: null })
+      return "already_sent"
+    }
+    await save({ tracking_email_error: "Email delivery could not be confirmed. Review Email Studio before sending again." })
+    return "needs_attention"
+  }
 
-  await notificationModuleService.createNotifications({
-    to: order.email,
-    channel: "email",
-    template: EmailTemplates.ORDER_SHIPPED,
-    data: {
-      emailOptions: {
-        replyTo: "hello@thedabpal.com",
-        subject: emailConfig.subject,
+  await save({ tracking_email_started_at: new Date().toISOString() })
+  try {
+    const notification = await notificationModuleService.createNotifications({
+      idempotency_key: idempotencyKey,
+      resource_id: fulfillmentId,
+      resource_type: "fulfillment",
+      to: order.email,
+      channel: "email",
+      template: EmailTemplates.ORDER_SHIPPED,
+      data: {
+        emailOptions: {
+          replyTo: "hello@thedabpal.com",
+          subject: emailConfig.subject,
+        },
+        order,
+        shippingAddress,
+        trackingNumber,
+        trackingUrl,
+        carrier,
+        preview: emailConfig.preview,
       },
-      order,
-      shippingAddress,
-      trackingNumber,
-      trackingUrl,
-      carrier,
-      preview: emailConfig.preview,
-    },
-  })
+    })
 
-  await fulfillmentModuleService.updateFulfillment(fulfillmentId, {
-    data: {
-      ...data,
-      tracking_email_sent_at: new Date().toISOString(),
-    },
-  })
+    if (notification?.status !== "success") {
+      const records = await notificationModuleService.listNotifications({ resource_id: fulfillmentId, template: EmailTemplates.ORDER_SHIPPED })
+      if (!records.some((record) => record.status === "success")) {
+        await save({ tracking_email_error: "Email delivery could not be confirmed. Review Email Studio before sending again." })
+        return "needs_attention"
+      }
+    }
+    await save({ tracking_email_sent_at: new Date().toISOString(), tracking_email_error: null })
+  } catch (error) {
+    await save({ tracking_email_error: (error as Error).message })
+    throw error
+  }
 
   return "sent"
 }

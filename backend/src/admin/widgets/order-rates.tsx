@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { defineWidgetConfig } from "@medusajs/admin-sdk"
 
 type Rate = {
@@ -107,29 +107,47 @@ export default function OrderRatesWidget() {
   const [done,      setDone]      = useState<FulfillResp | null>(null)
   const [err,       setErr]       = useState<string | null>(null)
 
+  const [canPurchase, setCanPurchase] = useState(false)
+  const [checking, setChecking] = useState(true)
+  const checkProgress = useCallback(async () => {
+    if (!orderId) return
+    try {
+      const response = await fetch(`/admin/orders/${orderId}/shipping`, { credentials: "include" })
+      if (!response.ok) throw new Error("Could not check existing shipping purchases")
+      const data = await response.json()
+      setCanPurchase(Boolean(data.orders?.length))
+    } catch (error) { setCanPurchase(false); setErr((error as Error).message) }
+    finally { setChecking(false) }
+  }, [orderId])
+  useEffect(() => { void checkProgress() }, [checkProgress])
   const fetchRates = async () => {
-    if (!orderId || loading) return
+    if (!orderId || loading || !canPurchase) return
     setLoading(true); setErr(null); setDone(null); setSelected(null); setRates(null)
-    const r = await fetch(`/admin/orders/${orderId}/rates`, { credentials: "include" })
-    const d: RatesResp = await r.json()
-    if (d.error) { setErr(d.error) }
-    else { setRates(d.rates); setMeta({ to: d.to, weight_oz: d.weight_oz }) }
-    setLoading(false)
+    try {
+      const r = await fetch(`/admin/orders/${orderId}/rates`, { credentials: "include" })
+      const d: RatesResp = await r.json()
+      if (!r.ok || d.error) throw new Error(d.error || "Could not fetch rates")
+      setRates(d.rates); setMeta({ to: d.to, weight_oz: d.weight_oz })
+    } catch (error) { setErr((error as Error).message) }
+    finally { setLoading(false) }
   }
-
   const fulfill = async () => {
-    if (!orderId || !selected || fulfilling) return
+    if (!orderId || !selected || fulfilling || !canPurchase) return
     setFulfilling(true); setErr(null)
-    const r = await fetch(`/admin/orders/${orderId}/fulfill`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rate_object_id: selected }),
-    })
-    const d: FulfillResp = await r.json()
-    if (d.error) setErr(d.error)
-    else setDone(d)
-    setFulfilling(false)
+    try {
+      const r = await fetch(`/admin/orders/${orderId}/fulfill`, {
+        method: "POST", credentials: "include", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rate_object_id: selected }),
+      })
+      const d: FulfillResp = await r.json()
+      if (!r.ok || d.error) throw new Error(d.error || "Could not confirm the purchase result")
+      setDone(d)
+    } catch (error) { setErr(`${(error as Error).message}. Check shipping progress before trying again.`) }
+    finally {
+      setFulfilling(false)
+      await checkProgress()
+      window.dispatchEvent(new Event("dabpal:shipping-updated"))
+    }
   }
 
   const showRates = rates && rates.length > 0
@@ -143,17 +161,18 @@ export default function OrderRatesWidget() {
           {meta && <span style={S.pill}>{meta.to} · {meta.weight_oz} oz</span>}
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          {selected && !done && (
+          {selected && !done && canPurchase && (
             <button onClick={fulfill} disabled={fulfilling} style={S.btn(true, fulfilling)}>
-              {fulfilling ? "Buying label…" : "Fulfill →"}
+              {fulfilling ? "Buying label…" : "Buy label →"}
             </button>
           )}
-          <button onClick={fetchRates} disabled={loading} style={S.btn(false, loading)}>
+          <button onClick={fetchRates} disabled={loading || !canPurchase} style={S.btn(false, loading || !canPurchase)}>
             {loading ? "Fetching…" : rates ? "Refresh" : "Get Rates"}
           </button>
         </div>
       </div>
 
+      {!checking && !canPurchase && <p style={{ padding: "0 20px", color: "#a1a1aa", fontSize: 13 }}>This order is not available for a new label. <a href="#shipping-progress" style={{ color: "#d4a22a" }}>Review shipping progress below.</a></p>}
       {/* Error */}
       {err && (
         <div style={{ padding: "12px 20px", color: "#f87171", fontSize: 13 }}>
@@ -161,30 +180,11 @@ export default function OrderRatesWidget() {
         </div>
       )}
 
-      {/* Done */}
       {done && (
         <div style={S.success}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 13, color: "#4ade80", fontWeight: 600 }}>✓ Fulfilled</span>
-            <span style={{ fontSize: 12, color: "#71717a" }}>{done.carrier} · {done.service}</span>
-          </div>
-          {done.tracking_number && (
-            <div style={{ fontSize: 12, color: "#a1a1aa" }}>
-              Tracking:{" "}
-              {done.tracking_url
-                ? <a href={done.tracking_url} target="_blank" rel="noreferrer" style={{ color: "#d4a22a" }}>{done.tracking_number}</a>
-                : <span style={{ color: "#fafafa" }}>{done.tracking_number}</span>
-              }
-            </div>
-          )}
-          {done.label_url && (
-            <div>
-              <a href={done.label_url} target="_blank" rel="noreferrer"
-                style={{ fontSize: 12, color: "#d4a22a", textDecoration: "underline" }}>
-                Print Label ↗
-              </a>
-            </div>
-          )}
+          <a href="#shipping-progress" style={{ fontSize: 13, color: "#d4a22a" }}>
+            Purchase submitted. Follow shipping progress below.
+          </a>
         </div>
       )}
 
