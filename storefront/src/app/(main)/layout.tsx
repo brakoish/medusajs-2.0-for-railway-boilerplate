@@ -8,7 +8,7 @@ const SITE_NAME = "Dab Pal"
 const SITE_URL = getBaseURL()
 const TAGLINE = "Puffco cleaning kit and dab swab case."
 const DESCRIPTION =
-  "Dab Pal is a portable Puffco cleaning kit and dab swab case with 30 Q-tips, a 1oz iso bottle, and clean/dirty swab storage. Made for Puffco Peak, Pro, Proxy, e-rigs, and quartz bangers."
+  "Dab Pal is a portable Puffco cleaning kit and dab swab case with storage for 30 Q-tips, an empty 1oz bottle, and a clean/dirty slider. Swabs and iso not included. Made for Puffco Peak, Pro, Proxy, e-rigs, and quartz bangers."
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

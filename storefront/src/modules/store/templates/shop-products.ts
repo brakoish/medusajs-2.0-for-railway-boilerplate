@@ -19,7 +19,7 @@ export const shopProducts: ShopProduct[] = [
     title: "Black Speck",
     subtitle: "Original finish",
     description:
-      "Matte black speck Puffco cleaning kit with a 1oz iso bottle, 30 Q-tips, and the clean/dirty swab slider.",
+      "Black Speck dab swab case with an empty 1oz bottle and clean/dirty slider. Holds 30 regular Q-tips. Swabs and iso not included.",
     seoDescription:
       "Black Speck Dab Pal is a portable Puffco cleaning kit and dab swab case for Q-tips, iso, e-rigs, and quartz bangers.",
     image: "/dab-pal/product-front.png",
@@ -35,12 +35,12 @@ export const shopProducts: ShopProduct[] = [
     title: "White Speck",
     subtitle: "Bright finish",
     description:
-      "White speck Puffco cleaning kit with the same compact bottle, dab swab storage, and slider layout.",
+      "White Speck dab swab case with an empty 1oz bottle and clean/dirty slider. Holds 30 regular Q-tips. Swabs and iso not included.",
     seoDescription:
       "White Speck Dab Pal is a portable dab cleaning kit and swab holder for Puffco Peak, Pro, Proxy, e-rigs, and quartz bangers.",
     image: "/dab-pal/product-front-white.jpg",
     price: "From $25",
-    badge: "Ready to ship",
+    badge: "Made to order",
     cta: "View product",
     medusaHandle: "dab-pal-white-speck",
     sku: "DABPAL-WHT-SINGLE",

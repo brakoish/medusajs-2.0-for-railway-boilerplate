@@ -1,6 +1,7 @@
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { BlogArticle, blogArticles } from "./articles"
 import { BlogTextCover } from "./text-cover"
+import { GuideProductLink } from "./product-link"
 
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat("en-US", {
@@ -104,6 +105,8 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
                 {article.description}
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                <span>By Dab Pal</span>
+                <span aria-hidden>•</span>
                 <span>Updated {formatDate(article.updatedAt)}</span>
                 <span aria-hidden>•</span>
                 <span>{article.readingMinutes} min read</span>
@@ -118,10 +121,6 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
               {article.intro.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
               ))}
-            </div>
-
-            <div className="mt-8 overflow-hidden rounded-lg">
-              <BlogTextCover article={article} />
             </div>
 
             {article.howTo && (
@@ -146,6 +145,72 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
                 </ol>
               </section>
             )}
+
+            {article.guideLinks && (
+              <nav
+                aria-label="Related cleaning guides"
+                className="mt-8 grid gap-3 small:grid-cols-2"
+              >
+                {article.guideLinks.map((link) => (
+                  <LocalizedClientLink
+                    key={link.slug}
+                    href={`/blog/${link.slug}`}
+                    className="rounded-lg border border-gray-200 p-4 hover:border-amber-400"
+                  >
+                    <span className="block font-semibold text-gray-950">
+                      {link.label} →
+                    </span>
+                    <span className="mt-2 block text-sm leading-6 text-gray-600">
+                      {link.description}
+                    </span>
+                  </LocalizedClientLink>
+                ))}
+              </nav>
+            )}
+
+            {article.comparison && (
+              <section className="mt-8">
+                <h2 className="text-2xl font-semibold text-gray-950">
+                  Compare your options
+                </h2>
+                <div className="mt-4 grid gap-4">
+                  {article.comparison.map((item) => (
+                    <div
+                      key={item.type}
+                      className="rounded-lg border border-gray-200 p-5"
+                    >
+                      <h3 className="font-semibold text-gray-950">
+                        {item.type}
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-gray-700">
+                        {item.use}
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-gray-600">
+                        {item.check}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section className="mt-8 rounded-lg border border-amber-200 bg-amber-50 p-5">
+              <h2 className="text-lg font-semibold text-gray-950">
+                A place for your cleaning supplies
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-gray-700">
+                Dab Pal holds 30 regular Q-tips with a clean/dirty slider and an
+                empty 1oz bottle. Swabs and iso are not included. Made to order
+                in NY; allow 3–5 business days before shipping.
+              </p>
+              <GuideProductLink slug={article.slug} />
+            </section>
+
+            <div className="mt-8 overflow-hidden rounded-lg">
+              <BlogTextCover article={article} />
+            </div>
+
+
 
             <div className="mt-10 space-y-10">
               {article.sections.map((section) => (
@@ -203,7 +268,7 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-gray-600">
                 Dab Pal holds 30 Q-tips, a 1oz iso bottle, and a slider for
-                clean vs dirty swabs.
+                clean vs dirty swabs. Swabs and iso are not included.
               </p>
               <div className="mt-4 grid gap-2">
                 <LocalizedClientLink

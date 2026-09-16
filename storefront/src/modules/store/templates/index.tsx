@@ -55,7 +55,7 @@ const StoreTemplate = ({
               Shop Dab Pal
             </span>
             <h1 className="mt-3 text-4xl small:text-6xl font-semibold tracking-tight leading-[1.05] text-gray-950">
-              One kit. Pick your finish.
+              Your portable dab cleaning kit.
             </h1>
             <p className="mt-5 text-base small:text-lg leading-relaxed text-gray-600">
               Pocket Q-tip, iso, and dab swab storage with a clean/dirty slider.
@@ -63,6 +63,11 @@ const StoreTemplate = ({
               builder before customs open.
             </p>
 
+            <p className="mt-4 text-sm leading-relaxed text-gray-600">
+              Includes the case, clean/dirty slider, and empty 1oz bottle.
+              Q-tips and iso are not included. Sized for regular Q-tips;
+              specialty swab fit varies. Closed: 80 × 80 × 25 mm. Made to order in NY.
+            </p>
             <div className="mt-8">
               <div className="flex items-center justify-between gap-4">
                 <h2 className="text-sm font-semibold text-gray-950">Finish</h2>
@@ -128,8 +133,8 @@ const StoreTemplate = ({
 
             <div className="mt-8 grid grid-cols-3 gap-3 border-t border-gray-200 pt-6">
               {[
-                ["30", "Q-tips"],
-                ["1oz", "iso bottle"],
+                ["30", "swab capacity"],
+                ["1oz", "empty bottle"],
                 ["NY", "made"],
               ].map(([value, label]) => (
                 <div key={label}>
@@ -150,7 +155,7 @@ const StoreTemplate = ({
         <div className="content-container grid grid-cols-1 small:grid-cols-3 divide-y small:divide-y-0 small:divide-x divide-gray-200">
           {[
             ["Made in NY", "Small-batch production from Astoria."],
-            ["Ships fast", "Most orders leave in 1 to 2 business days."],
+            ["Made to order", "Allow 3–5 business days for handling before shipping."],
             ["Wallet ready", "Apple Pay, Google Pay, Link, PayPal, and cards."],
           ].map(([title, body]) => (
             <div key={title} className="py-6 small:px-8 first:small:pl-0">

@@ -15,6 +15,7 @@ import { addToCart } from "@lib/data/cart"
 import { dispatchCartChange } from "@lib/util/cart-events"
 import { useSetSelectedVariantId } from "@modules/products/contexts/variant-context"
 import { HttpTypes } from "@medusajs/types"
+import { usePostHog } from "posthog-js/react"
 
 const COUNTRY = "us"
 
@@ -45,7 +46,7 @@ const optionsAsKeymap = (variantOptions: any) => {
 const FulfillmentNote = () => (
   <div className="rounded-lg border border-gray-200 bg-zinc-50 px-3 py-2 text-sm text-gray-800">
     <span className="font-medium text-gray-950">Made in NY.</span>{" "}
-    <span>Most orders ship in 1 to 2 business days.</span>
+    <span>Made to order. Allow 3–5 business days before shipping.</span>
   </div>
 )
 
@@ -56,6 +57,7 @@ export default function ProductActions({
   hideMobileActions,
   initialVariantSku = "DABPAL-BLK-SINGLE",
 }: ProductActionsProps) {
+  const posthog = usePostHog()
   const [options, setOptions] = useState<Record<string, string | undefined>>(
     () => {
       // Pre-compute defaults so there's no "Select variant" flash on first render.
@@ -200,6 +202,13 @@ export default function ProductActions({
 
     dispatchCartChange()
     setIsAdding(false)
+    posthog.capture("add_to_cart", {
+      product_id: product.id,
+      variant_id: selectedVariant.id,
+      quantity: 1,
+      currency: selectedVariant.calculated_price?.currency_code,
+      value: selectedVariant.calculated_price?.calculated_amount,
+    })
   }
 
   return (

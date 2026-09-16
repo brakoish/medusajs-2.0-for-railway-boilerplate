@@ -1,6 +1,6 @@
 const features = [
   {
-    title: "30 Q-tips + 1oz iso",
+    title: "Room for 30 Q-tips + 1oz bottle",
     description:
       "Everything you need for a quick clean, packed tight. No more loose swabs rattling around your bag.",
   },

@@ -10,14 +10,19 @@ import { VariantProvider } from "@modules/products/contexts/variant-context"
 import ProductActionsWrapper from "@modules/products/templates/product-actions-wrapper"
 import CustomizerPreview from "@modules/store/components/customizer-preview"
 import { ShopProduct } from "./shop-products"
+import { getBaseURL } from "@lib/util/env"
+import { buildProductSchema } from "@lib/util/product-schema"
 
 const VIDEO_URL =
   "https://bucket-production-a39d.up.railway.app/medusa-media/dabpal_video-01KRBQAN081CB5FHH4QC6G6PKN.mp4"
 
 const details = [
-  ["Inside", "30 Q-tips, 1oz iso bottle, clean/dirty slider."],
-  ["Fit", "Pocket-sized case for Puffco and quartz banger cleaning."],
-  ["Shipping", "Made in NY and ships in 1 to 2 business days."],
+  ["Included", "Dab Pal case, empty 1oz bottle, and clean/dirty slider. Q-tips and iso are not included."],
+  ["Capacity", "Holds 30 regular Q-tips. Specialty swab fit varies."],
+  ["Returns", "14-day returns, including opened kits. Contact @nslabs_ on Instagram to arrange a return."],
+  ["Closed dimensions", "80 × 80 × 25 mm. Exterior dimensions; specialty swab fit varies."],
+  ["Fit", "An independent organizer for Puffco and quartz banger cleaning supplies."],
+  ["Shipping", "Made to order in NY. Allow 3–5 business days before shipping."],
 ]
 
 const instructions = [
@@ -81,6 +86,10 @@ const FinishProductTemplate = async ({
 
   return (
     <main className="bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildProductSchema(product, medusaProduct, getBaseURL())).replace(/</g, "\\u003c") }}
+      />
       <section className="content-container py-5 small:py-12">
         <div className="mb-5 small:mb-6 flex items-center gap-2 text-sm text-gray-500">
           <LocalizedClientLink href="/store" className="hover:text-gray-900">
@@ -299,6 +308,11 @@ const ProductReviewSnippets = () => (
 const ProductInstructions = ({ className = "" }: { className?: string }) => (
   <section className={`border-t border-gray-200 pt-5 ${className}`}>
     <h2 className="text-sm font-semibold text-gray-950">How to use it</h2>
+    <p className="mt-3 text-sm text-gray-600">
+      <LocalizedClientLink href="/care" className="underline">Case care</LocalizedClientLink>
+      {" · "}
+      <LocalizedClientLink href="/blog/how-to-clean-puffco-peak-pro-proxy" className="underline">Puffco cleaning guides</LocalizedClientLink>
+    </p>
     <ol className="mt-3 grid gap-3">
       {instructions.map((instruction, index) => (
         <li key={instruction} className="flex gap-3 text-sm leading-relaxed">

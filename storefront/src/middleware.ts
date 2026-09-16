@@ -37,6 +37,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(`${origin}${stripped}${search}`, 301)
   }
 
+  const canonicalRoutes: Record<string, string> = {
+    "/products/dab-pal-black-speck": "/store/black-speck",
+    "/products/dab-pal-white-speck": "/store/white-speck",
+    "/blog/how-to-clean-a-puffco-peak-pro-proxy": "/blog/how-to-clean-puffco-peak-pro-proxy",
+  }
+  if (canonicalRoutes[pathname]) {
+    return NextResponse.redirect(`${origin}${canonicalRoutes[pathname]}${search}`, 301)
+  }
+
   if (pathname === "/products/dab-pal") {
     return NextResponse.redirect(`${origin}/store${search}`, 301)
   }

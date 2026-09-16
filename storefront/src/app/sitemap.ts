@@ -8,35 +8,29 @@ import { blogArticles } from "@modules/blog/articles"
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = getBaseURL()
-  const now = new Date()
   const coreRoutes: MetadataRoute.Sitemap = [
     {
       url: base,
-      lastModified: now,
       changeFrequency: "weekly",
       priority: 1.0,
     },
     {
       url: `${base}/store`,
-      lastModified: now,
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${base}/store/black-speck`,
-      lastModified: now,
       changeFrequency: "weekly",
       priority: 0.85,
     },
     {
       url: `${base}/store/white-speck`,
-      lastModified: now,
       changeFrequency: "weekly",
       priority: 0.85,
     },
     {
       url: `${base}/care`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.65,
     },
@@ -46,7 +40,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...coreRoutes,
     {
       url: `${base}/blog`,
-      lastModified: now,
       changeFrequency: "weekly",
       priority: 0.8,
     },

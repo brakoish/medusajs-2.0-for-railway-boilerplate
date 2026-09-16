@@ -21,8 +21,8 @@ const stats = [
 
 const confidence = [
   "Made in Astoria, NY",
-  "Most orders ship in 1 to 2 business days",
-  "14-day returns on unopened kits",
+  "Made to order. Allow 3–5 business days before shipping",
+  "14-day returns",
 ]
 
 const included = [

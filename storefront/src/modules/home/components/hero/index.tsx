@@ -29,8 +29,8 @@ const Hero = () => {
               Your banger cleaning kit. In your pocket.
             </h1>
             <p className="max-w-[20rem] small:max-w-[34rem] text-base small:text-xl text-white/75 leading-relaxed">
-              30 Q-tips, a 1oz iso bottle, a slider that keeps used swabs out of
-              the clean ones. Made in NY for Puffco and quartz setups.
+              Storage for 30 Q-tips, an empty 1oz bottle, and a clean/dirty slider.
+              Made in NY. Q-tips and iso not included.
             </p>
             <div className="flex flex-wrap items-center gap-3 small:gap-4 pt-1 small:pt-2">
               <a

@@ -19,18 +19,19 @@ export const metadata: Metadata = {
     description:
       "Black Speck and White Speck dab swab cases with Q-tip storage, iso bottle storage, and a clean/dirty slider.",
     url: `${base}/store`,
+    images: ["/dab-pal/lineup.png"],
   },
 }
 
 type Params = {
-  searchParams: {
+  searchParams: Promise<{
     sortBy?: SortOptions
     page?: string
-  }
+  }>
 }
 
 export default async function StorePage({ searchParams }: Params) {
-  const { sortBy, page } = searchParams
+  const { sortBy, page } = await searchParams
 
   return (
     <>

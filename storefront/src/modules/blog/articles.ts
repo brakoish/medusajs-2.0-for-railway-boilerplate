@@ -34,6 +34,8 @@ export type BlogArticle = {
   sourceUrl?: string
   cover: BlogCover
   howTo?: BlogHowTo
+  guideLinks?: { slug: string; label: string; description: string }[]
+  comparison?: { type: string; use: string; check: string }[]
   intro: string[]
   sections: BlogSection[]
   faq: BlogFAQ[]
@@ -41,81 +43,85 @@ export type BlogArticle = {
 
 export const blogArticles: BlogArticle[] = [
   {
+    publishedAt: "2026-07-08",
+    updatedAt: "2026-09-16",
+    readingMinutes: 3,
     slug: "how-to-clean-puffco-peak-pro-proxy",
-    title: "How to Clean a Puffco Peak, Peak Pro, or Proxy",
+    title: "How to Clean a Puffco: Choose Your Model",
     eyebrow: "Puffco cleaning",
     description:
-      "A simple Puffco cleaning routine for Peak, Peak Pro, and Proxy users, including swabs, isopropyl alcohol, chamber care, and travel kit tips.",
-    publishedAt: "2026-07-08",
-    updatedAt: "2026-07-08",
-    readingMinutes: 5,
+      "Find the cleaning guide for your Puffco Peak, Peak Pro, Proxy, Pivot, or Plus. Start with your model before choosing chamber and glass cleaning steps.",
     keywords: [
       "puffco cleaning kit",
       "how to clean puffco peak",
       "puffco peak pro cleaning kit",
       "puffco proxy cleaning kit",
-      "puffco swab holder",
     ],
     cover: {
       title: ["Find your", "model."],
-      subtitle: "Peak / Peak Pro / Proxy",
+      subtitle: "Peak / Peak Pro / Proxy / Pivot / Plus",
     },
-    sourceLabel: "Puffco Proxy cleaning guidance",
-    sourceUrl:
-      "https://puffco.zendesk.com/hc/en-us/articles/45364120003227-How-do-I-clean-my-Puffco-Proxy",
     intro: [
-      "A Puffco is easier to keep clean when the tools live in one place. You need cotton swabs, isopropyl alcohol, a little patience, and a way to keep fresh swabs away from used ones.",
-      "This routine is for everyday cleanup, not repair work. Always let the device cool before cleaning, keep electronics dry, and follow Puffco's device-specific support guidance when in doubt.",
+      "Start with the model you own. Peak, Peak Pro, Proxy, Pivot, and Plus do not share one universal deep-cleaning routine. Use the links below to find your guide, then check Puffco’s instructions for your exact generation and chamber.",
+    ],
+    guideLinks: [
+      {
+        slug: "how-to-clean-puffco-peak",
+        label: "Peak",
+        description: "Check whether you own the original or newer Peak.",
+      },
+      {
+        slug: "how-to-clean-puffco-peak-pro",
+        label: "Peak Pro",
+        description: "Chamber, glass, and contact cleaning.",
+      },
+      {
+        slug: "how-to-clean-puffco-proxy",
+        label: "Proxy",
+        description: "Check the instructions for your Proxy generation.",
+      },
+      {
+        slug: "how-to-clean-puffco-pivot",
+        label: "Pivot",
+        description: "Chamber, mouthpiece, and base care.",
+      },
+      {
+        slug: "how-to-clean-puffco-plus",
+        label: "Plus",
+        description: "For the pen-style Plus.",
+      },
     ],
     sections: [
       {
-        heading: "What to keep nearby",
+        heading: "Identify your device first",
         body: [
-          "Keep regular Q-tips or tightly wound cotton swabs, 90%+ isopropyl alcohol, a small iso bottle, and a clean towel nearby. A pocket case helps because the tools are ready before the chamber cools too much.",
-          "Dab Pal keeps 30 Q-tips and a 1oz iso bottle together, with a slider that separates clean and used swabs. That matters when you are cleaning away from your desk or dab station.",
+          "Check the model name on your device, packaging, or purchase receipt. A similarly shaped chamber is not enough to establish that two products have the same cleaning instructions.",
+          "The linked guides are starting points, with manufacturer care references. If the instructions for your exact hardware differ, follow the manufacturer.",
         ],
       },
       {
-        heading: "Quick clean after a session",
+        heading: "Build the kit around the routine",
         body: [
-          "Once the bowl is warm, not hot, use a dry swab to lift leftover residue. If a spot needs more help, lightly dip the swab in isopropyl alcohol and clean the surface gently.",
-          "Do not flood the chamber. A swab should be damp, not dripping. The goal is controlled cleaning, not soaking the entire device.",
+          "Keep your fresh swabs, cleaning supplies, and used swabs organized before you begin. A storage case helps you carry those supplies; it does not replace your device’s care instructions.",
+          "Dab Pal includes a case, clean/dirty slider, and empty 1oz bottle. It holds 30 regular Q-tips; swabs and isopropyl alcohol are not included. Specialty swab fit varies.",
         ],
       },
       {
-        heading: "Contacts and connection points",
+        heading: "Quick cleanup and deep cleaning are different",
         body: [
-          "Puffco support recommends cleaning gold contact points with a cotton swab dipped in isopropyl alcohol. This helps prevent connection issues caused by residue between the chamber and base.",
-          "Never soak the base. Keep USB ports and electronics dry, and let any cleaned parts fully dry before using the device again.",
-        ],
-      },
-      {
-        heading: "Deep cleaning",
-        body: [
-          "For supported removable chambers, Puffco guidance calls for 90%+ isopropyl alcohol and full drying before reuse. Glass pieces can usually be soaked separately, then rinsed and dried completely.",
-          "Do not rush the drying step. Isopropyl alcohol is flammable, and trapped liquid around electronics is never worth the risk.",
-        ],
-      },
-      {
-        heading: "A better habit",
-        body: [
-          "The easiest Puffco cleaning routine is the one you actually repeat. Keep swabs and iso together, clean while residue is still easy to remove, and separate used swabs before they touch the clean side of your kit.",
-          "That is the whole point of Dab Pal: swabs, iso, and dirty-swab separation in one pocket-sized case.",
+          "Use the model guide to distinguish quick bowl cleanup from a full disassembly. Check which parts can be soaked, which need only a careful wipe, and how they must dry before reassembly.",
+          "Do not use one model’s soak time as a rule for every Puffco device.",
         ],
       },
     ],
     faq: [
       {
-        q: "What iso should I use for Puffco cleaning?",
-        a: "Puffco support guidance commonly references 90%+ isopropyl alcohol for chamber cleaning. Use a damp swab for light cleaning and let parts fully dry.",
+        q: "Which guide should I use for a Peak Pro?",
+        a: "Choose the Peak Pro guide above, then match the manufacturer’s instructions to your chamber and device generation.",
       },
       {
-        q: "Can I soak the Puffco base?",
-        a: "No. Do not soak the base or flood electronics. Clean contact points carefully with a lightly dipped cotton swab.",
-      },
-      {
-        q: "Does Dab Pal fit Puffco cleaning supplies?",
-        a: "Yes. Dab Pal holds 30 regular Q-tips and a 1oz iso bottle, which covers the core Puffco cleaning routine.",
+        q: "Is Dab Pal a Puffco device or replacement part?",
+        a: "No. Dab Pal is an independent cleaning-supply organizer. It does not attach to or replace parts of your device.",
       },
     ],
   },
@@ -176,7 +182,7 @@ export const blogArticles: BlogArticle[] = [
         heading: "The simple checklist",
         body: [
           "Your dab cleaning kit should have Q-tips, a small iso bottle, clean/dirty swab separation, a pocketable case, and a shape that fits into a dab bag or glove box.",
-          "That is the Dab Pal formula: 30 Q-tips, 1oz iso bottle storage, and a built-in slider in a made-to-order case.",
+          "That is the Dab Pal formula: storage for 30 Q-tips, an empty 1oz bottle, and a built-in slider in a made-to-order case. Swabs and iso are not included.",
         ],
       },
     ],
@@ -283,20 +289,21 @@ export const blogArticles: BlogArticle[] = [
     ],
   },
   {
-    slug: "best-swabs-for-dabs",
-    title: "Best Swabs for Dabs: Q-tips, Cotton Swabs, and Heady Swabs",
-    eyebrow: "Swab guide",
-    description:
-      "A plain-English guide to dab swabs, Q-tips, cotton swabs, heady swabs, and how to store clean and dirty swabs.",
     publishedAt: "2026-07-08",
-    updatedAt: "2026-07-08",
-    readingMinutes: 4,
+    updatedAt: "2026-09-16",
+    readingMinutes: 3,
+    slug: "best-swabs-for-dabs",
+    title: "Best Swabs for Dabs: Q-tips vs Specialty Swabs",
+    eyebrow: "Swab selection",
+    description:
+      "Compare regular Q-tips, pointed cotton swabs, and specialty dab swabs by tip shape, access, and case fit. A practical selection guide, without brand rankings.",
     keywords: [
       "best swabs for dabs",
+      "dab q tips",
+      "q tips for dabs",
+      "cotton swabs for dabbing",
       "dab swab case",
       "heady swabs",
-      "q tip holder for dabs",
-      "cotton swabs for dabs",
     ],
     cover: {
       title: ["Choose", "your swab."],
@@ -304,58 +311,76 @@ export const blogArticles: BlogArticle[] = [
       dark: true,
     },
     intro: [
-      "People use a lot of names for the same job: Q-tips, cotton swabs, dab swabs, heady swabs. The point is simple. You need something clean, absorbent, and easy to grab right after a session.",
-      "The best swab is the one you actually have nearby when it is time to clean.",
+      "Choose a swab around the area you need to reach and the case you want to carry it in. Start with your device’s care instructions, then compare tip shape, shaft length, and storage fit.",
+      "This is a selection guide, not a hands-on brand test. We have not ranked brands for absorbency, lint, or durability. Dab Pal is sized for regular Q-tips; we do not claim universal specialty-swab compatibility.",
+    ],
+    comparison: [
+      {
+        type: "Regular Q-tips",
+        use: "A starting point for a kit built around regular cotton swabs.",
+        check:
+          "Dab Pal holds 30 regular Q-tips. Swabs are purchased separately.",
+      },
+      {
+        type: "Pointed cotton swabs",
+        use: "An option when a rounded tip cannot reach an area described in your care guide.",
+        check:
+          "Check the tip, shaft length, and care instructions. Do not force the tip into an opening.",
+      },
+      {
+        type: "Specialty / heady swabs",
+        use: "Compare the specific product rather than relying on the “dab swab” label.",
+        check:
+          "Tip sizes and shafts vary. Check measurements and case fit before buying a large pack.",
+      },
+    ],
+    guideLinks: [
+      {
+        slug: "what-to-keep-in-a-dab-cleaning-kit",
+        label: "Build a cleaning kit",
+        description: "Organize the supplies you already use.",
+      },
+      {
+        slug: "how-to-clean-puffco-peak-pro-proxy",
+        label: "Find your Puffco guide",
+        description: "Choose the routine for your device.",
+      },
     ],
     sections: [
       {
-        heading: "Regular Q-tips work",
+        heading: "What to compare before buying",
         body: [
-          "For most people, regular Q-tips are the easiest choice. They are cheap, easy to find, and fit inside small cleaning kits.",
-          "Dab Pal is sized around regular Q-tips because that is what most Puffco, e-rig, and banger users already keep around.",
+          "Look at the actual tip shape, shaft length, pack quantity, and cost per swab. Those are more useful shopping details than an unsupported “best for dabs” badge.",
+          "Check a new swab for loose cotton or damage before use. Follow the device maker’s cleaning method, and avoid scraping or forcing a swab into small openings.",
         ],
       },
       {
-        heading: "Tightly wound swabs are cleaner",
+        heading: "Check fit before filling your case",
         body: [
-          "A tighter cotton tip is less likely to leave loose fibers behind. That matters around hot quartz, ceramic bowls, and small chamber areas.",
-          "If you are buying swabs specifically for dabs, look for a firm tip that does not shed easily.",
+          "Dab Pal is designed to hold 30 regular Q-tips beside an empty 1oz bottle. Larger tips or longer shafts may change capacity or prevent the lid from closing. We have not verified every specialty swab.",
+          "The closed case measures 80 × 80 × 25 mm. These are exterior dimensions, not the available space inside the swab compartment. Keep the lid and slider moving freely.",
         ],
       },
       {
-        heading: "Pointed swabs can help",
+        heading: "Keep fresh and used swabs separate",
         body: [
-          "Pointed or detail swabs can help with corners, seams, and contact areas. They are useful, but they are not mandatory for a basic cleaning kit.",
-          "For daily use, regular swabs plus iso cover most jobs. Detail swabs are a nice extra if your setup has tight spots.",
-        ],
-      },
-      {
-        heading: "Storage matters more than the label",
-        body: [
-          "The real problem is not what you call the swab. It is where the clean ones go and where the dirty ones end up.",
-          "A dab swab case should keep fresh swabs clean, keep used swabs contained, and keep iso close enough that cleanup does not become a scavenger hunt.",
-        ],
-      },
-      {
-        heading: "The Dab Pal setup",
-        body: [
-          "Dab Pal holds 30 regular Q-tips and a 1oz iso bottle. The internal slider gives used swabs their own side after cleaning.",
-          "That makes it less of a display piece and more of a daily-use tool, which is exactly what a cleaning kit should be.",
+          "Load fresh swabs on the clean side. Move used swabs behind the divider toward the hinge until you can discard them. Empty the used side before restocking.",
+          "The kit includes the case, slider, and empty bottle. Q-tips and iso are not included.",
         ],
       },
     ],
     faq: [
       {
-        q: "Are heady swabs different from Q-tips?",
-        a: "Sometimes the term just means swabs used for dab cleanup. Some brands sell specialty swabs, but regular Q-tips work for most daily cleaning.",
+        q: "Are Q-tips included with Dab Pal?",
+        a: "No. Add your own Q-tips and iso.",
       },
       {
-        q: "How many swabs does Dab Pal hold?",
-        a: "Dab Pal holds 30 regular Q-tips plus a 1oz iso bottle.",
+        q: "Do all heady swabs fit?",
+        a: "We have not verified universal fit. Dab Pal holds 30 regular Q-tips; specialty swab dimensions and capacity vary.",
       },
       {
-        q: "Why use a dab swab case?",
-        a: "It keeps clean swabs ready and used swabs contained, especially when you are cleaning away from home.",
+        q: "Which swab brand is best?",
+        a: "We do not have comparative hands-on results to name a winner. Compare fit, tip shape, quantity, and your device’s care requirements.",
       },
     ],
   },
@@ -778,94 +803,88 @@ export const blogArticles: BlogArticle[] = [
     ],
   },
   {
-    slug: "how-to-clean-puffco-pivot",
-    title: "How to Clean a Puffco Pivot",
-    eyebrow: "Puffco Pivot cleaning",
-    description:
-      "A Puffco Pivot cleaning routine for the chamber, mouthpiece, base connection, glass adapter, cotton swabs, and 90%+ iso.",
     publishedAt: "2026-07-08",
-    updatedAt: "2026-07-08",
-    readingMinutes: 4,
+    updatedAt: "2026-09-16",
+    readingMinutes: 3,
+    slug: "how-to-clean-puffco-pivot",
+    title: "How to Clean a Puffco Pivot: Chamber, Mouthpiece & Base",
+    eyebrow: "Pivot cleaning",
+    description:
+      "Puffco Pivot cleaning steps for the chamber, mouthpiece, and base, with official soak guidance and full drying before reassembly.",
     keywords: [
       "how to clean puffco pivot",
-      "puffco pivot cleaning kit",
-      "puffco pivot chamber cleaning",
-      "puffco pivot swab holder",
-      "90% iso puffco pivot",
+      "puffco pivot cleaning",
+      "puffco cleaning kit",
+      "dab swab case",
     ],
+    sourceLabel: "Puffco Pivot support — care instructions",
+    sourceUrl: "https://www.puffco.com/pages/pivot-support",
     cover: {
-      title: ["Pivot."],
-      subtitle: "A guide for your model",
-      dark: true,
-    },
-    sourceLabel: "Puffco Pivot cleaning guidance",
-    sourceUrl:
-      "https://puffco.zendesk.com/hc/en-us/articles/45237725674779-How-do-I-clean-the-Pivot",
-    howTo: {
-      totalTime: "PT30M",
-      supplies: ["90%+ isopropyl alcohol", "Cotton swabs", "Clean towel"],
-      tools: ["Dab Pal or another Puffco cleaning kit"],
-      steps: [
-        "Remove the chamber from the Pivot mouthpiece.",
-        "Submerge the chamber in 90%+ iso for 20 to 30 minutes.",
-        "Clean the base threading and connection area with an iso-dipped swab.",
-        "Soak the mouthpiece or glass adapter separately when needed.",
-        "Let all parts fully dry before use.",
-      ],
+      title: ["Clean your", "Pivot."],
+      subtitle: "Chamber / mouthpiece / base",
     },
     intro: [
-      "The Pivot has small parts, so cleaning works best when you keep chamber, mouthpiece, base, and adapter steps separate.",
-      "Puffco's Pivot guidance uses 90%+ isopropyl alcohol for chamber and mouthpiece cleaning, plus cotton swabs for the base threading and connection.",
+      "Remove the Pivot chamber for a 20–30 minute soak in 90%+ iso. Wipe the base connection with an iso-dipped swab; keep the base out of the soak. Let parts dry completely before reassembly. Detailed steps below follow Puffco’s Pivot support guidance.",
     ],
     sections: [
       {
-        heading: "Remove the chamber",
+        heading: "After a session",
         body: [
-          "Remove the chamber from the mouthpiece before cleaning. Small parts are easier to clean when they are separated.",
-          "If residue is heavy, do not force it with sharp tools. Let iso do the work.",
+          "Puffco recommends a cotton swab for the bowl while it is still warm, and for the mouthpiece after use.",
         ],
       },
       {
-        heading: "Soak the chamber",
+        heading: "Chamber: remove, soak, dry",
         body: [
-          "Puffco says the Pivot chamber can be submerged in 90%+ iso for 20 to 30 minutes.",
-          "After soaking, set it upside down and allow time to fully dry before using it again.",
+          "Detach the chamber from the mouthpiece. Soak it in 90% or stronger isopropyl alcohol for 20–30 minutes. Place it upside down and let it dry completely before reattaching.",
         ],
       },
       {
-        heading: "Clean the base connection",
+        heading: "Base: wipe the connection",
         body: [
-          "Use a cotton swab dipped in 90%+ iso to wipe threading and the connection area on the base.",
-          "This matters because sticky residue can interfere with the chamber connection and trigger errors.",
+          "Use an iso-dipped cotton swab on the threading and connection points. Keep the electronic base out of the soak.",
         ],
       },
       {
-        heading: "Mouthpiece and glass adapter",
+        heading: "Mouthpiece and optional glass adapter",
         body: [
-          "The mouthpiece can be submerged in 90%+ iso for 20 to 30 minutes, then rinsed and fully dried.",
-          "For the glass adapter, remove the chamber first, soak the adapter, rinse it, and let it dry completely.",
+          "Soak the mouthpiece in 90% or stronger iso for 20–30 minutes, rinse with water, then invert and dry. For the glass adapter, first remove the chamber, then soak, rinse, and dry the adapter separately.",
         ],
       },
       {
-        heading: "What to keep in the kit",
+        heading: "Make time for cleaning",
         body: [
-          "A Pivot cleaning kit should have cotton swabs, 90%+ iso, and a small case that keeps clean and used swabs apart.",
-          "Dab Pal works well for this because it keeps the bottle and swabs together without loose cotton floating around.",
+          "Puffco recommends a deep clean whenever the battery is depleted. Follow its current care instructions if they change.",
+          "Set the parts somewhere they can dry undisturbed. Plan your next session around complete drying rather than the end of a timer.",
         ],
+      },
+      {
+        heading: "Keep the supplies together",
+        body: [
+          "Dab Pal is a separate organizer, not a required Pivot accessory. It includes an empty 1oz bottle, swab storage, and a clean/dirty slider. Bring your own regular Q-tips and iso.",
+        ],
+      },
+    ],
+    guideLinks: [
+      {
+        slug: "how-to-clean-puffco-peak-pro-proxy",
+        label: "Cleaning a different Puffco?",
+        description: "Return to the model chooser.",
+      },
+      {
+        slug: "best-swabs-for-dabs",
+        label: "Choose swabs for your kit",
+        description: "Compare regular and specialty swab fit.",
       },
     ],
     faq: [
       {
-        q: "What iso does Puffco recommend for the Pivot?",
-        a: "Puffco recommends 90%+ isopropyl alcohol for Pivot cleaning.",
+        q: "Does the soak time include drying?",
+        a: "No. Drying is a separate step. Do not reassemble or use the device while cleaned parts are wet.",
       },
       {
-        q: "How long should I soak the Pivot chamber?",
-        a: "Puffco says to submerge the chamber in 90%+ iso for 20 to 30 minutes, then let it fully dry.",
-      },
-      {
-        q: "Can a dirty Pivot connection cause errors?",
-        a: "Yes. Puffco notes that residue between the chamber and base can interfere with the connection.",
+        q: "Do I need a Dab Pal to clean a Pivot?",
+        a: "No. It is an optional organizer. Use the care supplies specified by Puffco.",
       },
     ],
   },

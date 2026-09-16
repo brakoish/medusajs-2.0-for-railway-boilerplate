@@ -1,6 +1,8 @@
 import Image from "next/image"
 
 const specs = [
+  { label: "Closed dimensions", value: "80 × 80 × 25 mm" },
+  { label: "Included", value: "Case, clean/dirty slider, empty 1oz bottle. Q-tips and iso not included." },
   { label: "Capacity", value: "30 regular Q-tips + 1oz iso bottle" },
   { label: "Closure", value: "Friction-fit hinge lid (no magnets, no clasps)" },
   { label: "Internal slider", value: "Separates used from unused swabs" },

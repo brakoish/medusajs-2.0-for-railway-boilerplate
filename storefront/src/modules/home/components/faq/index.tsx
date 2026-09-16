@@ -4,12 +4,16 @@ import { useState } from "react"
 
 const faqs = [
   {
+    q: "What is included, and how big is it?",
+    a: "The case, clean/dirty slider, and empty 1oz bottle are included. Q-tips and iso are not included. Closed dimensions are 80 × 80 × 25 mm; the case holds 30 regular Q-tips.",
+  },
+  {
     q: "Will this fit my Puffco Peak / Pro / Proxy?",
     a: "Yes, the Dab Pal is designed for Puffco Peak, Peak Pro, and Proxy users, plus traditional quartz bangers and any e-rig setup. The kit holds the Q-tips and iso you use after every dab.",
   },
   {
     q: "Is the iso bottle filled?",
-    a: "No. We ship the bottle empty so it can travel safely (no airline issues, no leaks in transit). Fill it with your preferred isopropyl when it arrives.",
+    a: "No. The 1oz bottle ships empty. Q-tips and isopropyl alcohol are not included; add your own before use.",
   },
   {
     q: "How does the slider work?",
@@ -21,7 +25,7 @@ const faqs = [
   },
   {
     q: "How fast does it ship?",
-    a: "Each Dab Pal is made to order in our Astoria, NY shop. Most orders ship in 2 to 3 business days. You'll get tracking when it goes out.",
+    a: "Each Dab Pal is made to order in our Astoria, NY shop. Allow 3–5 business days for handling before shipping. Delivery time is additional. You'll get tracking when it goes out.",
   },
   {
     q: "Is it 3D printed?",
@@ -33,7 +37,7 @@ const faqs = [
   },
   {
     q: "Returns?",
-    a: "Unopened kits can be returned within 14 days for a full refund. Reach out on Instagram (@nslabs_) if anything's wrong.",
+    a: "We accept returns within 14 days of delivery, including opened kits. Contact us on Instagram (@nslabs_) to arrange a return.",
   },
 ]
 

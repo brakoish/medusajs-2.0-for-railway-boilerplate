@@ -9,6 +9,8 @@ import {
   shopProducts,
 } from "@modules/store/templates/shop-products"
 
+export const revalidate = 300
+
 type Props = {
   params: Promise<{ finish: string }>
 }
