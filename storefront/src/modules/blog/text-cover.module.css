@@ -1,0 +1,80 @@
+.frame {
+  container-type: inline-size;
+  min-width: 0;
+}
+
+.cover {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: clamp(14px, 3.5cqw, 20px);
+  min-height: clamp(232px, 62.5cqw, 360px);
+  padding: clamp(20px, 5.7cqw, 32px);
+}
+
+.light {
+  color: #1b1b1a;
+  background: #efede5;
+  box-shadow: inset -8px 0 #ce912d;
+}
+
+.dark {
+  color: #f4f2e8;
+  background: #232521;
+}
+
+.kicker {
+  color: #85561b;
+  font-size: clamp(9px, 2cqw, 11px);
+  line-height: 1.4;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.dark .kicker {
+  color: #e6b971;
+}
+
+.copy {
+  align-self: center;
+  min-width: 0;
+}
+
+.title {
+  font-size: clamp(28px, 10cqw, 60px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+  overflow-wrap: break-word;
+}
+
+.title span {
+  display: block;
+}
+
+.subtitle {
+  margin: 12px 0 0;
+  font-size: clamp(12px, 2.4cqw, 13px);
+  line-height: 1.45;
+  overflow-wrap: break-word;
+}
+
+.dark .subtitle {
+  color: #d7d6ca;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  font-size: 9px;
+  line-height: 1.4;
+  letter-spacing: 1.2px;
+}
+
+.footer b {
+  font-size: clamp(15px, 3.2cqw, 18px);
+  line-height: 1.2;
+  letter-spacing: -0.7px;
+}

@@ -1,7 +1,6 @@
-import Image from "next/image"
-
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { BlogArticle, blogArticles } from "./articles"
+import { BlogTextCover } from "./text-cover"
 
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat("en-US", {
@@ -10,12 +9,6 @@ const formatDate = (value: string) =>
     year: "numeric",
     timeZone: "UTC",
   }).format(new Date(`${value}T00:00:00Z`))
-
-const getArticleImage = (article: BlogArticle) =>
-  article.image ?? {
-    src: "/dab-pal/product-front-white.jpg",
-    alt: "White Speck Dab Pal cleaning kit",
-  }
 
 const getRelatedArticles = (article: BlogArticle) =>
   blogArticles
@@ -57,16 +50,10 @@ export const BlogIndexTemplate = () => {
             <LocalizedClientLink
               key={article.slug}
               href={`/blog/${article.slug}`}
-              className="group max-w-[20rem] small:max-w-none rounded-lg border border-gray-200 bg-white transition hover:border-amber-300 hover:shadow-elevation-card-rest"
+              className="group min-w-0 rounded-lg border border-gray-200 bg-white transition hover:border-amber-300 hover:shadow-elevation-card-rest"
             >
-              <div className="relative aspect-[16/10] overflow-hidden rounded-t-lg bg-zinc-50">
-                <Image
-                  src={getArticleImage(article).src}
-                  alt={getArticleImage(article).alt}
-                  fill
-                  sizes="(max-width: 800px) 100vw, 50vw"
-                  className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                />
+              <div className="overflow-hidden rounded-t-lg">
+                <BlogTextCover article={article} />
               </div>
               <div className="p-5 small:p-6">
                 <span className="text-xs uppercase tracking-[0.22em] text-amber-700">
@@ -94,7 +81,6 @@ export const BlogIndexTemplate = () => {
 
 export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
   const related = getRelatedArticles(article)
-  const image = getArticleImage(article)
 
   return (
     <main className="bg-white">
@@ -134,15 +120,8 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
               ))}
             </div>
 
-            <div className="relative mt-8 aspect-[16/10] overflow-hidden rounded-lg bg-zinc-50">
-              <Image
-                src={image.src}
-                alt={image.alt}
-                fill
-                priority
-                sizes="(max-width: 800px) 100vw, 760px"
-                className="object-cover"
-              />
+            <div className="mt-8 overflow-hidden rounded-lg">
+              <BlogTextCover article={article} />
             </div>
 
             {article.howTo && (

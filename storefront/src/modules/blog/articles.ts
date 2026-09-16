@@ -15,9 +15,10 @@ export type BlogHowTo = {
   steps: string[]
 }
 
-export type BlogImage = {
-  src: string
-  alt: string
+export type BlogCover = {
+  title: string[]
+  subtitle: string
+  dark?: boolean
 }
 
 export type BlogArticle = {
@@ -31,7 +32,7 @@ export type BlogArticle = {
   keywords: string[]
   sourceLabel?: string
   sourceUrl?: string
-  image?: BlogImage
+  cover: BlogCover
   howTo?: BlogHowTo
   intro: string[]
   sections: BlogSection[]
@@ -55,9 +56,9 @@ export const blogArticles: BlogArticle[] = [
       "puffco proxy cleaning kit",
       "puffco swab holder",
     ],
-    image: {
-      src: "/dab-pal/blog/puffco-peak-pro-proxy-cleaning.webp",
-      alt: "Peak, Peak Pro, and Proxy-style devices with cotton swabs and iso bottle",
+    cover: {
+      title: ["Find your", "model."],
+      subtitle: "Peak / Peak Pro / Proxy",
     },
     sourceLabel: "Puffco Proxy cleaning guidance",
     sourceUrl:
@@ -134,9 +135,9 @@ export const blogArticles: BlogArticle[] = [
       "dab kit organizer",
       "isopropyl swab kit",
     ],
-    image: {
-      src: "/dab-pal/blog/dab-cleaning-kit-checklist.webp",
-      alt: "Black and White Speck Dab Pal kits with cotton swabs, iso bottle, towel, and quartz banger",
+    cover: {
+      title: ["Keep it", "together."],
+      subtitle: "Your cleaning kit checklist",
     },
     intro: [
       "A good dab cleaning kit is not complicated. It just needs to make the clean thing easy to do every time.",
@@ -210,9 +211,9 @@ export const blogArticles: BlogArticle[] = [
       "iso q tips for banger",
       "portable banger cleaner",
     ],
-    image: {
-      src: "/dab-pal/blog/quartz-banger-cleaning.webp",
-      alt: "Quartz banger on a towel with cotton swabs and iso bottle",
+    cover: {
+      title: ["A clearer", "routine."],
+      subtitle: "Quartz banger cleaning",
     },
     howTo: {
       totalTime: "PT5M",
@@ -297,9 +298,10 @@ export const blogArticles: BlogArticle[] = [
       "q tip holder for dabs",
       "cotton swabs for dabs",
     ],
-    image: {
-      src: "/dab-pal/blog/best-swabs-for-dabs.webp",
-      alt: "Clean cotton swabs arranged beside an open black Dab Pal kit and iso bottle",
+    cover: {
+      title: ["Choose", "your swab."],
+      subtitle: "Q-tips / cotton / specialty swabs",
+      dark: true,
     },
     intro: [
       "People use a lot of names for the same job: Q-tips, cotton swabs, dab swabs, heady swabs. The point is simple. You need something clean, absorbent, and easy to grab right after a session.",
@@ -373,9 +375,9 @@ export const blogArticles: BlogArticle[] = [
       "used q tip holder",
       "dab q tip holder",
     ],
-    image: {
-      src: "/dab-pal/blog/clean-vs-dirty-dab-swabs.webp",
-      alt: "Dab Pal kit separating clean cotton swabs from lightly used swabs",
+    cover: {
+      title: ["Fresh here.", "Used there."],
+      subtitle: "Keeping swabs separate",
     },
     intro: [
       "The overlooked part of dab cleanup is what happens after the swab is used. A dirty swab is sticky, smelly, and very good at finding the clean side of your bag.",
@@ -442,9 +444,9 @@ export const blogArticles: BlogArticle[] = [
       "q tips travel case",
       "iso bottle case",
     ],
-    image: {
-      src: "/dab-pal/blog/travel-dab-cleaning-kit.webp",
-      alt: "Open Dab Pal travel cleaning kit with cotton swabs, iso bottle, towel, quartz banger, and pouch",
+    cover: {
+      title: ["Pack", "the kit."],
+      subtitle: "A compact cleaning setup",
     },
     intro: [
       "Travel is where cleanup gets messy. At home, everything has a spot. In a car, hotel room, backpack, or dab bag, the little stuff starts moving around.",
@@ -518,9 +520,9 @@ export const blogArticles: BlogArticle[] = [
       "puffco peak pro swab holder",
       "90% iso puffco peak pro",
     ],
-    image: {
-      src: "/dab-pal/blog/puffco-peak-pro-cleaning.webp",
-      alt: "Peak Pro-style device beside cotton swabs and iso bottle",
+    cover: {
+      title: ["Peak Pro."],
+      subtitle: "A guide for your model",
     },
     sourceLabel: "Puffco Peak Pro cleaning guidance",
     sourceUrl:
@@ -609,9 +611,9 @@ export const blogArticles: BlogArticle[] = [
       "puffco peak swab holder",
       "99% iso puffco peak",
     ],
-    image: {
-      src: "/dab-pal/blog/puffco-peak-cleaning.webp",
-      alt: "Peak-style device beside cotton swabs, iso bottle, and towel",
+    cover: {
+      title: ["Peak."],
+      subtitle: "Start with the right generation",
     },
     sourceLabel: "Puffco Peak cleaning guidance",
     sourceUrl:
@@ -700,9 +702,9 @@ export const blogArticles: BlogArticle[] = [
       "puffco proxy swab holder",
       "90% iso puffco proxy",
     ],
-    image: {
-      src: "/dab-pal/blog/puffco-proxy-cleaning.webp",
-      alt: "Proxy-style device beside cotton swabs and iso bottle",
+    cover: {
+      title: ["Proxy."],
+      subtitle: "A guide for your model",
     },
     sourceLabel: "Puffco Proxy cleaning guidance",
     sourceUrl:
@@ -791,9 +793,10 @@ export const blogArticles: BlogArticle[] = [
       "puffco pivot swab holder",
       "90% iso puffco pivot",
     ],
-    image: {
-      src: "/dab-pal/blog/puffco-pivot-cleaning.webp",
-      alt: "Pivot-style pen device with chamber part beside cotton swabs and iso bottle",
+    cover: {
+      title: ["Pivot."],
+      subtitle: "A guide for your model",
+      dark: true,
     },
     sourceLabel: "Puffco Pivot cleaning guidance",
     sourceUrl:
@@ -882,9 +885,9 @@ export const blogArticles: BlogArticle[] = [
       "puffco plus dart cleaning",
       "puffco plus swab holder",
     ],
-    image: {
-      src: "/dab-pal/blog/puffco-plus-cleaning.webp",
-      alt: "Plus-style pen device with separated chamber parts beside cotton swabs",
+    cover: {
+      title: ["Plus."],
+      subtitle: "A guide for your model",
     },
     sourceLabel: "Puffco Plus cleaning guidance",
     sourceUrl:
