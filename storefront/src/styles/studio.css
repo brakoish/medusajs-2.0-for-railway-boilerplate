@@ -10,6 +10,7 @@
 html, body { overflow-x: clip; overflow-y: visible; }
 html { scroll-behavior: smooth; scroll-padding-top: 110px; }
 body { background: var(--studio-cream); color: var(--studio-ink); font-family: "DM Sans", sans-serif; }
+.text-gray-500 { color: #626870; }
 button, input, select, textarea { font: inherit; }
 a, button, input, select, summary { -webkit-tap-highlight-color: transparent; }
 :focus-visible { outline: 3px solid #9b371c; outline-offset: 4px; }
@@ -189,7 +190,7 @@ a, button, input, select, summary { -webkit-tap-highlight-color: transparent; }
 .studio-cart-summary { background: #e5ddcf; border-radius: 12px; }
 .studio-cart-summary h2 { font-family: "Coiny", sans-serif; font-size: 30px; }
 .studio-cart a[data-testid="checkout-button"] button { min-height: 52px; font-size: 17px; background: var(--studio-ink); }
-.studio-cart button[aria-label="Remove item"] { min-width: 36px; min-height: 44px; align-items: center; justify-content: center; }
+.studio-cart button[aria-label="Remove item"] { min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
 .studio-checkout .bg-white { background: transparent; }
 @media(max-width: 700px) { .studio-cart { padding-block: 24px; } .studio-cart table td { padding-inline: 4px; } .studio-cart table td:first-child { width: 48px; } .studio-cart table td:nth-child(3) > div { width: auto; gap: 0; } .studio-cart [data-testid="product-variant"] { font-size: 12px; white-space: normal; } }
 

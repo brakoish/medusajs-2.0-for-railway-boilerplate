@@ -28,7 +28,7 @@ export const BlogIndexTemplate = () => {
   return (
     <main className="bg-white">
       <section className="border-b border-gray-100">
-        <div className="content-container py-12 small:py-20">
+        <div className="content-container py-8 small:py-20">
           <div className="max-w-3xl">
             <span className="text-xs uppercase tracking-[0.25em] text-amber-700">
               Field notes
@@ -45,13 +45,13 @@ export const BlogIndexTemplate = () => {
         </div>
       </section>
 
-      <nav aria-label="Guide topics" className="content-container pt-8 flex flex-wrap gap-4">
+      <nav aria-label="Guide topics" className="content-container pt-4 small:pt-8 flex flex-wrap gap-x-4 gap-y-1 small:gap-4">
         <LocalizedClientLink className="studio-text-link" href="/blog/how-to-clean-puffco-peak-pro-proxy">Puffco by model</LocalizedClientLink>
         <LocalizedClientLink className="studio-text-link" href="/blog/best-swabs-for-dabs">Swab selection</LocalizedClientLink>
         <LocalizedClientLink className="studio-text-link" href="/blog/how-to-clean-a-quartz-banger">Banger care</LocalizedClientLink>
         <LocalizedClientLink className="studio-text-link" href="/blog/dab-terms-glossary">Dab dictionary</LocalizedClientLink>
       </nav>
-      <section className="content-container py-10 small:py-16">
+      <section className="content-container py-6 small:py-16">
         <div className="grid grid-cols-1 small:grid-cols-2 gap-4 small:gap-6">
           {blogArticles.map((article) => (
             <LocalizedClientLink

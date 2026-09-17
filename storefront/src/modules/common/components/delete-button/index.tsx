@@ -37,7 +37,7 @@ const DeleteButton = ({
       )}
     >
       <button
-        className="flex gap-x-1 text-ui-fg-subtle hover:text-ui-fg-base cursor-pointer"
+        className="flex min-h-11 min-w-11 items-center justify-center gap-x-1 rounded-md text-ui-fg-subtle hover:text-ui-fg-base cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
         aria-label="Remove item"
         disabled={isDeleting}
         onClick={() => handleDelete(id)}

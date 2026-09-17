@@ -18,6 +18,12 @@ type ShippingProps = {
   availableShippingMethods: HttpTypes.StoreCartShippingOption[] | null
 }
 
+// Transit windows configured for these Shippo service groups; checked September 17, 2026.
+const transitEstimates: Record<string, string> = {
+  "Standard Shipping": "Estimated 3–5 days in transit",
+  "Priority Shipping": "Estimated 2–3 days in transit",
+}
+
 const Shipping: React.FC<ShippingProps> = ({
   cart,
   availableShippingMethods,
@@ -131,7 +137,7 @@ const Shipping: React.FC<ShippingProps> = ({
                     value={option.id}
                     data-testid="delivery-option-radio"
                     className={clx(
-                      "flex items-center justify-between text-small-regular cursor-pointer py-4 border rounded-rounded px-8 mb-2 hover:shadow-borders-interactive-with-active",
+                      "flex items-center justify-between gap-3 text-small-regular cursor-pointer py-4 border rounded-rounded px-4 small:px-8 mb-2 hover:shadow-borders-interactive-with-active",
                       {
                         "border-ui-border-interactive":
                           option.id === selectedShippingMethod?.id,
@@ -142,9 +148,14 @@ const Shipping: React.FC<ShippingProps> = ({
                       <Radio
                         checked={option.id === selectedShippingMethod?.id}
                       />
-                      <span className="text-base-regular">{option.name}</span>
+                      <span>
+                        <span className="block text-base-regular">{option.name}</span>
+                        {transitEstimates[option.name] && (
+                          <span className="block mt-1 text-xs text-gray-600">{transitEstimates[option.name]}</span>
+                        )}
+                      </span>
                     </div>
-                    <span className="justify-self-end text-ui-fg-base">
+                    <span className="shrink-0 justify-self-end text-ui-fg-base">
                       {convertToLocale({
                         amount: option.amount!,
                         currency_code: cart?.currency_code,

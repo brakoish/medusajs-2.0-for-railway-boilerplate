@@ -152,7 +152,8 @@ const ProductMediaExtras = ({ product }: { product: ShopProduct }) => {
   const alternate = getAlternateFinish(product)
   return (
     <div className="grid gap-4">
-      <div className="overflow-hidden rounded-lg bg-black">
+      <details className="overflow-hidden rounded-lg border border-gray-300">
+        <summary className="cursor-pointer px-4 py-4 font-semibold">Watch the slider in action</summary>
         <video
           controls
           muted
@@ -164,7 +165,7 @@ const ProductMediaExtras = ({ product }: { product: ShopProduct }) => {
         >
           <source src={VIDEO_URL} type="video/mp4" />
         </video>
-      </div>
+      </details>
 
       <div className="grid grid-cols-2 gap-3 small:gap-4">
         <figure className="rounded-lg border border-gray-200 bg-zinc-50 p-3">

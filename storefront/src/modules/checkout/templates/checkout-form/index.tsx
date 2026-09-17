@@ -6,6 +6,7 @@ import ExpressCheckout from "@modules/checkout/components/express-checkout"
 import Payment from "@modules/checkout/components/payment"
 import RecoveryPanel from "@modules/checkout/components/recovery-panel"
 import Shipping from "@modules/checkout/components/shipping"
+import CheckoutStepFocus from "@modules/checkout/components/step-focus"
 
 export default async function CheckoutForm({
   cart,
@@ -23,15 +24,16 @@ export default async function CheckoutForm({
 
   return (
     <div>
+      <CheckoutStepFocus />
       <div className="w-full grid grid-cols-1 gap-y-8">
         <div>
           <ExpressCheckout cart={cart} />
         </div>
-        <div>
+        <div id="checkout-address" tabIndex={-1} className="scroll-mt-6 focus:outline-none">
           <Addresses cart={cart} customer={customer} />
         </div>
 
-        <div>
+        <div id="checkout-delivery" tabIndex={-1} className="scroll-mt-6 focus:outline-none">
           {shippingMethods === null ? (
             <RecoveryPanel message="Shipping options could not load. Your address and cart are saved. Please try again." />
           ) : (
@@ -39,7 +41,7 @@ export default async function CheckoutForm({
           )}
         </div>
 
-        <div>
+        <div id="checkout-payment" tabIndex={-1} className="scroll-mt-6 focus:outline-none">
           {/* Payment step ends with the Place Order button itself — no
               separate Review step. Cuts a click from the funnel. */}
           {paymentMethods === null ? (

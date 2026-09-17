@@ -21,6 +21,7 @@ type DiscountCodeProps = {
 const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const [message, setMessage] = React.useState<string | null>(null)
+  const [codeInput, setCodeInput] = React.useState("")
 
   const [removing, setRemoving] = React.useState(false)
   const { items = [], promotions = [] } = cart
@@ -47,7 +48,6 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
     if (!code) {
       return
     }
-    const input = document.getElementById("promotion-input") as HTMLInputElement
     // Keep already-applied codes (the original `=== undefined` check
     // dropped them all). Promo codes are stored case-sensitively in
     // Medusa, so normalize to upper-case to match the typical
@@ -65,7 +65,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
         setMessage("That code is not eligible for this cart. Check the offer requirements.")
         return
       }
-      if (input) input.value = ""
+      setCodeInput("")
     } catch {
       setMessage("That code could not be applied. Check it and try again.")
     }
@@ -101,6 +101,8 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
                   aria-label="Promotion code"
                   id="promotion-input"
                   name="code"
+                  value={codeInput}
+                  onChange={(event) => setCodeInput(event.target.value)}
                   type="text"
                   autoFocus={false}
                   data-testid="discount-input"

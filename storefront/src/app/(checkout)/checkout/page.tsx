@@ -78,7 +78,7 @@ export default async function Checkout({ searchParams }: CheckoutProps) {
   const customer = await getCustomer()
 
   return (
-    <div className="grid grid-cols-1 small:grid-cols-[1fr_416px] content-container gap-12 py-12">
+    <div className="grid grid-cols-1 small:grid-cols-[1fr_416px] content-container gap-6 small:gap-12 py-6 small:py-12">
       <CommerceEvent event="begin_checkout" value={cart.total ?? 0} currency={cart.currency_code} sessionKey={cart.id} />
       <h1 className="text-3xl font-semibold small:col-span-2">Checkout</h1>
       <div className="small:col-start-2 small:row-start-2"><CheckoutSummary cart={cart} /></div>
