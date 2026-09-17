@@ -17,11 +17,11 @@ export const shopProducts: ShopProduct[] = [
   {
     handle: "black-speck",
     title: "Slate",
-    subtitle: "Original finish",
+    subtitle: "Dark speckled finish",
     description:
-      "Slate dab swab case with an empty 1oz bottle and clean/dirty slider. Holds 30 regular Q-tips. Swabs and iso not included.",
+      "A 3D-printed swab case in a dark speckled finish. Keep fresh and used swabs separate, with room for 30 regular Q-tips and the included empty 1 oz bottle. Swabs and iso not included.",
     seoDescription:
-      "Slate Dab Pal is a portable Puffco cleaning kit and dab swab case for Q-tips, iso, e-rigs, and quartz bangers.",
+      "Dab Pal — Slate: a 3D-printed dab swab case in a dark speckled finish. Includes a divider and empty 1 oz bottle. Made to order in Astoria, NY.",
     image: "/dab-pal/product-front.png",
     price: "From $25",
     badge: "Best seller",
@@ -33,11 +33,11 @@ export const shopProducts: ShopProduct[] = [
   {
     handle: "white-speck",
     title: "Marble",
-    subtitle: "Bright finish",
+    subtitle: "Marble-look finish",
     description:
-      "Marble dab swab case with an empty 1oz bottle and clean/dirty slider. Holds 30 regular Q-tips. Swabs and iso not included.",
+      "A 3D-printed swab case with a light, marble-look finish. Keep fresh and used swabs separate, with room for 30 regular Q-tips and the included empty 1 oz bottle. Swabs and iso not included.",
     seoDescription:
-      "Marble Dab Pal is a portable dab cleaning kit and swab holder for Puffco Peak, Pro, Proxy, e-rigs, and quartz bangers.",
+      "Dab Pal — Marble: a 3D-printed dab swab case with a marble-look finish. Includes a divider and empty 1 oz bottle. Made to order in Astoria, NY.",
     image: "/dab-pal/product-front-white.jpg",
     price: "From $25",
     badge: "Made to order",

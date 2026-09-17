@@ -21,7 +21,7 @@ export function buildProductSchema(
   return {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: `${product.title} Dab Pal`,
+    name: `Dab Pal — ${product.title}`,
     description: product.description,
     image: [`${base}${product.image}`],
     url,

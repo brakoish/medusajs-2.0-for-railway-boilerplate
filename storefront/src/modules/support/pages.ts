@@ -68,7 +68,7 @@ export const supportPages = {
       {
         "heading": "Made to order in Astoria, NY",
         "body": [
-          "Each case is 3D printed and hand-finished. Small variations in texture and layer detail are part of that process. Slate is the dark finish; Marble is the light finish. Both have the same layout."
+          "Each case is 3D printed to order. Small variations in texture and visible print layers are part of that process. Slate has a dark speckled finish; Marble has a light, marble-look finish. These are finish names, not stone materials. Both have the same layout."
         ]
       },
       {

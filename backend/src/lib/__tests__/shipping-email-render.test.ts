@@ -14,8 +14,8 @@ test("confirmation HTML identifies Marble, Slate packs, and the correct photos i
   const html = renderToStaticMarkup(React.createElement(OrderPlacedTemplate, {
     order, shippingAddress: { first_name: "Local", address_1: "Fixture", address_2: "Apartment 4B" } as any,
   }))
-  expect(html).toContain("Marble Dab Pal")
-  expect(html).toContain("Slate Dab Pal")
+  expect(html).toContain("Dab Pal — Marble")
+  expect(html).toContain("Dab Pal — Slate")
   expect(html).toContain("3-Pack")
   expect(html).toContain("product-front-white.jpg")
   expect(html).toContain("product-front.png")

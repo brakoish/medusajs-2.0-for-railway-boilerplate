@@ -16,6 +16,7 @@ const VIDEO_URL =
   "https://bucket-production-a39d.up.railway.app/medusa-media/dabpal_video-01KRBQAN081CB5FHH4QC6G6PKN.mp4"
 
 const details = [
+  ["Construction", "3D printed to order. Slate and Marble describe the finishes, not stone materials. Small variations in texture and visible print layers are part of the process."],
   ["Included", "Dab Pal case, empty 1oz bottle, and clean/dirty slider. Q-tips and iso are not included."],
   ["Capacity", "Holds 30 regular Q-tips. Specialty swab fit varies."],
   ["Returns", "14-day returns from delivery, including opened kits. Email hello@thedabpal.com to arrange a return."],
@@ -76,7 +77,7 @@ const FinishProductTemplate = async ({
               {product.subtitle}
             </span>
             <h1 className="mt-3 text-3xl small:text-5xl font-semibold tracking-tight leading-tight text-gray-950">
-              {product.title} Dab Pal
+              Dab Pal <span className="whitespace-nowrap">— {product.title}</span>
             </h1>
             <p className="mt-4 text-base leading-relaxed text-gray-600">
               {product.description}
@@ -120,12 +121,12 @@ const getAlternateFinish = (product: ShopProduct) =>
   product.handle === "black-speck"
     ? {
         src: "/dab-pal/product-front-white.jpg",
-        alt: "Marble Dab Pal finish",
+        alt: "Dab Pal in the Marble-look finish",
         label: "Marble",
       }
     : {
         src: "/dab-pal/product-front.png",
-        alt: "Slate Dab Pal finish",
+        alt: "Dab Pal in the Slate finish",
         label: "Slate",
       }
 
@@ -136,7 +137,7 @@ const ProductMedia = ({ product }: { product: ShopProduct }) => {
       <div className="relative aspect-[16/9] rounded-lg bg-zinc-50 overflow-hidden">
         <Image
           src={product.handle === "black-speck" ? "/dab-pal/studio/black.webp" : "/dab-pal/studio/white.webp"}
-          alt={`${product.title} Dab Pal`}
+          alt={`Dab Pal — ${product.title}`}
           fill
           priority
           sizes="(max-width: 800px) 100vw, 55vw"

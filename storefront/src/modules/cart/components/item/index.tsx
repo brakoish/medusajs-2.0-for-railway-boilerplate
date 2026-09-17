@@ -28,7 +28,7 @@ const Item = ({ item, type = "full" }: ItemProps) => {
   const white = item.variant?.sku?.startsWith("DABPAL-WHT")
   const black = item.variant?.sku?.startsWith("DABPAL-BLK")
   const productHref = white ? "/store/white-speck" : black ? "/store/black-speck" : "/store"
-  const productName = `${white ? "Marble " : black ? "Slate " : ""}Dab Pal`
+  const productName = `Dab Pal${white ? " — Marble" : black ? " — Slate" : ""}`
 
   const changeQuantity = async (quantity: number) => {
     setError(null)

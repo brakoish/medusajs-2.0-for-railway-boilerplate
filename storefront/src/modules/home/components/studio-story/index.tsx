@@ -14,7 +14,7 @@ const steps = [
   ],
   [
     "Close it. Take it along.",
-    "A compact 80 × 80 × 25 mm case, made to order and hand-finished in Astoria, NY.",
+    "A compact 80 × 80 × 25 mm case, 3D printed to order in Astoria, NY.",
   ],
 ]
 export default function StudioStory() {

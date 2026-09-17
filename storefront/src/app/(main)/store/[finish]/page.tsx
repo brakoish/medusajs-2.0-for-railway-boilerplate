@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!product) notFound()
 
   const url = `${getBaseURL()}/store/${product.handle}`
-  const title = `${product.title} Dab Pal | Puffco Cleaning Kit`
+  const title = `Dab Pal — ${product.title} | 3D-Printed Dab Swab Case`
   const description = product.seoDescription ?? product.description
 
   return {
@@ -57,7 +57,7 @@ export default async function FinishPage({ params }: Props) {
           { name: "Home", path: "" },
           { name: "Shop", path: "/store" },
           {
-            name: `${product.title} Dab Pal`,
+            name: `Dab Pal — ${product.title}`,
             path: `/store/${product.handle}`,
           },
         ]}

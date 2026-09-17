@@ -6,7 +6,7 @@ test.each([
   ["DABPAL-WHT-6PACK", "6-Pack", "Marble"],
 ])("email identity uses immutable SKU %s", (variant_sku, variant_title, finish) => {
   expect(orderLineDescription({ variant_sku, variant_title })).toEqual({
-    title: `${finish} Dab Pal`, finish, pack: variant_title, colors: "",
+    title: `Dab Pal — ${finish}`, finish, pack: variant_title, colors: "",
   })
 })
 

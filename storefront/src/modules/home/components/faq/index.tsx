@@ -29,7 +29,7 @@ const faqs = [
   },
   {
     q: "Is it 3D printed?",
-    a: "Yes. We chose 3D printing because it lets us tune the wall strength, the speckle finish, and the slider tolerances to spec. Each kit is hand-finished after printing, so small differences in texture or layer detail are normal and expected.",
+    a: "Yes. Each case is 3D printed to order in Astoria, NY. Small variations in texture and visible print layers are part of the process. Marble has a light, marble-look finish; Slate has a dark speckled finish. These are finish names, not stone materials.",
   },
   {
     q: "Is it waterproof?",
