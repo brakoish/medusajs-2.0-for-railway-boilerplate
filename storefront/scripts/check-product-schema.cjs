@@ -39,3 +39,8 @@ assert.equal(group.hasVariant[4].url, "https://thedabpal.com/store?finish=marble
 assert.equal(group.hasVariant[4].size, "3-pack")
 assert.equal(group.hasVariant[4].color, "White")
 console.log("Product schema: 21 assertions passed")
+const edited = buildProductGroupSchema([{ product: { ...product, title: "Slate" }, catalog: { variants: [{ ...selected, sku: "DABPAL-BLK-SINGLE" }] } }], "https://thedabpal.com", { title: "Edited name", capacity: "Edited capacity" })
+assert.equal(edited.name, "Edited name")
+assert.equal(edited.hasVariant[0].name, "Edited name — Slate · Single")
+assert.equal(edited.hasVariant[0].additionalProperty[0].value, "Edited capacity")
+console.log("Editable product schema: 3 assertions passed")

@@ -3,18 +3,23 @@ import { Suspense } from "react"
 import { getBaseURL } from "@lib/util/env"
 import BreadcrumbSchema from "@modules/common/components/breadcrumb-schema"
 import FinishProductTemplate from "@modules/store/templates/finish-product"
+import { getDabPalSettings } from "@lib/data/dabpal-settings"
 
 const base = getBaseURL()
-export const metadata: Metadata = {
-  title: { absolute: "Dab Pal | 3D-Printed Dab Swab Case" },
-  description: "A 3D-printed dab swab case with separate clean and used swab storage. Choose Slate or Marble, in single, 3-pack, or 6-pack. Empty 1 oz bottle included.",
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getDabPalSettings()
+  return {
+  title: { absolute: `${settings.title} | 3D-Printed Dab Swab Case` },
+  description: `${settings.description} ${settings.included}`,
   alternates: { canonical: `${base}/store` },
+  twitter: { card: "summary_large_image", title: `${settings.title} | 3D-Printed Dab Swab Case`, description: `${settings.description} ${settings.included}`, images: [settings.finishes.slate.image] },
   openGraph: {
-    title: "Dab Pal | 3D-Printed Dab Swab Case",
-    description: "Choose Slate or Marble. Case, slider, and empty 1 oz bottle included. Swabs and isopropyl alcohol not included.",
+    title: `${settings.title} | 3D-Printed Dab Swab Case`,
+    description: `${settings.description} ${settings.included}`,
     url: `${base}/store`,
-    images: ["/dab-pal/lineup.png"],
+    images: [settings.finishes.slate.image],
   },
+}
 }
 export default function StorePage() {
   return <>

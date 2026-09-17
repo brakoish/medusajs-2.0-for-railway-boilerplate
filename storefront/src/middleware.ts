@@ -51,6 +51,7 @@ export async function middleware(request: NextRequest) {
   }
 
   const canonicalRoutes: Record<string, string> = {
+    "/products/dab-pal-standard": "/store",
     "/order/confirmed": "/checkout/return",
     "/blog/how-to-clean-a-puffco-peak-pro-proxy": "/blog/how-to-clean-puffco-peak-pro-proxy",
   }

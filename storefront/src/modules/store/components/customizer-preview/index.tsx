@@ -20,36 +20,6 @@ type Swatch = {
 
 const MODEL_URL = "/dab-pal/customizer/dab-pal-customizer.glb"
 
-const palettes: Record<PartName, Swatch[]> = {
-  body: [
-    { name: "Black", value: "#252525" },
-    { name: "White", value: "#f6f6f3" },
-    { name: "Pink", value: "#f4a8bf" },
-    { name: "Amber", value: "#ed8f1f" },
-    { name: "Sage", value: "#8fa78f" },
-  ],
-  lid: [
-    { name: "Black", value: "#252525" },
-    { name: "White", value: "#f6f6f3" },
-    { name: "Amber", value: "#ed8f1f" },
-    { name: "Pink", value: "#f4a8bf" },
-    { name: "Blue", value: "#6f95c9" },
-  ],
-  slider: [
-    { name: "White", value: "#f6f6f3" },
-    { name: "Black", value: "#252525" },
-    { name: "Amber", value: "#ed8f1f" },
-    { name: "Pink", value: "#f4a8bf" },
-    { name: "Sage", value: "#8fa78f" },
-  ],
-}
-
-const initialColors: Record<PartName, string> = {
-  body: "#252525",
-  lid: "#ed8f1f",
-  slider: "#f4a8bf",
-}
-
 const partLabels: Record<PartName, string> = {
   body: "Body",
   lid: "Lid",
@@ -67,11 +37,13 @@ const COUNTRY = "us"
 const CustomizerPreview = ({
   product,
   ordersEnabled = false,
+  palettes,
 }: {
   product?: HttpTypes.StoreProduct | null
   ordersEnabled?: boolean
+  palettes: Record<PartName, Swatch[]>
 }) => {
-  const [colors, setColors] = useState(initialColors)
+  const [colors, setColors] = useState<Record<PartName, string>>({ body: palettes.body[0].value, lid: palettes.lid[0].value, slider: palettes.slider[0].value })
   const [isOpen, setIsOpen] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
   const [activePart, setActivePart] = useState<PartName | null>(null)
@@ -80,12 +52,10 @@ const CustomizerPreview = ({
   const [focusedPart, setFocusedPart] = useState<PartName | null>(null)
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const customVariant =
-    ordersEnabled
-      ? product?.variants?.find((variant) => variant.sku === CUSTOM_SKU) ??
-        product?.variants?.[0]
-      : undefined
-  const selectedColors = getSelectedColors(colors)
+  const customVariant = product?.variants?.find(variant => variant.sku === CUSTOM_SKU)
+  const [addError, setAddError] = useState("")
+  const [added, setAdded] = useState(false)
+  const selectedColors = getSelectedColors(colors, palettes)
   const colorSummary = formatColorSummary(selectedColors)
 
   useEffect(() => {
@@ -127,7 +97,8 @@ const CustomizerPreview = ({
   }
 
   const handleAddToCart = async () => {
-    if (!customVariant?.id) return
+    if (!ordersEnabled || !customVariant?.id || isAdding) return
+    setAddError(""); setAdded(false)
 
     setIsAdding(true)
     try {
@@ -142,6 +113,9 @@ const CustomizerPreview = ({
         },
       })
       dispatchCartChange()
+      setAdded(true)
+    } catch {
+      setAddError("Could not add this build. Refresh to check available colors and try again.")
     } finally {
       setIsAdding(false)
     }
@@ -164,6 +138,8 @@ const CustomizerPreview = ({
 
   return (
     <section className="bg-white text-zinc-950">
+      {addError && <p role="alert" className="p-4 text-red-800">{addError}</p>}
+      {added && <p role="status" className="p-4">Your custom build was added. <a href="/cart" className="underline">View cart</a></p>}
       <div className="content-container grid min-h-[calc(100vh-160px)] grid-cols-1 gap-4 py-3 small:grid-cols-[minmax(0,1fr)_22rem] small:gap-10 small:py-10">
         <div className="order-2 min-h-[27rem] cursor-pointer overflow-hidden bg-white small:order-none small:min-h-[calc(100vh-240px)]">
           <Canvas
@@ -220,7 +196,7 @@ const CustomizerPreview = ({
           <div className="relative mt-4 small:hidden">
             <div className="grid grid-cols-3 gap-2">
               {(Object.keys(palettes) as PartName[]).map((part) => {
-                const selected = getSwatchByValue(part, colors[part])
+                const selected = getSwatchByValue(part, colors[part], palettes)
                 const isActive = activePart === part
 
                 return (
@@ -347,7 +323,7 @@ const CustomizerPreview = ({
               customVariant={customVariant}
               isAdding={isAdding}
               onAddToCart={handleAddToCart}
-              ordersEnabled={ordersEnabled}
+              ordersEnabled={ordersEnabled} palettes={palettes}
             />
           </div>
         </aside>
@@ -359,7 +335,7 @@ const CustomizerPreview = ({
             customVariant={customVariant}
             isAdding={isAdding}
             onAddToCart={handleAddToCart}
-            ordersEnabled={ordersEnabled}
+            ordersEnabled={ordersEnabled} palettes={palettes}
           />
         </div>
       </div>
@@ -374,6 +350,7 @@ const BuildSummary = ({
   isAdding,
   onAddToCart,
   ordersEnabled,
+  palettes,
 }: {
   colors: Record<PartName, string>
   colorSummary: string
@@ -381,6 +358,7 @@ const BuildSummary = ({
   isAdding: boolean
   onAddToCart: () => void
   ordersEnabled: boolean
+  palettes: Record<PartName, Swatch[]>
 }) => (
   <div className="mt-6 border-t border-zinc-200 pt-5">
     <dl className="grid grid-cols-3 gap-2 text-xs">
@@ -388,7 +366,7 @@ const BuildSummary = ({
         <div key={part} className="min-w-0">
           <dt className="text-zinc-500">{partLabels[part]}</dt>
           <dd className="mt-1 truncate font-medium text-zinc-950">
-            {getSwatchByValue(part, colors[part]).name}
+            {getSwatchByValue(part, colors[part], palettes).name}
           </dd>
         </div>
       ))}
@@ -397,12 +375,12 @@ const BuildSummary = ({
     <div className="mt-5 grid gap-3">
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium text-zinc-950">Custom Dab Pal</span>
-        <span className="font-semibold text-zinc-950">$35</span>
+        <span className="font-semibold text-zinc-950">{typeof customVariant?.calculated_price?.calculated_amount === "number" ? new Intl.NumberFormat("en-US", { style: "currency", currency: customVariant.calculated_price.currency_code || "usd" }).format(customVariant.calculated_price.calculated_amount) : "Price unavailable"}</span>
       </div>
       <Button
         type="button"
         onClick={onAddToCart}
-        disabled={!ordersEnabled || !customVariant?.id || isAdding}
+        disabled={!ordersEnabled || !customVariant?.id || typeof customVariant.calculated_price?.calculated_amount !== "number" || (customVariant.manage_inventory && !customVariant.allow_backorder && (customVariant.inventory_quantity || 0) < 1) || isAdding}
         isLoading={isAdding}
         variant="primary"
         className="h-10 w-full rounded-lg"
@@ -572,16 +550,16 @@ const getPartName = (name: string): PartName | null => {
   return null
 }
 
-const getSwatchByValue = (part: PartName, value: string) =>
+const getSwatchByValue = (part: PartName, value: string, palettes: Record<PartName, Swatch[]>) =>
   palettes[part].find((swatch) => swatch.value === value) ?? {
     name: "Custom",
     value,
   }
 
-const getSelectedColors = (colors: Record<PartName, string>) => ({
-  body: getSwatchByValue("body", colors.body),
-  lid: getSwatchByValue("lid", colors.lid),
-  slider: getSwatchByValue("slider", colors.slider),
+const getSelectedColors = (colors: Record<PartName, string>, palettes: Record<PartName, Swatch[]>) => ({
+  body: getSwatchByValue("body", colors.body, palettes),
+  lid: getSwatchByValue("lid", colors.lid, palettes),
+  slider: getSwatchByValue("slider", colors.slider, palettes),
 })
 
 const formatColorSummary = (colors: ReturnType<typeof getSelectedColors>) =>

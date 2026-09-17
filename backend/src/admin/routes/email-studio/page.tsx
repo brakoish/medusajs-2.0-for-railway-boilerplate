@@ -1,4 +1,5 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk"
+import { DabPalNav } from "../../components/dabpal-layout"
 import { useEffect, useMemo, useState } from "react"
 
 export const config = defineRouteConfig({
@@ -408,6 +409,7 @@ export default function EmailStudioPage() {
   if (loading && !data) {
     return (
       <div style={S.page}>
+        <DabPalNav />
         <h1 style={S.heading}>Email Studio</h1>
         <p style={S.sub}>Loading email flows...</p>
       </div>
@@ -416,6 +418,7 @@ export default function EmailStudioPage() {
 
   return (
     <div style={S.page}>
+      <DabPalNav />
       <div style={S.toolbar}>
         <div>
           <h1 style={S.heading}>Email Studio</h1>

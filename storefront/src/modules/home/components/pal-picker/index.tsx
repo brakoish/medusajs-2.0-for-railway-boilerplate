@@ -1,3 +1,4 @@
+import { getDabPalSettings } from "@lib/data/dabpal-settings"
 import { getProductByHandle } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
 import { shopProducts } from "@modules/store/templates/shop-products"
@@ -8,7 +9,7 @@ export default async function PalPicker({
 }: {
   heading?: "h1" | "h2"
 }) {
-  const region = await getRegion("us")
+  const [region, settings] = await Promise.all([getRegion("us"), getDabPalSettings()])
   const finishes = await Promise.all(
     shopProducts
       .filter((p) => p.available)
@@ -22,10 +23,7 @@ export default async function PalPicker({
         return {
           handle: item.handle,
           name: item.title,
-          image:
-            item.handle === "black-speck"
-              ? "/dab-pal/studio/black.webp"
-              : "/dab-pal/studio/white.webp",
+          image: settings.finishes[item.handle === "black-speck" ? "slate" : "marble"].image,
           productId: product?.id,
           variantId: variant?.id,
           amount: typeof amount === "number" ? amount : null,

@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import type { DabPalSettings } from "@lib/data/dabpal-settings"
 import { useSearchParams } from "next/navigation"
 import { useState, type ReactNode } from "react"
 import type { HttpTypes } from "@medusajs/types"
@@ -19,10 +20,9 @@ export type FinishCatalog = {
 
 const packs = [{ value: "1", label: "Single" }, { value: "3", label: "3-pack" }, { value: "6", label: "6-pack" }]
 const finishes = [{ value: "slate", label: "Slate" }, { value: "marble", label: "Marble" }]
-const imageFor = (finish: string) => `/dab-pal/studio/${finish === "marble" ? "white" : "black"}.webp`
 const packSku = (finish: string, pack: string) => `DABPAL-${finish === "marble" ? "WHT" : "BLK"}-${pack === "1" ? "SINGLE" : pack}`
 
-export default function UnifiedProduct({ catalog, children }: { catalog: FinishCatalog[]; children: ReactNode }) {
+export default function UnifiedProduct({ catalog, settings, children }: { catalog: FinishCatalog[]; settings: DabPalSettings; children: ReactNode }) {
   const params = useSearchParams()
   const finish = params.get("finish") === "marble" ? "marble" : "slate"
   const pack = ["3", "6"].includes(params.get("pack") || "") ? params.get("pack")! : "1"
@@ -69,13 +69,13 @@ export default function UnifiedProduct({ catalog, children }: { catalog: FinishC
   return (
     <div className="grid grid-cols-1 small:grid-cols-[1.08fr_0.92fr] small:grid-rows-[auto_1fr] gap-6 small:gap-12 items-start">
       <div className="order-1 relative aspect-[16/9] max-h-[320px] small:max-h-none rounded-lg overflow-hidden bg-[#cec6bc]">
-        <Image src={imageFor(finish)} alt={`Dab Pal — ${finishName}, open case with an example bottle and swabs`} fill priority sizes="(max-width: 1023px) 100vw, 55vw" className="object-contain" />
+        <Image src={settings.finishes[finish].image} alt={`Dab Pal — ${finishName}, open case with an example bottle and swabs`} fill priority sizes="(max-width: 1023px) 100vw, 55vw" className="object-contain" />
       </div>
       <div className="order-2 min-w-0 small:row-span-2">
-        <h1 className="text-4xl small:text-5xl leading-tight">Dab Pal</h1>
-        <p className="mt-2 text-lg font-medium">3D-printed swab case</p>
-        <p className="mt-3 text-base leading-relaxed text-gray-600">Keep fresh and used swabs separate, with space for your cleaning bottle.</p>
-        <p className="mt-3 text-sm leading-relaxed">Includes case, slider, and empty 1 oz bottle. Swabs and isopropyl alcohol not included.</p>
+        <h1 className="text-4xl small:text-5xl leading-tight">{settings.title}</h1>
+        <p className="mt-2 text-lg font-medium">{settings.subtitle}</p>
+        <p className="mt-3 text-base leading-relaxed text-gray-600">{settings.description}</p>
+        <p className="mt-3 text-sm leading-relaxed">{settings.included}</p>
 
         <div className="mt-6 space-y-5">
           <fieldset disabled={pending}>
@@ -92,7 +92,7 @@ export default function UnifiedProduct({ catalog, children }: { catalog: FinishC
                 </label>
               ))}
             </div>
-            <p className="mt-2 text-sm text-gray-600">{finish === "marble" ? "Light, marble-look finish. 3D printed, not stone." : "Dark speckled finish. 3D printed to order."}</p>
+            <p className="mt-2 text-sm text-gray-600">{settings.finishes[finish].description}</p>
           </fieldset>
           <fieldset disabled={pending} aria-describedby={pack !== "1" ? "pack-contents" : undefined}>
             <legend className="text-sm font-semibold mb-2">Pack size</legend>
@@ -130,15 +130,15 @@ export default function UnifiedProduct({ catalog, children }: { catalog: FinishC
           </div>
         </div>
         <div className="mt-6 small:hidden">
-          <ProductDemo finish={finish} />
+          <ProductDemo poster={settings.finishes[finish].image} />
         </div>
         <div className="mt-6 border-t border-gray-300">{children}</div>
       </div>
       <div className="order-3 small:col-start-1 space-y-4">
-        <div className="hidden small:block"><ProductDemo finish={finish} /></div>
+        <div className="hidden small:block"><ProductDemo poster={settings.finishes[finish].image} /></div>
 
         <figure className="rounded-lg border border-gray-300 p-3">
-          <div className="relative aspect-[4/3]"><Image src={finish === "marble" ? "/dab-pal/product-front-white.jpg" : "/dab-pal/product-front.png"} alt={`Dab Pal — ${finishName}, case and bottle detail`} fill sizes="(max-width: 800px) 100vw, 50vw" className="object-contain" /></div>
+          <div className="relative aspect-[4/3]"><Image src={settings.finishes[finish].detail_image} alt={`Dab Pal — ${finishName}, case and bottle detail`} fill sizes="(max-width: 1023px) 100vw, 50vw" className="object-contain" /></div>
           <figcaption className="mt-2 text-sm text-gray-600">One complete kit shown. Swabs and isopropyl alcohol not included.</figcaption>
         </figure>
       </div>
@@ -146,11 +146,11 @@ export default function UnifiedProduct({ catalog, children }: { catalog: FinishC
   )
 }
 
-function ProductDemo({ finish }: { finish: string }) {
+function ProductDemo({ poster }: { poster: string }) {
   return (
         <details className="rounded-lg border border-gray-300 overflow-hidden">
           <summary className="cursor-pointer px-4 py-4 font-semibold">Watch the slider in action</summary>
-          <video controls muted playsInline preload="none" poster={imageFor(finish)} className="block aspect-video w-full bg-black object-contain" aria-label="Dab Pal product demo video">
+          <video controls muted playsInline preload="none" poster={poster} className="block aspect-video w-full bg-black object-contain" aria-label="Dab Pal product demo video">
             <source src="https://bucket-production-a39d.up.railway.app/medusa-media/dabpal_video-01KRBQAN081CB5FHH4QC6G6PKN.mp4" type="video/mp4" />
           </video>
         </details>

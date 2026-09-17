@@ -4,7 +4,8 @@ import type { ShopProduct } from "@modules/store/templates/shop-products"
 export function buildProductSchema(
   product: ShopProduct,
   catalog: HttpTypes.StoreProduct,
-  base: string
+  base: string,
+  content?: { title: string; capacity: string }
 ) {
   const variant = catalog.variants?.find((item) => item.sku === product.sku)
   const price = variant?.calculated_price
@@ -23,17 +24,17 @@ export function buildProductSchema(
   return {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: `Dab Pal — ${product.title}`,
+    name: `${content?.title || "Dab Pal"} — ${product.title}`,
     description: product.description,
-    image: [`${base}${product.image}`],
+    image: [product.image.startsWith("https://") ? product.image : `${base}${product.image}`],
     url,
     sku: product.sku,
     brand: { "@type": "Brand", name: "Dab Pal" },
     additionalProperty: [
       {
         "@type": "PropertyValue",
-        name: "Closed dimensions",
-        value: "80 × 80 × 25 mm",
+        name: content ? "Size and capacity" : "Closed dimensions",
+        value: content?.capacity || "80 × 80 × 25 mm",
       },
     ],
     ...(typeof amount === "number" &&
@@ -66,13 +67,14 @@ export function buildProductSchema(
 
 export function buildProductGroupSchema(
   products: { product: ShopProduct; catalog: HttpTypes.StoreProduct }[],
-  base: string
+  base: string,
+  content?: { title: string; capacity: string }
 ) {
   return {
     "@context": "https://schema.org",
     "@type": "ProductGroup",
     "@id": `${base}/store#dab-pal`,
-    name: "Dab Pal",
+    name: content?.title || "Dab Pal",
     description: "3D-printed dab swab case with separate clean and used swab storage, a slider, and an empty 1 oz bottle. Swabs and isopropyl alcohol not included.",
     url: `${base}/store`,
     productGroupID: "DABPAL",
@@ -83,8 +85,8 @@ export function buildProductGroupSchema(
       .map(variant => {
         const pack = variant.sku!.endsWith("-3") ? "3-pack" : variant.sku!.endsWith("-6") ? "6-pack" : "Single"
         return {
-          ...buildProductSchema({ ...product, sku: variant.sku! }, { ...catalog, variants: [variant] }, base),
-          name: `Dab Pal — ${product.title} · ${pack}`,
+          ...buildProductSchema({ ...product, sku: variant.sku! }, { ...catalog, variants: [variant] }, base, content),
+          name: `${content?.title || "Dab Pal"} — ${product.title} · ${pack}`,
           color: product.title === "Marble" ? "White" : "Black",
           size: pack,
           inProductGroupWithID: "DABPAL",

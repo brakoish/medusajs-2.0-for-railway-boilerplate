@@ -27,17 +27,18 @@ export const getProductsById = cache(async function ({
 export const getProductByHandle = cache(async function (
   handle: string,
   regionId: string
-) {
-  return sdk.store.product
-    .list(
-      {
-        handle,
-        region_id: regionId,
-        fields: "*variants.calculated_price,+variants.inventory_quantity,+variants.metadata",
-      },
-      { next: { tags: ["products"] } }
-    )
-    .then(({ products }) => products[0])
+): Promise<HttpTypes.StoreProduct> {
+  if (["dab-pal-black-speck", "dab-pal-white-speck"].includes(handle)) {
+    const unified = await getProductByHandle("dab-pal-standard", regionId)
+    if (unified) {
+      const prefix = handle === "dab-pal-white-speck" ? "DABPAL-WHT-" : "DABPAL-BLK-"
+      return { ...unified, variants: (unified.variants || []).filter(variant => variant.sku?.startsWith(prefix)) }
+    }
+  }
+  return sdk.client.fetch<{ products: HttpTypes.StoreProduct[] }>("/store/products", {
+    query: { handle, region_id: regionId, fields: "*variants.calculated_price,+variants.inventory_quantity,+variants.metadata" },
+    cache: "no-store",
+  }).then(({ products }) => products[0])
 })
 
 export const getProductsList = cache(async function ({

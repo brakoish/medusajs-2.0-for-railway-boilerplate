@@ -2,6 +2,7 @@ import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { useState, useEffect, useCallback, useRef } from "react"
 
 import ShippingProgress, { ProgressRow } from "../../components/shipping-progress"
+import { DabPalNav } from "../../components/dabpal-layout"
 
 export const config = defineRouteConfig({
   label: "Bulk Fulfill",
@@ -367,6 +368,7 @@ export default function BulkFulfillPage() {
 
   return (
     <div style={S.page}>
+      <DabPalNav />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
       <h1 style={S.heading}>Bulk Fulfill</h1>
