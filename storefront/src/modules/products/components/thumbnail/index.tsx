@@ -5,6 +5,7 @@ import React from "react"
 import PlaceholderImage from "@modules/common/icons/placeholder-image"
 
 type ThumbnailProps = {
+  alt?: string
   thumbnail?: string | null
   // TODO: Fix image typings
   images?: any[] | null
@@ -15,6 +16,7 @@ type ThumbnailProps = {
 }
 
 const Thumbnail: React.FC<ThumbnailProps> = ({
+  alt = "Product image",
   thumbnail,
   images,
   size = "small",
@@ -41,7 +43,7 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
       )}
       data-testid={dataTestid}
     >
-      <ImageOrPlaceholder image={initialImage} size={size} />
+      <ImageOrPlaceholder image={initialImage} size={size} alt={alt} />
     </Container>
   )
 }
@@ -49,11 +51,12 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
 const ImageOrPlaceholder = ({
   image,
   size,
-}: Pick<ThumbnailProps, "size"> & { image?: string }) => {
+  alt,
+}: Pick<ThumbnailProps, "size" | "alt"> & { image?: string }) => {
   return image ? (
     <Image
       src={image}
-      alt="Thumbnail"
+      alt={alt || "Product image"}
       className="absolute inset-0 object-cover object-center"
       draggable={false}
       quality={50}

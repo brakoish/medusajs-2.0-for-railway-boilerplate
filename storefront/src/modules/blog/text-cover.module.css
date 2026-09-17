@@ -13,8 +13,8 @@
 
 .light {
   color: #1b1b1a;
-  background: #efede5;
-  box-shadow: inset -8px 0 #ce912d;
+  background: #e7dfd2;
+  box-shadow: inset -8px 0 #ec6239;
 }
 
 .dark {
@@ -23,7 +23,7 @@
 }
 
 .kicker {
-  color: #85561b;
+  color: #9b371c;
   font-size: clamp(9px, 2cqw, 11px);
   line-height: 1.4;
   letter-spacing: 2px;
@@ -31,7 +31,7 @@
 }
 
 .dark .kicker {
-  color: #e6b971;
+  color: #f4a78d;
 }
 
 .copy {
@@ -40,8 +40,9 @@
 }
 
 .title {
+  font-family: "Coiny", sans-serif;
   font-size: clamp(28px, 10cqw, 60px);
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.05;
   letter-spacing: -0.045em;
   overflow-wrap: break-word;

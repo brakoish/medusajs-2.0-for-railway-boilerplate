@@ -1,56 +1,34 @@
 import Image from "next/image"
+import { ArrowDown, ArrowRight } from "@medusajs/icons"
 
-const Hero = () => {
+export default function Hero() {
   return (
-    <section className="relative w-full bg-black overflow-hidden">
-      {/* Background hero image, full-bleed */}
-      <div className="absolute inset-0 z-0">
+    <section className="studio-hero studio-container">
+      <div className="studio-hero-copy">
+        <h1 className="studio-display">
+          Keep the
+          <br />
+          session clean
+        </h1>
+        <p>Keep clean and used swabs separate.</p>
+        <div className="studio-hero-actions">
+          <a href="#shop" className="studio-button">
+            Pick your Pal <ArrowDown />
+          </a>
+          <a href="#how-it-works" className="studio-text-link">
+            How it works <ArrowRight />
+          </a>
+        </div>
+      </div>
+      <div className="studio-hero-image">
         <Image
-          src="/dab-pal/hero.jpg"
-          alt="Dab Pal portable Q-tip and isopropyl case on a black background"
+          src="/dab-pal/studio/hero.webp"
+          alt="Black Dab Pal case with a bottle and example swabs, shown open"
           fill
           priority
-          sizes="100vw"
-          className="object-cover object-[58%_center] small:object-center opacity-95 small:opacity-90"
+          sizes="(max-width: 700px) 100vw, 50vw"
         />
-        {/* Stronger gradient on mobile so the headline is readable */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/10 small:via-black/40 small:to-black/20" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/40 small:from-black/70" />
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 min-h-[64vh] small:min-h-[80vh] flex items-end pb-8 small:pb-24">
-        <div className="content-container w-full">
-          <div className="max-w-[min(100%,42rem)] flex flex-col gap-4 small:gap-6 text-white">
-            <span className="uppercase tracking-[0.25em] text-[10px] small:text-xs text-amber-400/90">
-              Dab cleaning kit · Made to order
-            </span>
-            <h1 className="max-w-[20rem] small:max-w-none text-[2rem] small:text-6xl xl:text-7xl font-semibold leading-[1.08] small:leading-[1.05] tracking-normal small:tracking-tight">
-              Your banger cleaning kit. In your pocket.
-            </h1>
-            <p className="max-w-[20rem] small:max-w-[34rem] text-base small:text-xl text-white/75 leading-relaxed">
-              Storage for 30 Q-tips, an empty 1oz bottle, and a clean/dirty slider.
-              Made in NY. Q-tips and iso not included.
-            </p>
-            <div className="flex flex-wrap items-center gap-3 small:gap-4 pt-1 small:pt-2">
-              <a
-                href="/store"
-                className="inline-flex items-center justify-center rounded-full bg-white text-black px-6 small:px-8 py-3 small:py-3.5 text-sm small:text-base font-medium hover:bg-white/90 transition-colors"
-              >
-                Shop Dab Pal
-              </a>
-              <a
-                href="#details"
-                className="hidden small:inline-flex items-center text-white/80 hover:text-white px-2 py-3.5 text-base"
-              >
-                See how it works ↓
-              </a>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   )
 }
-
-export default Hero

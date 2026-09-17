@@ -29,9 +29,9 @@ export const BlogIndexTemplate = () => {
     <main className="bg-white">
       <section className="border-b border-gray-100">
         <div className="content-container py-12 small:py-20">
-          <div className="max-w-[20rem] small:max-w-3xl">
+          <div className="max-w-3xl">
             <span className="text-xs uppercase tracking-[0.25em] text-amber-700">
-              Dab Pal guide
+              Field notes
             </span>
             <h1 className="mt-4 text-4xl small:text-6xl font-semibold tracking-tight leading-[1.05] text-gray-950">
               Puffco, banger, and dab swab cleaning guides.
@@ -94,7 +94,7 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
             >
               Back to guides
             </LocalizedClientLink>
-            <div className="mt-8 max-w-[20rem] small:max-w-3xl">
+            <div className="mt-8 max-w-3xl">
               <span className="text-xs uppercase tracking-[0.25em] text-amber-700">
                 {article.eyebrow}
               </span>
@@ -116,7 +116,7 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
         </header>
 
         <div className="content-container grid grid-cols-1 large:grid-cols-[minmax(0,760px)_minmax(260px,1fr)] gap-10 large:gap-16 py-10 small:py-16">
-          <div className="max-w-[20rem] small:max-w-none">
+          <div className="min-w-0">
             <div className="space-y-5 text-lg leading-8 text-gray-700">
               {article.intro.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>

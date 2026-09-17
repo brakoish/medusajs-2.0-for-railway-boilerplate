@@ -89,10 +89,10 @@ export const viewport: Viewport = {
 
 export default async function PageLayout(props: { children: React.ReactNode }) {
   return (
-    <>
+    <div className="studio-surface">
       <Nav />
       {props.children}
       <Footer />
-    </>
+    </div>
   )
 }

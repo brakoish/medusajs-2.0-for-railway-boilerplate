@@ -2,11 +2,8 @@ import { Metadata } from "next"
 
 import { getBaseURL } from "@lib/util/env"
 import Hero from "@modules/home/components/hero"
-import ProductFamilyGallery from "@modules/home/components/product-family-gallery"
-import FeatureTrio from "@modules/home/components/feature-trio"
-import DetailBlock from "@modules/home/components/detail-block"
-import PalMap from "@modules/home/components/pal-map"
-import Reviews from "@modules/home/components/reviews"
+import PalPicker from "@modules/home/components/pal-picker"
+import StudioStory from "@modules/home/components/studio-story"
 import FAQ from "@modules/home/components/faq"
 import StructuredData from "@modules/home/components/structured-data"
 import BreadcrumbSchema from "@modules/common/components/breadcrumb-schema"
@@ -26,11 +23,8 @@ export default async function Home() {
       <StructuredData />
       <BreadcrumbSchema items={[{ name: "Home", path: "" }]} />
       <Hero />
-      <ProductFamilyGallery />
-      <FeatureTrio />
-      <DetailBlock />
-      <Reviews />
-      <PalMap />
+      <PalPicker />
+      <StudioStory />
       <FAQ />
     </>
   )

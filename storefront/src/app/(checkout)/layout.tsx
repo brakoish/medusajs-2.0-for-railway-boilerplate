@@ -1,7 +1,6 @@
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import ChevronDown from "@modules/common/icons/chevron-down"
 import { DabPalLogoLong } from "@modules/common/components/dab-pal-logo"
-import MedusaCTA from "@modules/layout/components/medusa-cta"
 
 export default function CheckoutLayout({
   children,
@@ -9,7 +8,7 @@ export default function CheckoutLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="w-full bg-white relative small:min-h-screen">
+    <div className="studio-checkout w-full relative small:min-h-screen">
       <div className="h-16 bg-white border-b ">
         <nav className="flex h-full items-center content-container justify-between">
           <LocalizedClientLink
@@ -38,7 +37,7 @@ export default function CheckoutLayout({
       </div>
       <div className="relative" data-testid="checkout-container">{children}</div>
       <div className="py-4 w-full flex items-center justify-center">
-        <MedusaCTA />
+        <p className="text-sm text-ui-fg-subtle">Dab Pal · Made to order in New York.</p>
       </div>
     </div>
   )

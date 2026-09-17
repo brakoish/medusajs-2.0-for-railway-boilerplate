@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <div className="bg-white">
+    <div className="studio-not-found">
       <div className="content-container flex flex-col items-center justify-center text-center min-h-[calc(100vh-160px)] py-16">
         <span
           className="text-xs uppercase tracking-[0.2em] mb-4"
@@ -17,11 +17,10 @@ export default function NotFound() {
           404
         </span>
         <h1 className="text-3xl small:text-5xl font-semibold text-ui-fg-base mb-4">
-          We can't find that page.
+          We can&apos;t find that page.
         </h1>
         <p className="text-base text-ui-fg-subtle max-w-md mb-8">
-          The link may be old, or the page moved. Everything Dab Pal lives on
-          one page now.
+          The link may be old, or the page moved. Find your way back to the shop or our cleaning guides.
         </p>
         <div className="flex flex-col small:flex-row gap-3">
           <Link
@@ -31,7 +30,7 @@ export default function NotFound() {
             Back to home
           </Link>
           <Link
-            href="/#shop"
+            href="/store"
             className="inline-flex items-center justify-center rounded-md border border-black/20 px-6 py-3 text-sm font-medium text-ui-fg-base hover:border-black transition"
           >
             Shop the kit

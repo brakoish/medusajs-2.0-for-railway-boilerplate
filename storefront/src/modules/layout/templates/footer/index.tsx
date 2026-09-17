@@ -1,89 +1,65 @@
-import { Text } from "@medusajs/ui"
-
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { DabPalLogoStacked } from "@modules/common/components/dab-pal-logo"
+import { DabPalLogoLong } from "@modules/common/components/dab-pal-logo"
 
-export default async function Footer() {
+export default function Footer() {
   return (
-    <footer className="border-t border-ui-border-base w-full">
-      <div className="content-container flex flex-col w-full">
-        <div className="flex flex-col gap-y-6 xsmall:flex-row items-start justify-between py-20">
-          <div className="flex flex-col gap-y-2 max-w-md">
+    <footer className="studio-footer">
+      <div className="studio-container">
+        <div className="studio-footer-top">
+          <div>
             <LocalizedClientLink
               href="/"
-              aria-label="Dab Pal"
-              className="text-ui-fg-base hover:text-ui-fg-base inline-flex"
+              aria-label="Dab Pal home"
+              className="studio-footer-logo"
             >
-              <DabPalLogoStacked className="h-16 w-auto" />
+              <DabPalLogoLong />
             </LocalizedClientLink>
-            <Text className="text-ui-fg-subtle txt-small mt-2">
-              Portable Q-tip and isopropyl alcohol case for cleaning Puffco and
-              quartz bangers. Made to order in NY.
-            </Text>
+            <p>
+              A little order for every session.
+              <br />
+              Made to order in Astoria, NY.
+            </p>
           </div>
-          <div className="flex flex-col gap-y-2">
-            <span className="txt-small-plus txt-ui-fg-base">Shop</span>
-            <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
-              <li>
-                <LocalizedClientLink
-                  href="/#shop"
-                  className="hover:text-ui-fg-base"
-                >
-                  Dab Pal
-                </LocalizedClientLink>
-              </li>
-              <li>
-                <LocalizedClientLink
-                  href="/account"
-                  className="hover:text-ui-fg-base"
-                >
-                  Account
-                </LocalizedClientLink>
-              </li>
-              <li>
-                <LocalizedClientLink
-                  href="/cart"
-                  className="hover:text-ui-fg-base"
-                >
-                  Cart
-                </LocalizedClientLink>
-              </li>
-            </ul>
+          <div>
+            <h2>Find your Pal</h2>
+            <LocalizedClientLink href="/store">
+              Shop all finishes
+            </LocalizedClientLink>
+            <LocalizedClientLink href="/store/black-speck">
+              Black
+            </LocalizedClientLink>
+            <LocalizedClientLink href="/store/white-speck">
+              White Speck
+            </LocalizedClientLink>
           </div>
-          <div className="flex flex-col gap-y-2">
-            <span className="txt-small-plus txt-ui-fg-base">Learn</span>
-            <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
-              <li>
-                <LocalizedClientLink
-                  href="/blog"
-                  className="hover:text-ui-fg-base"
-                >
-                  Cleaning guides
-                </LocalizedClientLink>
-              </li>
-              <li>
-                <LocalizedClientLink
-                  href="/blog/how-to-clean-puffco-peak-pro-proxy"
-                  className="hover:text-ui-fg-base"
-                >
-                  Puffco cleaning
-                </LocalizedClientLink>
-              </li>
-              <li>
-                <LocalizedClientLink
-                  href="/blog/how-to-clean-a-quartz-banger"
-                  className="hover:text-ui-fg-base"
-                >
-                  Banger cleaning
-                </LocalizedClientLink>
-              </li>
-            </ul>
+          <div>
+            <h2>A little help</h2>
+            <LocalizedClientLink href="/blog">
+              Cleaning guides
+            </LocalizedClientLink>
+            <LocalizedClientLink href="/care">Case care</LocalizedClientLink>
+            <LocalizedClientLink href="/#faq">
+              Shipping & returns
+            </LocalizedClientLink>
+            <a
+              href="https://www.instagram.com/nslabs_/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Get in touch
+            </a>
+          </div>
+          <div>
+            <h2>Your corner</h2>
+            <LocalizedClientLink href="/cart">Your cart</LocalizedClientLink>
+            <LocalizedClientLink href="/account">
+              Your account
+            </LocalizedClientLink>
           </div>
         </div>
-        <div className="flex w-full mb-16 justify-between text-ui-fg-muted">
-          <Text className="txt-compact-small">
-            © {new Date().getFullYear()} Dab Pal. All rights reserved.
-          </Text>
+        <div className="studio-footer-bottom">
+          <span>© {new Date().getFullYear()} Dab Pal.</span>
+          <span>Small case. Good company.</span>
         </div>
       </div>
     </footer>

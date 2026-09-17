@@ -1,6 +1,7 @@
 import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
 import "styles/globals.css"
+import "styles/studio.css"
 import { PostHogProvider } from "./posthog-provider"
 
 export const metadata: Metadata = {
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-mode="light">
+    <html lang="en" data-mode="light" data-scroll-behavior="smooth">
       <body>
         <PostHogProvider>
           <main className="relative">{props.children}</main>

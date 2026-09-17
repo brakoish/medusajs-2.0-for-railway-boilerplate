@@ -159,7 +159,7 @@ const ShippingAddress = ({
           data-testid="shipping-email-input"
         />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="studio-address-grid grid grid-cols-2 gap-4">
         <Input
           label="First name"
           name="shipping_address.first_name"

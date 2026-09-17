@@ -17,6 +17,8 @@ const LineItemOptions = ({
 }: LineItemOptionsProps) => {
   const customColorSummary = getCustomColorSummary(metadata)
 
+  const finish = variant?.sku?.startsWith("DABPAL-WHT") ? "White Speck" : variant?.sku?.startsWith("DABPAL-BLK") ? "Black Speck" : null
+
   return (
     <span className="block">
       <Text
@@ -24,7 +26,7 @@ const LineItemOptions = ({
         data-value={dataValue}
         className="inline-block txt-medium text-ui-fg-subtle w-full overflow-hidden text-ellipsis"
       >
-        {variant?.title}
+        {finish && `${finish} · `}{variant?.title}
       </Text>
       {customColorSummary && (
         <Text className="mt-1 block text-xs leading-5 text-ui-fg-subtle whitespace-normal">

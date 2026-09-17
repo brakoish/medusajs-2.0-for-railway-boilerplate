@@ -5,6 +5,7 @@ import { isEqual } from "lodash"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { useIntersection } from "@lib/hooks/use-in-view"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Divider from "@modules/common/components/divider"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 
@@ -69,6 +70,8 @@ export default function ProductActions({
     }
   )
   const [isAdding, setIsAdding] = useState(false)
+  const [addError, setAddError] = useState("")
+  const [added, setAdded] = useState("")
   const [btnReady, setBtnReady] = useState(false)
   const prevVariantIdRef = useRef<string | undefined>(undefined)
   const countryCode = COUNTRY
@@ -193,22 +196,29 @@ export default function ProductActions({
     if (!selectedVariant?.id) return null
 
     setIsAdding(true)
+    setAddError("")
+    setAdded("")
+    try {
+      await addToCart({
+        variantId: selectedVariant.id,
+        quantity: 1,
+        countryCode,
+      })
 
-    await addToCart({
-      variantId: selectedVariant.id,
-      quantity: 1,
-      countryCode,
-    })
-
-    dispatchCartChange()
-    setIsAdding(false)
-    posthog.capture("add_to_cart", {
-      product_id: product.id,
-      variant_id: selectedVariant.id,
-      quantity: 1,
-      currency: selectedVariant.calculated_price?.currency_code,
-      value: selectedVariant.calculated_price?.calculated_amount,
-    })
+      dispatchCartChange()
+      setAdded(selectedVariant.title || "Your Pal")
+      posthog.capture("add_to_cart", {
+        product_id: product.id,
+        variant_id: selectedVariant.id,
+        quantity: 1,
+        currency: selectedVariant.calculated_price?.currency_code,
+        value: selectedVariant.calculated_price?.calculated_amount,
+      })
+    } catch {
+      setAddError("We couldn’t add this Pal. Please try again.")
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   return (
@@ -260,6 +270,15 @@ export default function ProductActions({
             ? "Out of stock"
             : "Add to cart"}
         </Button>
+        {added && (
+          <p role="status" className="text-sm py-2">
+            {added} added.{" "}
+            <LocalizedClientLink href="/cart" className="underline font-semibold">
+              View your cart
+            </LocalizedClientLink>
+          </p>
+        )}
+        {addError && <p role="alert" className="text-sm text-red-700">{addError}</p>}
         <PdpBuyNow
           variant={selectedVariant}
           countryCode={countryCode}

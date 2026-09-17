@@ -17,9 +17,9 @@ export const metadata: Metadata = {
 }
 
 type CheckoutProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     promo_code?: string | string[]
-  }
+  }>
 }
 
 const getQueryValue = (value?: string | string[]) =>
@@ -72,11 +72,12 @@ const fetchCart = async (promoCode?: string) => {
 }
 
 export default async function Checkout({ searchParams }: CheckoutProps) {
-  const cart = await fetchCart(getQueryValue(searchParams?.promo_code))
+  const params = await searchParams
+  const cart = await fetchCart(getQueryValue(params?.promo_code))
   const customer = await getCustomer()
 
   return (
-    <div className="grid grid-cols-1 small:grid-cols-[1fr_416px] content-container gap-x-40 py-12">
+    <div className="grid grid-cols-1 small:grid-cols-[1fr_416px] content-container gap-12 py-12">
       <Wrapper cart={cart}>
         <CheckoutForm cart={cart} customer={customer} />
       </Wrapper>

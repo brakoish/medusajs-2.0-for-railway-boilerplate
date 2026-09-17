@@ -2,9 +2,8 @@
 
 import { Badge, Heading, Input, Label, Text, Tooltip } from "@medusajs/ui"
 import React from "react"
-import { useFormState } from "react-dom"
 
-import { applyPromotions, submitPromotionForm } from "@lib/data/cart"
+import { applyPromotions } from "@lib/data/cart"
 import { HIDDEN_PROMOTION_CODES } from "@lib/util/promotion-codes"
 import { convertToLocale } from "@lib/util/money"
 import { InformationCircleSolid } from "@medusajs/icons"
@@ -21,6 +20,7 @@ type DiscountCodeProps = {
 
 const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
   const [isOpen, setIsOpen] = React.useState(false)
+  const [message, setMessage] = React.useState<string | null>(null)
 
   const { items = [], promotions = [] } = cart
   const visiblePromotions = promotions.filter(
@@ -55,21 +55,24 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
       .map((p) => p.code!)
     codes.push(code.toString().trim().toUpperCase())
 
-    await applyPromotions(codes)
-
-    if (input) {
-      input.value = ""
+    setMessage(null)
+    try {
+      await applyPromotions(codes)
+      if (input) input.value = ""
+    } catch {
+      setMessage("That code could not be applied. Check it and try again.")
     }
   }
 
-  const [message, formAction] = useFormState(submitPromotionForm, null)
 
   return (
-    <div className="w-full bg-white flex flex-col">
+    <div className="w-full flex flex-col">
       <div className="txt-medium">
         <form action={(a) => addPromotionCode(a)} className="w-full mb-5">
           <Label className="flex gap-x-1 my-2 items-center">
             <button
+              aria-label="Add promotion code"
+              aria-expanded={isOpen}
               onClick={() => setIsOpen(!isOpen)}
               type="button"
               className="txt-medium text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
@@ -88,6 +91,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
               <div className="flex w-full gap-x-2">
                 <Input
                   className="size-full"
+                  aria-label="Promotion code"
                   id="promotion-input"
                   name="code"
                   type="text"

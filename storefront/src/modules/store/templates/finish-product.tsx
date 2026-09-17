@@ -85,7 +85,7 @@ const FinishProductTemplate = async ({
   if (!medusaProduct) notFound()
 
   return (
-    <main className="bg-white">
+    <main className="studio-product">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildProductSchema(product, medusaProduct, getBaseURL())).replace(/</g, "\\u003c") }}
@@ -100,13 +100,11 @@ const FinishProductTemplate = async ({
         </div>
 
         <div className="grid grid-cols-1 small:grid-cols-[1.08fr_0.92fr] gap-8 small:gap-16 items-start">
-          <div className="order-2 small:order-1 grid grid-cols-1 gap-3 small:gap-4">
+          <div className="order-1 grid grid-cols-1 gap-3 small:gap-4">
             <ProductMedia product={product} />
-            <ProductDetails className="small:hidden" />
-            <ProductInstructions className="small:hidden" />
           </div>
 
-          <div className="order-1 small:order-2 max-w-[20rem] small:max-w-none small:sticky small:top-28">
+          <div className="order-2 min-w-0 small:sticky small:top-28">
             <span className="text-xs uppercase tracking-[0.25em] text-amber-700">
               {product.subtitle}
             </span>
@@ -140,9 +138,10 @@ const FinishProductTemplate = async ({
               </VariantProvider>
             </div>
 
+            <div className="small:hidden mt-6"><ProductMediaExtras product={product} /></div>
             <ProductReviewSnippets />
-            <ProductDetails className="hidden small:block" />
-            <ProductInstructions className="hidden small:block" />
+            <ProductDetails />
+            <ProductInstructions />
           </div>
         </div>
       </section>
@@ -164,21 +163,29 @@ const getAlternateFinish = (product: ShopProduct) =>
       }
 
 const ProductMedia = ({ product }: { product: ShopProduct }) => {
-  const alternate = getAlternateFinish(product)
 
   return (
     <div className="grid grid-cols-1 gap-3 small:gap-4">
-      <div className="relative aspect-[4/3] small:aspect-square rounded-lg bg-zinc-50 overflow-hidden">
+      <div className="relative aspect-[16/9] rounded-lg bg-zinc-50 overflow-hidden">
         <Image
-          src={product.image}
+          src={product.handle === "black-speck" ? "/dab-pal/studio/black.webp" : "/dab-pal/studio/white.webp"}
           alt={`${product.title} Dab Pal`}
           fill
           priority
           sizes="(max-width: 800px) 100vw, 55vw"
-          className="object-contain p-5 small:p-14"
+          className="object-cover"
         />
       </div>
 
+      <div className="hidden small:block"><ProductMediaExtras product={product} /></div>
+    </div>
+  )
+}
+
+const ProductMediaExtras = ({ product }: { product: ShopProduct }) => {
+  const alternate = getAlternateFinish(product)
+  return (
+    <div className="grid gap-4">
       <div className="overflow-hidden rounded-lg bg-black">
         <video
           controls
@@ -297,7 +304,7 @@ const ProductReviewSnippets = () => (
             &ldquo;{review.quote}&rdquo;
           </blockquote>
           <figcaption className="mt-1 text-xs text-gray-500">
-            {review.name} &middot; Verified buyer
+            {review.name}{review.name !== "Verified buyer" && " · Verified buyer"}
           </figcaption>
         </figure>
       ))}

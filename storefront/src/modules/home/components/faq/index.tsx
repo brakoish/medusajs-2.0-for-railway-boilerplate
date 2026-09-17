@@ -45,7 +45,7 @@ export default function FAQ() {
   const [open, setOpen] = useState<number | null>(0)
 
   return (
-    <section id="faq" className="bg-white py-20 small:py-32 scroll-mt-24">
+    <section id="faq" className="studio-faq scroll-mt-32">
       <div className="content-container">
         <div className="max-w-2xl mb-12 small:mb-16">
           <span className="uppercase tracking-[0.25em] text-xs text-gray-500">
@@ -62,6 +62,8 @@ export default function FAQ() {
               <div key={i} className="border-b border-gray-200">
                 <button
                   type="button"
+                  aria-expanded={isOpen}
+                  aria-controls={`faq-answer-${i}`}
                   onClick={() => setOpen(isOpen ? null : i)}
                   className="w-full flex items-center justify-between gap-6 py-6 text-left"
                 >
@@ -77,7 +79,7 @@ export default function FAQ() {
                   </span>
                 </button>
                 {isOpen && (
-                  <div className="pb-6 pr-12 text-base text-gray-600 leading-relaxed">
+                  <div id={`faq-answer-${i}`} className="pb-6 pr-12 text-base text-gray-600 leading-relaxed">
                     {faq.a}
                   </div>
                 )}

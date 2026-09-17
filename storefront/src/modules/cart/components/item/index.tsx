@@ -25,11 +25,10 @@ const Item = ({ item, type = "full" }: ItemProps) => {
   const [updating, setUpdating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Single-product store: cart links return to the canonical PDP (home)
-  // and scroll to the buy section. Bypasses the /products/* -> / 301.
-  const productHref = "/#shop"
-  const { handle } = item.variant?.product ?? {}
-  void handle
+  const white = item.variant?.sku?.startsWith("DABPAL-WHT")
+  const black = item.variant?.sku?.startsWith("DABPAL-BLK")
+  const productHref = white ? "/store/white-speck" : black ? "/store/black-speck" : "/store"
+  const productName = `${white ? "White Speck " : black ? "Black Speck " : ""}Dab Pal`
 
   const changeQuantity = async (quantity: number) => {
     setError(null)
@@ -57,12 +56,14 @@ const Item = ({ item, type = "full" }: ItemProps) => {
       <Table.Cell className="!pl-0 p-4 w-24">
         <LocalizedClientLink
           href={productHref}
+          aria-label={`View ${productName}`}
           className={clx("flex", {
             "w-16": type === "preview",
             "small:w-24 w-12": type === "full",
           })}
         >
           <Thumbnail
+            alt={productName}
             thumbnail={
               item.variant?.thumbnail || item.variant?.product?.thumbnail
             }
@@ -95,6 +96,8 @@ const Item = ({ item, type = "full" }: ItemProps) => {
           <div className="flex gap-2 items-center w-28">
             <DeleteButton id={item.id} data-testid="product-delete-button" />
             <CartItemSelect
+              aria-label="Quantity"
+              disabled={updating}
               value={item.quantity}
               onChange={(value) => changeQuantity(parseInt(value.target.value))}
               className="w-14 h-10 p-4"
@@ -112,9 +115,7 @@ const Item = ({ item, type = "full" }: ItemProps) => {
                 )
               )}
 
-              <option value={1} key={1}>
-                1
-              </option>
+
             </CartItemSelect>
             {updating && <Spinner />}
           </div>

@@ -165,6 +165,8 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
           const hint = v && hints ? hints[v] : null
           return (
             <button
+              type="button"
+              aria-pressed={v === current}
               onClick={() => updateOption(option.title ?? "", v ?? "")}
               key={v}
               className={clx(
