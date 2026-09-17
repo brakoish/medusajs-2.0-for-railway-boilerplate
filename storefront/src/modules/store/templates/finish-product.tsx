@@ -1,244 +1,56 @@
-import { Suspense } from "react"
-import Image from "next/image"
-import { notFound } from "next/navigation"
-
 import { getProductByHandle } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import ProductActions from "@modules/products/components/product-actions"
-import { VariantProvider } from "@modules/products/contexts/variant-context"
-import ProductActionsWrapper from "@modules/products/templates/product-actions-wrapper"
-import { ShopProduct } from "./shop-products"
 import { getBaseURL } from "@lib/util/env"
-import { buildProductSchema } from "@lib/util/product-schema"
-
-const VIDEO_URL =
-  "https://bucket-production-a39d.up.railway.app/medusa-media/dabpal_video-01KRBQAN081CB5FHH4QC6G6PKN.mp4"
+import { buildProductGroupSchema } from "@lib/util/product-schema"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { shopProducts } from "./shop-products"
+import UnifiedProduct, { type FinishCatalog } from "./unified-product"
 
 const details = [
-  ["Construction", "3D printed to order. Slate and Marble describe the finishes, not stone materials. Small variations in texture and visible print layers are part of the process."],
-  ["Included", "Dab Pal case, empty 1oz bottle, and clean/dirty slider. Q-tips and iso are not included."],
-  ["Capacity", "Holds 30 regular Q-tips. Specialty swab fit varies."],
-  ["Returns", "14-day returns from delivery, including opened kits. Email hello@thedabpal.com to arrange a return."],
-  ["Closed dimensions", "80 × 80 × 25 mm. Exterior dimensions; specialty swab fit varies."],
-  ["Fit", "An independent organizer for Puffco and quartz banger cleaning supplies."],
-  ["Shipping", "Made to order in NY. Allow 3–5 business days before shipping."],
+  ["Size & capacity", "80 × 80 × 25 mm closed. Holds 30 regular cotton swabs and the included 1 oz bottle. Specialty swab fit varies."],
+  ["Construction", "3D printed to order. Small variations in texture and visible print layers are part of the process."],
 ]
 
 const instructions = [
-  "Fill the 1oz bottle with your preferred 90%+ iso.",
-  "Load clean Q-tips into the clean side.",
+  "Fill the 1 oz bottle with your preferred 90%+ isopropyl alcohol.",
+  "Load clean cotton swabs into the clean side.",
   "Swab your Puffco bowl, e-rig chamber, or banger after each dab.",
   "Slide used swabs behind the slider, toward the hinge, until you can toss them.",
 ]
 
-const FinishProductTemplate = async ({
-  product,
-  countryCode,
-}: {
-  product: ShopProduct
-  countryCode: string
-}) => {
-  if (!product.available || !product.sku || !product.medusaHandle) {
-    return <ComingSoonProduct product={product} />
-  }
-
-  const region = await getRegion(countryCode)
-  if (!region) notFound()
-
-  const medusaProduct = await getProductByHandle(
-    product.medusaHandle,
-    region.id
-  )
-  if (!medusaProduct) notFound()
-
+export default async function FinishProductTemplate() {
+  const region = await getRegion("us")
+  if (!region) throw new Error("Store region unavailable")
+  const products = await Promise.all(shopProducts.filter(product => product.available).map(async product => ({
+    product,
+    catalog: await getProductByHandle(product.medusaHandle!, region.id),
+  })))
+  const availableProducts = products.filter(item => !!item.catalog)
+  if (!availableProducts.length) throw new Error("Product catalog unavailable")
+  const catalog: FinishCatalog[] = availableProducts.map(item => ({
+    finish: item.product.handle === "white-speck" ? "marble" : "slate",
+    productId: item.catalog.id,
+    variants: (item.catalog.variants || []).map(variant => ({
+      id: variant.id,
+      title: variant.title,
+      sku: variant.sku,
+      manage_inventory: variant.manage_inventory,
+      allow_backorder: variant.allow_backorder,
+      inventory_quantity: variant.inventory_quantity,
+      calculated_price: variant.calculated_price ? {
+        calculated_amount: variant.calculated_price.calculated_amount,
+        currency_code: variant.calculated_price.currency_code,
+      } : undefined,
+    })),
+  }))
   return (
     <main className="studio-product">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildProductSchema(product, medusaProduct, getBaseURL())).replace(/</g, "\\u003c") }}
-      />
-      <section className="content-container py-5 small:py-12">
-        <div className="mb-5 small:mb-6 flex items-center gap-2 text-sm text-gray-500">
-          <LocalizedClientLink href="/store" className="hover:text-gray-900">
-            Shop
-          </LocalizedClientLink>
-          <span>/</span>
-          <span className="text-gray-900">{product.title}</span>
-        </div>
-
-        <div className="grid grid-cols-1 small:grid-cols-[1.08fr_0.92fr] small:grid-rows-[auto_1fr] gap-8 small:gap-16 items-start">
-          <div className="order-1 grid grid-cols-1 gap-3 small:gap-4">
-            <ProductMedia product={product} />
-          </div>
-
-          <div className="order-2 min-w-0 small:row-span-2 small:sticky small:top-28">
-            <span className="text-xs uppercase tracking-[0.25em] text-amber-700">
-              {product.subtitle}
-            </span>
-            <h1 className="mt-3 text-3xl small:text-5xl font-semibold tracking-tight leading-tight text-gray-950">
-              Dab Pal <span className="whitespace-nowrap">— {product.title}</span>
-            </h1>
-            <p className="mt-4 text-base leading-relaxed text-gray-600">
-              {product.description}
-            </p>
-
-            <div className="mt-5 small:mt-7 border-y border-gray-200 py-5 small:py-6">
-              <VariantProvider>
-                <Suspense
-                  fallback={
-                    <ProductActions
-                      disabled
-                      product={medusaProduct}
-                      region={region}
-                      hideMobileActions
-                      initialVariantSku={product.sku}
-                    />
-                  }
-                >
-                  <ProductActionsWrapper
-                    id={medusaProduct.id!}
-                    region={region}
-                    hideMobileActions
-                    initialVariantSku={product.sku}
-                  />
-                </Suspense>
-              </VariantProvider>
-            </div>
-
-
-            <ProductDetails />
-            <ProductInstructions />
-          </div>
-          <div className="order-3 small:col-start-1"><ProductMediaExtras product={product} /></div>
-        </div>
-      </section>
-    </main>
-  )
-}
-
-const getAlternateFinish = (product: ShopProduct) =>
-  product.handle === "black-speck"
-    ? {
-        src: "/dab-pal/product-front-white.jpg",
-        alt: "Dab Pal in the Marble-look finish",
-        label: "Marble",
-      }
-    : {
-        src: "/dab-pal/product-front.png",
-        alt: "Dab Pal in the Slate finish",
-        label: "Slate",
-      }
-
-const ProductMedia = ({ product }: { product: ShopProduct }) => {
-
-  return (
-    <div className="grid grid-cols-1 gap-3 small:gap-4">
-      <div className="relative aspect-[16/9] rounded-lg bg-zinc-50 overflow-hidden">
-        <Image
-          src={product.handle === "black-speck" ? "/dab-pal/studio/black.webp" : "/dab-pal/studio/white.webp"}
-          alt={`Dab Pal — ${product.title}`}
-          fill
-          priority
-          sizes="(max-width: 800px) 100vw, 55vw"
-          className="object-cover"
-        />
-      </div>
-
-    </div>
-  )
-}
-
-const ProductMediaExtras = ({ product }: { product: ShopProduct }) => {
-  const alternate = getAlternateFinish(product)
-  return (
-    <div className="grid gap-4">
-      <details className="overflow-hidden rounded-lg border border-gray-300">
-        <summary className="cursor-pointer px-4 py-4 font-semibold">Watch the slider in action</summary>
-        <video
-          controls
-          muted
-          playsInline
-          preload="none"
-          poster={product.handle === "white-speck" ? "/dab-pal/studio/white.webp" : "/dab-pal/studio/black.webp"}
-          className="block aspect-video w-full bg-black object-contain"
-          aria-label="Dab Pal product demo video"
-        >
-          <source src={VIDEO_URL} type="video/mp4" />
-        </video>
-      </details>
-
-      <div className="grid grid-cols-2 gap-3 small:gap-4">
-        <figure className="rounded-lg border border-gray-200 bg-zinc-50 p-3">
-          <div className="relative aspect-[4/3]">
-            <Image
-              src="/dab-pal/lineup.png"
-              alt="Dab Pal Slate and Marble finish lineup"
-              fill
-              sizes="(max-width: 800px) 50vw, 28vw"
-              className="object-contain"
-            />
-          </div>
-          <figcaption className="mt-2 text-xs uppercase tracking-[0.18em] text-gray-600">
-            Finish lineup
-          </figcaption>
-        </figure>
-        <figure className="rounded-lg border border-gray-200 bg-zinc-50 p-3">
-          <div className="relative aspect-[4/3]">
-            <Image
-              src={alternate.src}
-              alt={alternate.alt}
-              fill
-              sizes="(max-width: 800px) 50vw, 28vw"
-              className="object-contain"
-            />
-          </div>
-          <figcaption className="mt-2 text-xs uppercase tracking-[0.18em] text-gray-600">
-            {alternate.label}
-          </figcaption>
-        </figure>
-      </div>
-    </div>
-  )
-}
-
-const ComingSoonProduct = ({ product }: { product: ShopProduct }) => {
-  return (
-    <main className="bg-zinc-950 text-white">
-      <section className="content-container grid min-h-[calc(100vh-160px)] grid-cols-1 small:grid-cols-[0.9fr_1.1fr] gap-8 small:gap-16 items-center py-12 small:py-20">
-        <div>
-          <LocalizedClientLink
-            href="/store"
-            className="text-sm text-white/60 hover:text-white"
-          >
-            Back to shop
-          </LocalizedClientLink>
-          <span className="mt-8 block text-xs uppercase tracking-[0.25em] text-amber-400">
-            {product.subtitle}
-          </span>
-          <h1 className="mt-3 text-4xl small:text-6xl font-semibold tracking-tight leading-[1.05]">
-            Custom Dab Pal.
-          </h1>
-          <p className="mt-5 max-w-xl text-base small:text-lg leading-relaxed text-white/70">
-            We are testing custom colorways and name plates next. Slate
-            and Marble are available now.
-          </p>
-          <LocalizedClientLink
-            href="/store"
-            className="mt-8 inline-flex rounded-full bg-white px-6 py-3 text-sm font-semibold text-black hover:bg-white/90"
-          >
-            Shop available finishes
-          </LocalizedClientLink>
-        </div>
-        <div className="relative aspect-[4/3] rounded-lg bg-white/5 overflow-hidden">
-          <Image
-            src={product.image}
-            alt="Custom Dab Pal preview"
-            fill
-            sizes="(max-width: 800px) 100vw, 55vw"
-            className="object-contain p-6"
-          />
-        </div>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildProductGroupSchema(availableProducts, getBaseURL())).replace(/</g, "\\u003c") }} />
+      <section className="content-container py-6 small:py-12">
+        <UnifiedProduct catalog={catalog}>
+          <ProductDetails />
+          <ProductInstructions />
+        </UnifiedProduct>
       </section>
     </main>
   )
@@ -246,10 +58,11 @@ const ComingSoonProduct = ({ product }: { product: ShopProduct }) => {
 
 const ProductDetails = ({ className = "" }: { className?: string }) => (
   <div className={`divide-y divide-gray-200 ${className}`}>
+    <h2 className="pt-5 pb-3 text-xl font-semibold">Product details</h2>
     {details.map(([title, body]) => (
       <div key={title} className="py-4">
-        <h2 className="text-sm font-semibold text-gray-950">{title}</h2>
-        <p className="mt-1 text-sm leading-relaxed text-gray-600">{body}</p>
+        <h3 className="text-base font-semibold text-gray-950">{title}</h3>
+        <p className="mt-1 text-base leading-relaxed text-gray-600">{body}</p>
       </div>
     ))}
   </div>
@@ -257,7 +70,7 @@ const ProductDetails = ({ className = "" }: { className?: string }) => (
 
 const ProductInstructions = ({ className = "" }: { className?: string }) => (
   <section className={`border-t border-gray-200 pt-5 ${className}`}>
-    <h2 className="text-sm font-semibold text-gray-950">How to use it</h2>
+    <h2 className="text-xl font-semibold text-gray-950">How to use it</h2>
     <p className="mt-3 text-sm text-gray-600">
       <LocalizedClientLink href="/care" className="underline">Case care</LocalizedClientLink>
       {" · "}
@@ -265,7 +78,7 @@ const ProductInstructions = ({ className = "" }: { className?: string }) => (
     </p>
     <ol className="mt-3 grid gap-3">
       {instructions.map((instruction, index) => (
-        <li key={instruction} className="flex gap-3 text-sm leading-relaxed">
+        <li key={instruction} className="flex gap-3 text-base leading-relaxed">
           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-xs font-semibold text-gray-700">
             {index + 1}
           </span>
@@ -275,5 +88,3 @@ const ProductInstructions = ({ className = "" }: { className?: string }) => (
     </ol>
   </section>
 )
-
-export default FinishProductTemplate

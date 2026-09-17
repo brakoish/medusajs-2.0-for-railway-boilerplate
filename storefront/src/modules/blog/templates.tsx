@@ -282,13 +282,13 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
               </p>
               <div className="mt-4 grid gap-2">
                 <GuideProductLink slug={article.slug} placement="article_sidebar"
-                  href="/store/black-speck"
+                  href="/store?finish=slate"
                   className="inline-flex rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800"
                 >
                   Shop Slate
                 </GuideProductLink>
                 <GuideProductLink slug={article.slug} placement="article_sidebar"
-                  href="/store/white-speck"
+                  href="/store?finish=marble"
                   className="inline-flex rounded-full border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-950 transition hover:border-amber-300"
                 >
                   Shop Marble

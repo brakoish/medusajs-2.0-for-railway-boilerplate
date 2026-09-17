@@ -4,7 +4,7 @@ import { blogArticles } from "@modules/blog/articles"
 
 /**
  * Sitemap. Keep transactional/account routes out, but include the public
- * shop and product-style routes so search engines can index finish pages.
+ * canonical product page so search engines index the shared product.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = getBaseURL()
@@ -18,16 +18,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${base}/store`,
       changeFrequency: "weekly",
       priority: 0.9,
-    },
-    {
-      url: `${base}/store/black-speck`,
-      changeFrequency: "weekly",
-      priority: 0.85,
-    },
-    {
-      url: `${base}/store/white-speck`,
-      changeFrequency: "weekly",
-      priority: 0.85,
     },
     {
       url: `${base}/care`,

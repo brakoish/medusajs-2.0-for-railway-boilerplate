@@ -4,6 +4,7 @@ import { Table, Text, clx } from "@medusajs/ui"
 
 import { updateLineItem } from "@lib/data/cart"
 import { dispatchCartChange } from "@lib/util/cart-events"
+import { productUrlForSku } from "@lib/util/product-url"
 import { HttpTypes } from "@medusajs/types"
 import CartItemSelect from "@modules/cart/components/cart-item-select"
 import ErrorMessage from "@modules/checkout/components/error-message"
@@ -27,7 +28,7 @@ const Item = ({ item, type = "full" }: ItemProps) => {
 
   const white = item.variant?.sku?.startsWith("DABPAL-WHT")
   const black = item.variant?.sku?.startsWith("DABPAL-BLK")
-  const productHref = white ? "/store/white-speck" : black ? "/store/black-speck" : "/store"
+  const productHref = productUrlForSku(item.variant?.sku)
   const productName = `Dab Pal${white ? " — Marble" : black ? " — Slate" : ""}`
 
   const changeQuantity = async (quantity: number) => {

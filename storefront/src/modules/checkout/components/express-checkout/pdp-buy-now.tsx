@@ -37,8 +37,12 @@ import {
 const stripeKey = process.env.NEXT_PUBLIC_STRIPE_KEY
 const stripePromise = stripeKey ? loadStripe(stripeKey) : null
 
+export type WalletVariant = Pick<HttpTypes.StoreProductVariant, "id" | "sku" | "title"> & {
+  calculated_price?: Pick<NonNullable<HttpTypes.StoreProductVariant["calculated_price"]>, "calculated_amount" | "currency_code">
+}
+
 type Props = {
-  variant?: HttpTypes.StoreProductVariant
+  variant?: WalletVariant
   countryCode: string
   inStock: boolean
   /** Quantity to add (default 1). */

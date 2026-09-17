@@ -10,7 +10,9 @@ export function buildProductSchema(
   const price = variant?.calculated_price
   const amount = price?.calculated_amount
   const currency = price?.currency_code
-  const url = `${base}/store/${product.handle}`
+  const finish = product.handle === "white-speck" ? "marble" : "slate"
+  const pack = product.sku?.endsWith("-3") ? "3" : product.sku?.endsWith("-6") ? "6" : "1"
+  const url = `${base}/store?finish=${finish}&pack=${pack}`
   const availability =
     !variant?.manage_inventory || (variant.inventory_quantity ?? 0) > 0
       ? "InStock"
@@ -59,5 +61,34 @@ export function buildProductSchema(
           },
         }
       : {}),
+  }
+}
+
+export function buildProductGroupSchema(
+  products: { product: ShopProduct; catalog: HttpTypes.StoreProduct }[],
+  base: string
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ProductGroup",
+    "@id": `${base}/store#dab-pal`,
+    name: "Dab Pal",
+    description: "3D-printed dab swab case with separate clean and used swab storage, a slider, and an empty 1 oz bottle. Swabs and isopropyl alcohol not included.",
+    url: `${base}/store`,
+    productGroupID: "DABPAL",
+    brand: { "@type": "Brand", name: "Dab Pal" },
+    variesBy: ["https://schema.org/color", "https://schema.org/size"],
+    hasVariant: products.flatMap(({ product, catalog }) => (catalog.variants || [])
+      .filter(variant => variant.sku && /-(SINGLE|3|6)$/.test(variant.sku))
+      .map(variant => {
+        const pack = variant.sku!.endsWith("-3") ? "3-pack" : variant.sku!.endsWith("-6") ? "6-pack" : "Single"
+        return {
+          ...buildProductSchema({ ...product, sku: variant.sku! }, { ...catalog, variants: [variant] }, base),
+          name: `Dab Pal — ${product.title} · ${pack}`,
+          color: product.title === "Marble" ? "White" : "Black",
+          size: pack,
+          inProductGroupWithID: "DABPAL",
+        }
+      })),
   }
 }

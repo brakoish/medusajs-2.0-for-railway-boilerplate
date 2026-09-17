@@ -4,7 +4,7 @@ import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
 import { omit } from "lodash"
-import { revalidateTag } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
 import { getPaymentReturnCartId, setPaymentReturnCartId, removePaymentReturnCartId } from "./cookies"
@@ -25,8 +25,8 @@ export type LineItemMetadata = {
 }
 
 export async function retrieveCartById(cartId: string) {
-  return await sdk.store.cart
-    .retrieve(cartId, {}, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
+  return await sdk.client
+    .fetch<{ cart: HttpTypes.StoreCart }>(`/store/carts/${cartId}`, { cache: "no-store", headers: await getAuthHeaders() })
     .then(({ cart }) => cart)
     .catch(() => null)
 }
@@ -38,8 +38,8 @@ export async function retrieveCart() {
     return null
   }
 
-  return await sdk.store.cart
-    .retrieve(cartId, {}, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
+  return await sdk.client
+    .fetch<{ cart: HttpTypes.StoreCart }>(`/store/carts/${cartId}`, { cache: "no-store", headers: await getAuthHeaders() })
     .then(({ cart }) => cart)
     .catch(() => {
       return null
@@ -313,6 +313,7 @@ export async function deleteLineItem(lineId: string) {
     })
     .catch(medusaError)
   revalidateTag("cart")
+  revalidatePath("/cart")
 }
 
 export async function enrichLineItems(

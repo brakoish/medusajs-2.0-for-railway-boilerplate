@@ -5,6 +5,7 @@ import { ShoppingCart } from "@medusajs/icons"
 import { usePathname, useRouter } from "next/navigation"
 import { Fragment, useEffect, useRef, useState } from "react"
 import { subscribeToCartChange } from "@lib/util/cart-events"
+import { productUrlForSku } from "@lib/util/product-url"
 
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
@@ -27,6 +28,13 @@ const CartDropdown = ({
   const open = () => setCartDropdownOpen(true)
   const close = () => setCartDropdownOpen(false)
   const router = useRouter()
+
+  useEffect(() => {
+    if (!cartDropdownOpen) return
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") close() }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [cartDropdownOpen])
 
   // The nav lives in the layout, so server-action revalidateTag("cart")
   // doesn't refresh it. When client code dispatches a cart-change event
@@ -138,8 +146,9 @@ const CartDropdown = ({
             className="absolute top-[calc(100%+1px)] right-0 bg-white border-x border-b border-gray-200 w-[420px] text-ui-fg-base"
             data-testid="nav-cart-dropdown"
           >
-            <div className="p-4 flex items-center justify-center">
+            <div className="p-4 flex items-center justify-between">
               <h3 className="text-large-semi">Cart</h3>
+              <button type="button" onClick={close} aria-label="Close cart preview" className="min-h-11 min-w-11 underline">Close</button>
             </div>
             {cartState && cartState.items?.length ? (
               <>
@@ -157,7 +166,7 @@ const CartDropdown = ({
                         data-testid="cart-item"
                       >
                         <LocalizedClientLink
-                          href={item.variant?.sku?.startsWith("DABPAL-WHT") ? "/store/white-speck" : item.variant?.sku?.startsWith("DABPAL-BLK") ? "/store/black-speck" : "/store"}
+                          href={productUrlForSku(item.variant?.sku)}
                           className="w-24"
                         >
                           <Thumbnail
@@ -176,7 +185,7 @@ const CartDropdown = ({
                               <div className="flex flex-col overflow-ellipsis whitespace-nowrap mr-4 w-[180px]">
                                 <h3 className="text-base-regular overflow-hidden text-ellipsis">
                                   <LocalizedClientLink
-                                    href={item.variant?.sku?.startsWith("DABPAL-WHT") ? "/store/white-speck" : item.variant?.sku?.startsWith("DABPAL-BLK") ? "/store/black-speck" : "/store"}
+                                    href={productUrlForSku(item.variant?.sku)}
                                     data-testid="product-link"
                                   >
                                     {item.title}

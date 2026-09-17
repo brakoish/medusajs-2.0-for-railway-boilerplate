@@ -6,6 +6,7 @@ const vm = require("node:vm")
 const ts = require("typescript")
 
 const calls = []
+const refreshedPaths = []
 let savedToken = null
 let loginResult = "test-token"
 const capture = (name, result) => async (...args) => {
@@ -23,7 +24,7 @@ const sdk = {
 const mocks = {
   "@lib/config": { sdk },
   "@lib/util/medusa-error": { default: e => { throw e }, __esModule: true },
-  "next/cache": { revalidateTag: () => {} },
+  "next/cache": { revalidateTag: () => {}, revalidatePath: path => refreshedPaths.push(path) },
   "next/navigation": { redirect: () => {} },
   react: { cache: fn => fn },
   "./cookies": {
@@ -61,6 +62,7 @@ async function main() {
   await orders.retrieveOrder("order-test")
   await orders.listOrders()
   await load("lib/data/cart.ts").deleteLineItem("line-test")
+  assert.ok(refreshedPaths.includes("/cart"), "cart removal must refresh the displayed cart")
   for (const { name, args } of calls) assert.equal(args.at(-1).authorization, "Bearer test-token", `${name} must await auth headers`)
   const deletion = calls.find(c => c.name === "deleteLineItem")
   assert.equal(deletion.args.length, 4, "cart deletion headers must use the fourth SDK argument")

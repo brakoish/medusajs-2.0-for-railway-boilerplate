@@ -1,68 +1,8 @@
-import { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 
-import { getBaseURL } from "@lib/util/env"
-import BreadcrumbSchema from "@modules/common/components/breadcrumb-schema"
-import FinishProductTemplate from "@modules/store/templates/finish-product"
-import {
-  getShopProduct,
-  shopProducts,
-} from "@modules/store/templates/shop-products"
-
-export const revalidate = 300
-
-type Props = {
-  params: Promise<{ finish: string }>
-}
-
-export function generateStaticParams() {
-  return shopProducts.filter(product => product.handle !== "custom").map((product) => ({
-    finish: product.handle,
-  }))
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export default async function FinishPage({ params }: { params: Promise<{ finish: string }> }) {
   const { finish } = await params
-  const product = getShopProduct(finish)
-  if (!product) notFound()
-
-  const url = `${getBaseURL()}/store/${product.handle}`
-  const title = `Dab Pal — ${product.title} | 3D-Printed Dab Swab Case`
-  const description = product.seoDescription ?? product.description
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: url,
-    },
-    openGraph: {
-      title,
-      description,
-      url,
-      images: [product.image],
-    },
-  }
-}
-
-export default async function FinishPage({ params }: Props) {
-  const { finish } = await params
-  const product = getShopProduct(finish)
-  if (!product) notFound()
-
-  return (
-    <>
-      <BreadcrumbSchema
-        items={[
-          { name: "Home", path: "" },
-          { name: "Shop", path: "/store" },
-          {
-            name: `Dab Pal — ${product.title}`,
-            path: `/store/${product.handle}`,
-          },
-        ]}
-      />
-      <FinishProductTemplate product={product} countryCode="us" />
-    </>
-  )
+  if (finish === "white-speck") permanentRedirect("/store?finish=marble")
+  if (finish === "black-speck") permanentRedirect("/store?finish=slate")
+  notFound()
 }

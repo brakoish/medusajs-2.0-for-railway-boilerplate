@@ -37,10 +37,21 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(`${origin}${stripped}${search}`, 301)
   }
 
+  const finishRoutes: Record<string, string> = {
+    "/store/black-speck": "slate",
+    "/store/white-speck": "marble",
+    "/products/dab-pal-black-speck": "slate",
+    "/products/dab-pal-white-speck": "marble",
+  }
+  if (finishRoutes[pathname]) {
+    const destination = request.nextUrl.clone()
+    destination.pathname = "/store"
+    destination.searchParams.set("finish", finishRoutes[pathname])
+    return NextResponse.redirect(destination, 301)
+  }
+
   const canonicalRoutes: Record<string, string> = {
     "/order/confirmed": "/checkout/return",
-    "/products/dab-pal-black-speck": "/store/black-speck",
-    "/products/dab-pal-white-speck": "/store/white-speck",
     "/blog/how-to-clean-a-puffco-peak-pro-proxy": "/blog/how-to-clean-puffco-peak-pro-proxy",
   }
   if (canonicalRoutes[pathname]) {

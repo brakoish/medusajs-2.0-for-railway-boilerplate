@@ -1,47 +1,26 @@
 import { Metadata } from "next"
-
+import { Suspense } from "react"
 import { getBaseURL } from "@lib/util/env"
 import BreadcrumbSchema from "@modules/common/components/breadcrumb-schema"
-import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
-import StoreTemplate from "@modules/store/templates"
+import FinishProductTemplate from "@modules/store/templates/finish-product"
 
 const base = getBaseURL()
-
 export const metadata: Metadata = {
-  title: "Shop Dab Pal Puffco Cleaning Kits",
-  description:
-    "Shop Dab Pal portable dab cleaning kits for Puffco, e-rigs, quartz bangers, Q-tips, iso, and clean/dirty swab storage.",
-  alternates: {
-    canonical: `${base}/store`,
-  },
+  title: { absolute: "Dab Pal | 3D-Printed Dab Swab Case" },
+  description: "A 3D-printed dab swab case with separate clean and used swab storage. Choose Slate or Marble, in single, 3-pack, or 6-pack. Empty 1 oz bottle included.",
+  alternates: { canonical: `${base}/store` },
   openGraph: {
-    title: "Shop Dab Pal Puffco Cleaning Kits",
-    description:
-      "Slate and Marble dab swab cases with Q-tip storage, iso bottle storage, and a clean/dirty slider.",
+    title: "Dab Pal | 3D-Printed Dab Swab Case",
+    description: "Choose Slate or Marble. Case, slider, and empty 1 oz bottle included. Swabs and isopropyl alcohol not included.",
     url: `${base}/store`,
     images: ["/dab-pal/lineup.png"],
   },
 }
-
-type Params = {
-  searchParams: Promise<{
-    sortBy?: SortOptions
-    page?: string
-  }>
-}
-
-export default async function StorePage({ searchParams }: Params) {
-  const { sortBy, page } = await searchParams
-
-  return (
-    <>
-      <BreadcrumbSchema
-        items={[
-          { name: "Home", path: "" },
-          { name: "Shop", path: "/store" },
-        ]}
-      />
-      <StoreTemplate sortBy={sortBy} page={page} countryCode="us" />
-    </>
-  )
+export default function StorePage() {
+  return <>
+    <BreadcrumbSchema items={[{ name: "Home", path: "" }, { name: "Dab Pal", path: "/store" }]} />
+    <Suspense fallback={<div className="content-container py-12" role="status">Loading Dab Pal…</div>}>
+      <FinishProductTemplate />
+    </Suspense>
+  </>
 }

@@ -25,10 +25,10 @@ export default function Footer() {
             <LocalizedClientLink href="/store">
               Shop all finishes
             </LocalizedClientLink>
-            <LocalizedClientLink href="/store/black-speck">
+            <LocalizedClientLink href="/store?finish=slate">
               Slate
             </LocalizedClientLink>
-            <LocalizedClientLink href="/store/white-speck">
+            <LocalizedClientLink href="/store?finish=marble">
               Marble
             </LocalizedClientLink>
           </div>

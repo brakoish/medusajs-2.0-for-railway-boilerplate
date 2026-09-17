@@ -29,6 +29,11 @@ async function main() {
     retrieve: async () => ({ cart: { item_subtotal: 25, item_discount_total: 5, shipping_subtotal: 7, tax_total: 2, total: 29 } }),
     complete: async (id) => { mutations.push(["complete", id]); return result },
   } } }
+  sdk.client = { fetch: async (url, options) => {
+    assert.equal(options.cache, "no-store", "cart reads must bypass stale response caching")
+    assert.equal(options.headers.authorization, "test")
+    return sdk.store.cart.retrieve()
+  } }
   const cart = load("lib/data/cart.ts", {
     "@lib/config": { sdk }, "@lib/util/medusa-error": { __esModule: true, default: e => { throw e } },
     "next/cache": { revalidateTag: () => {} }, "next/navigation": { redirect: url => { throw new Error(`REDIRECT:${url}`) } },

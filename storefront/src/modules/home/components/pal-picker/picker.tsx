@@ -175,7 +175,7 @@ export default function PalPickerClient({
           {error && <p role="alert">{error}</p>}
         </div>
         <LocalizedClientLink
-          href={`/store/${finish?.handle || "black-speck"}`}
+          href={`/store?finish=${finish?.handle === "white-speck" ? "marble" : "slate"}`}
           className="studio-detail-link"
         >
           Details & multi-packs <ArrowRight />
