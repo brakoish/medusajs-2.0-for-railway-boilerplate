@@ -48,3 +48,20 @@ export const removeCartId = async () => {
   const cookiesStore = await cookies()
   cookiesStore.set("_medusa_cart_id", "", { maxAge: -1 })
 }
+
+export const setPaymentReturnCartId = async (cartId: string) => {
+  (await cookies()).set("_dabpal_payment_cart", cartId, {
+    maxAge: 60 * 60,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  })
+}
+
+export const getPaymentReturnCartId = async () =>
+  (await cookies()).get("_dabpal_payment_cart")?.value
+
+export const removePaymentReturnCartId = async () => {
+  (await cookies()).set("_dabpal_payment_cart", "", { maxAge: -1, path: "/" })
+}

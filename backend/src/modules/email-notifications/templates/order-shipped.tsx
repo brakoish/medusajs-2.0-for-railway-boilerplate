@@ -1,7 +1,7 @@
 import { Text, Section, Hr, Link, Html, Head, Preview, Body, Container, Row, Column, Button } from '@react-email/components'
 import * as React from 'react'
 import { OrderDTO, OrderAddressDTO } from '@medusajs/framework/types'
-import { DabPalEmailLogo, DabPalProductImage } from './brand'
+import { DabPalEmailLogo } from './brand'
 
 export const ORDER_SHIPPED = 'order-shipped'
 
@@ -70,11 +70,8 @@ export const OrderShippedTemplate: React.FC<OrderShippedTemplateProps> & {
           <Section style={S.body_pad}>
             <Text style={S.h1}>Your Dab Pal is out the door</Text>
             <Text style={S.subtitle}>
-              Tiny kit, big cleanup energy. Track it below.
+              The carrier has your parcel. Follow its progress below.
             </Text>
-            <Section style={S.productShot}>
-              <DabPalProductImage size={128} />
-            </Section>
 
             {/* Tracking box */}
             <Section style={S.trackingBox}>
@@ -104,9 +101,9 @@ export const OrderShippedTemplate: React.FC<OrderShippedTemplateProps> & {
 
           {/* Footer */}
           <Section style={S.footer}>
-            <Text style={S.footerText}>Need anything? DM us on Instagram</Text>
+            <Text style={S.footerText}>Need help with your order?</Text>
             <Text style={{ ...S.footerText, margin: '0 0 8px' }}>
-              <Link href="https://instagram.com/nslabs_" style={S.link}>@nslabs_</Link>
+              <Link href="mailto:hello@thedabpal.com" style={S.link}>hello@thedabpal.com</Link>
             </Text>
             <Text style={{ ...S.footerText, margin: '0' }}>
               <Link href="https://thedabpal.com" style={S.link}>thedabpal.com</Link>

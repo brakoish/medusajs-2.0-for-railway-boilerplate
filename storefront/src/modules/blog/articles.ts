@@ -43,6 +43,63 @@ export type BlogArticle = {
 
 export const blogArticles: BlogArticle[] = [
   {
+    slug: "dab-terms-glossary",
+    title: "Dab Terms: A Plain-English Guide to Gear & Cleaning",
+    eyebrow: "Dab dictionary",
+    description: "What do banger, chamber, carb cap, iso, and dab swab mean? Learn the gear and cleaning terms, then find the right care guide for your setup.",
+    publishedAt: "2026-09-17",
+    updatedAt: "2026-09-17",
+    readingMinutes: 4,
+    keywords: ["dab terms", "dab glossary", "dab swabs", "quartz banger", "dab cleaning kit"],
+    sourceLabel: "Puffco’s dab equipment dictionary",
+    sourceUrl: "https://www.puffco.com/blogs/cannabis-knowledge-base/dab-technology-how-do-dab-rigs-dab-pens-work",
+    cover: { title: ["Know your", "gear."], subtitle: "A dab & cleaning dictionary" },
+    intro: [
+      "A dab is a small portion of cannabis concentrate; dabbing refers to vaporizing concentrate with purpose-built equipment. This glossary explains the equipment and cleaning vocabulary you will see in care guides. It is not a dosing guide.",
+      "Names matter when you clean: the glass attachment, heated chamber, and electronic base can need different treatment. Identify the part first, then use the instructions for your exact model.",
+    ],
+    guideLinks: [
+      { slug: "how-to-clean-puffco-peak-pro-proxy", label: "Choose your Puffco model", description: "Find model-specific care references." },
+      { slug: "best-swabs-for-dabs", label: "Compare swab types", description: "Regular Q-tips, pointed tips, and specialty swabs." },
+      { slug: "how-to-clean-a-quartz-banger", label: "Quartz banger care", description: "A separate routine for a separate part." },
+    ],
+    sections: [
+      { heading: "Dab rig and e-rig", body: [
+        "A dab rig is equipment designed for concentrates. An e-rig uses an electronic heater. These names describe the setup; they do not tell you whether a particular part can be soaked.",
+        "For cleaning, separate manufacturer-approved removable parts from the powered base. Never treat an electronic base as a container you can fill or immerse.",
+      ] },
+      { heading: "Banger and nail", body: [
+        "A nail is a heated surface used with a rig. A banger is a cup-shaped version, commonly made from quartz. Material and construction still matter for care.",
+        "A quartz banger guide is not automatically appropriate for a ceramic chamber or electronic atomizer. Check the material and manufacturer before choosing a cleaning method.",
+      ] },
+      { heading: "Chamber and atomizer", body: [
+        "On an e-rig, the chamber is the part where material is heated. Atomizer is another term for the heating assembly; product makers can use the words differently.",
+        "Use your device’s exact model and generation when looking up a care guide or replacement part. Similar-looking parts are not proof of compatibility.",
+      ] },
+      { heading: "Carb cap and loading tool", body: [
+        "A carb cap covers the heated cup and helps direct airflow. A loading tool, also called a dabber, transfers material into it. They have different jobs.",
+        "Keep caps, tools, and cleaning supplies in their own places. Dab Pal is a swab-and-bottle organizer, not a universal case for glass or loading tools.",
+      ] },
+      { heading: "Dab swab, Q-tip, and specialty swab", body: [
+        "A dab swab is a cotton swab used during clean-up. Q-tips is a brand name often used conversationally for regular cotton swabs. Specialty swabs can have pointed tips, larger heads, or different shafts.",
+        "Choose the tip for the surface you need to reach, and check dimensions for storage. Dab Pal holds 30 regular Q-tips. We have not verified every specialty-swab shape; swabs are purchased separately.",
+      ] },
+      { heading: "Iso", body: [
+        "Iso is shorthand for isopropyl alcohol. Its percentage describes the concentration. Follow the concentration and method specified for your exact device and part.",
+        "Keep alcohol away from flames and heat. Allow cleaned components to dry fully before use. Dab Pal’s included 1 oz bottle ships empty.",
+      ] },
+      { heading: "Clean side, used side, and the slider", body: [
+        "These describe the storage routine inside Dab Pal. Fresh swabs start together on one side. The movable slider makes space for used swabs separately, toward the hinge.",
+        "Dispose of used swabs regularly instead of mixing them back into your supply. Restock, check the bottle’s cap, and make sure the slider and lid move freely. The organizer does not replace your device’s care routine.",
+      ] },
+    ],
+    faq: [
+      { q: "Does a dab cleaning kit include a dab rig?", a: "Check the contents. Dab Pal includes the organizer case, slider and empty 1 oz bottle. It does not include a device, swabs or alcohol." },
+      { q: "Are dab swabs different from regular Q-tips?", a: "The term describes their use, not one universal shape. Compare the actual tip and shaft dimensions. Regular Q-tips and larger specialty swabs may fit differently." },
+      { q: "Can I use one cleaning guide for every device?", a: "No. Match the instructions to the exact model and part. Powered bases, removable chambers and glass can have different cleaning rules." },
+    ],
+  },
+  {
     publishedAt: "2026-07-08",
     updatedAt: "2026-09-16",
     readingMinutes: 3,
@@ -293,7 +350,7 @@ export const blogArticles: BlogArticle[] = [
     updatedAt: "2026-09-16",
     readingMinutes: 3,
     slug: "best-swabs-for-dabs",
-    title: "Best Swabs for Dabs: Q-tips vs Specialty Swabs",
+    title: "Dab Q-tips & Swabs: Regular vs Specialty Tips",
     eyebrow: "Swab selection",
     description:
       "Compare regular Q-tips, pointed cotton swabs, and specialty dab swabs by tip shape, access, and case fit. A practical selection guide, without brand rankings.",
@@ -311,7 +368,7 @@ export const blogArticles: BlogArticle[] = [
       dark: true,
     },
     intro: [
-      "Choose a swab around the area you need to reach and the case you want to carry it in. Start with your device’s care instructions, then compare tip shape, shaft length, and storage fit.",
+      "Dab swabs are cotton swabs used to wipe residue during clean-up. Regular Q-tips are one option; pointed and larger specialty tips serve different shapes. Compare tip shape, shaft length, price per swab, and storage fit.",
       "This is a selection guide, not a hands-on brand test. We have not ranked brands for absorbency, lint, or durability. Dab Pal is sized for regular Q-tips; we do not claim universal specialty-swab compatibility.",
     ],
     comparison: [

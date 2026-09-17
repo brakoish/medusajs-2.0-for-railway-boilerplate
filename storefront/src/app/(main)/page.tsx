@@ -11,7 +11,7 @@ import BreadcrumbSchema from "@modules/common/components/breadcrumb-schema"
 export const metadata: Metadata = {
   title: "Dab Pal | Puffco Cleaning Kit and Dab Swab Case",
   description:
-    "Portable dab cleaning kit for Puffco Peak, Pro, Proxy, e-rigs, and quartz bangers. Holds 30 Q-tips, a 1oz iso bottle, and clean/dirty swabs in one pocket case.",
+    "Portable dab cleaning kit for Puffco Peak, Pro, Proxy, e-rigs, and quartz bangers. Case, slider and empty 1oz bottle. Holds 30 regular Q-tips; swabs and iso not included.",
   alternates: {
     canonical: getBaseURL(),
   },
@@ -19,13 +19,13 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   return (
-    <>
+    <main>
       <StructuredData />
       <BreadcrumbSchema items={[{ name: "Home", path: "" }]} />
       <Hero />
       <PalPicker />
       <StudioStory />
       <FAQ />
-    </>
+    </main>
   )
 }

@@ -7,7 +7,7 @@ type OrderDetailsProps = {
 }
 
 const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
-  const formatStatus = (str: string) => {
+  const formatStatus = (str: string = "pending") => {
     const formatted = str.split("_").join(" ")
 
     return formatted.slice(0, 1).toUpperCase() + formatted.slice(1)
@@ -16,7 +16,7 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
   return (
     <div>
       <Text>
-        We have sent the order confirmation details to{" "}
+        Order confirmation will be emailed to{" "}
         <span
           className="text-ui-fg-medium-plus font-semibold"
           data-testid="order-email"
@@ -25,6 +25,7 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
         </span>
         .
       </Text>
+      <p className="mt-3 text-sm">Made to order: allow 3–5 business days before shipping, then carrier transit. We’ll email tracking when the carrier has your parcel. Questions? <a href="mailto:hello@thedabpal.com" className="underline">Email Dab Pal</a>.</p>
       <Text className="mt-2">
         Order date:{" "}
         <span data-testid="order-date">
@@ -41,17 +42,16 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
             <Text>
               Order status:{" "}
               <span className="text-ui-fg-subtle " data-testid="order-status">
-                {/* TODO: Check where the statuses should come from */}
-                {/* {formatStatus(order.fulfillment_status)} */}
+                {formatStatus(order.fulfillment_status)}
               </span>
             </Text>
             <Text>
               Payment status:{" "}
               <span
                 className="text-ui-fg-subtle "
-                sata-testid="order-payment-status"
+                data-testid="order-payment-status"
               >
-                {/* {formatStatus(order.payment_status)} */}
+                {formatStatus(order.payment_status)}
               </span>
             </Text>
           </>

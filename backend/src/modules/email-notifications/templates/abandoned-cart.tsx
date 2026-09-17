@@ -1,3 +1,4 @@
+import { orderLineDescription } from "../../../lib/order-line-description"
 import {
   Body,
   Button,
@@ -20,6 +21,8 @@ export const ABANDONED_CART = "abandoned-cart"
 export type AbandonedCartItem = {
   id?: string | null
   title?: string | null
+  product_title?: string | null
+  variant_sku?: string | null
   variant_title?: string | null
   quantity?: number | string | null
   unit_price?: number | string | null
@@ -264,10 +267,10 @@ export const AbandonedCartTemplate: React.FC<AbandonedCartTemplateProps> & {
                     }}
                   >
                     <Column style={S.itemPhotoCol}>
-                      <DabPalProductImage variantTitle={item.variant_title || item.title} />
+                      <DabPalProductImage variantTitle={orderLineDescription(item).finish} />
                     </Column>
                     <Column>
-                      <Text style={S.itemName}>Dab Pal</Text>
+                      <Text style={S.itemName}>{orderLineDescription(item).title}</Text>
                       <Text style={S.itemMeta}>
                         {cleanTitle(item)} x {quantity}
                       </Text>
@@ -284,7 +287,7 @@ export const AbandonedCartTemplate: React.FC<AbandonedCartTemplateProps> & {
 
             <Hr style={{ borderColor: "#e4e4e7", margin: "24px 0 0" }} />
             <Text style={S.note}>
-              Made in Brooklyn. Ships in 2-3 business days. Your next cleanup does not have to be a whole thing.
+              Made to order in Astoria, NY. Ships in 3-5 business days. Your next cleanup does not have to be a whole thing.
             </Text>
           </Section>
 

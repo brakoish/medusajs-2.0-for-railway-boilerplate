@@ -23,4 +23,7 @@ assert.equal(schema({ ...selected, calculated_price: { calculated_amount: 0, cur
 assert.equal(schema({ ...selected, calculated_price: undefined }).offers, undefined)
 assert.equal(schema({ ...selected, calculated_price: { calculated_amount: -1, currency_code: "usd" } }).offers, undefined)
 assert.equal(schema({ ...selected, sku: "OTHER" }).offers, undefined)
-console.log("Product schema: 10 assertions passed")
+assert.equal(schema().offers.hasMerchantReturnPolicy.returnFees, "https://schema.org/ReturnFeesCustomerResponsibility")
+assert.equal(schema().offers.hasMerchantReturnPolicy.merchantReturnDays, 14)
+assert.equal(schema().offers.hasMerchantReturnPolicy.merchantReturnLink, "https://thedabpal.com/shipping-returns")
+console.log("Product schema: 13 assertions passed")

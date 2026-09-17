@@ -46,6 +46,16 @@ export function buildProductSchema(
             priceCurrency: currency.toUpperCase(),
             availability: `https://schema.org/${availability}`,
             itemCondition: "https://schema.org/NewCondition",
+            seller: { "@type": "Organization", name: "Dab Pal", url: base },
+            hasMerchantReturnPolicy: {
+              "@type": "MerchantReturnPolicy",
+              applicableCountry: "US",
+              returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+              merchantReturnDays: 14,
+              returnMethod: "https://schema.org/ReturnByMail",
+              returnFees: "https://schema.org/ReturnFeesCustomerResponsibility",
+              merchantReturnLink: `${base}/shipping-returns`,
+            },
           },
         }
       : {}),

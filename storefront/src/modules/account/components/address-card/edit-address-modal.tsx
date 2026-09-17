@@ -29,6 +29,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
   isActive = false,
 }) => {
   const [removing, setRemoving] = useState(false)
+  const [removeError, setRemoveError] = useState("")
   const [successState, setSuccessState] = useState(false)
   const { state, open, close: closeModal } = useToggleState(false)
 
@@ -57,9 +58,12 @@ const EditAddress: React.FC<EditAddressProps> = ({
   }, [formState])
 
   const removeAddress = async () => {
+    if (removing) return
     setRemoving(true)
-    await deleteCustomerAddress(address.id)
-    setRemoving(false)
+    setRemoveError("")
+    try { await deleteCustomerAddress(address.id) }
+    catch { setRemoveError("Could not remove this address. Please try again.") }
+    finally { setRemoving(false) }
   }
 
   return (
@@ -114,6 +118,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
           <button
             className="text-small-regular text-ui-fg-base flex items-center gap-x-2"
             onClick={removeAddress}
+            disabled={removing}
             data-testid="address-delete-button"
           >
             {removing ? <Spinner /> : <Trash />}
@@ -122,6 +127,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
         </div>
       </div>
 
+      {removeError && <p role="alert" className="text-sm text-red-800">{removeError}</p>}
       <Modal isOpen={state} close={close} data-testid="edit-address-modal">
         <Modal.Title>
           <Heading className="mb-2">Edit address</Heading>
@@ -169,7 +175,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
                 defaultValue={address.address_2 || undefined}
                 data-testid="address-2-input"
               />
-              <div className="grid grid-cols-[144px_1fr] gap-x-2">
+              <div className="grid grid-cols-1 small:grid-cols-2 gap-2">
                 <Input
                   label="Postal code"
                   name="postal_code"
@@ -211,7 +217,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
               />
             </div>
             {formState.error && (
-              <div className="text-rose-500 text-small-regular py-2">
+              <div role="alert" className="text-red-800 text-sm py-2">
                 {formState.error}
               </div>
             )}

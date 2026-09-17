@@ -59,7 +59,7 @@ const medusaConfig = {
   modules: [
     {
       key: Modules.FILE,
-      resolve: '@medusajs/file',
+      resolve: '@medusajs/medusa/file',
       options: {
         providers: [
           ...(MINIO_ENDPOINT && MINIO_ACCESS_KEY && MINIO_SECRET_KEY ? [{
@@ -72,7 +72,7 @@ const medusaConfig = {
               bucket: MINIO_BUCKET // Optional, default: medusa-media
             }
           }] : [{
-            resolve: '@medusajs/file-local',
+            resolve: '@medusajs/medusa/file-local',
             id: 'local',
             options: {
               upload_dir: 'static',
@@ -84,7 +84,7 @@ const medusaConfig = {
     },
     ...(REDIS_URL ? [{
       key: Modules.EVENT_BUS,
-      resolve: '@medusajs/event-bus-redis',
+      resolve: '@medusajs/medusa/event-bus-redis',
       options: {
         redisUrl: REDIS_URL
       }
@@ -100,7 +100,7 @@ const medusaConfig = {
     }] : []),
     ...(SENDGRID_API_KEY && SENDGRID_FROM_EMAIL || RESEND_API_KEY && RESEND_FROM_EMAIL ? [{
       key: Modules.NOTIFICATION,
-      resolve: '@medusajs/notification',
+      resolve: '@medusajs/medusa/notification',
       options: {
         providers: [
           ...(SENDGRID_API_KEY && SENDGRID_FROM_EMAIL ? [{
@@ -126,7 +126,7 @@ const medusaConfig = {
     }] : []),
     ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET ? [{
       key: Modules.PAYMENT,
-      resolve: '@medusajs/payment',
+      resolve: '@medusajs/medusa/payment',
       options: {
         providers: [
           {

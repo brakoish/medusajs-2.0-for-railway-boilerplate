@@ -1,24 +1,24 @@
 "use client"
 
-import { usePostHog } from "posthog-js/react"
+import { useAnalytics } from "@lib/util/analytics"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
-export function GuideProductLink({ slug }: { slug: string }) {
-  const posthog = usePostHog()
+export function GuideProductLink({ slug, href = "/store", placement = "article_intro", children = "Choose your Dab Pal finish", className }: { slug: string; href?: string; placement?: string; children?: React.ReactNode; className?: string }) {
+  const posthog = useAnalytics()
 
   return (
     <LocalizedClientLink
-      href="/store"
+      href={href}
       onClick={() =>
         posthog.capture("guide_product_click", {
           article_slug: slug,
-          destination: "/store",
-          placement: "article_intro",
+          destination: href,
+          placement,
         })
       }
-      className="mt-4 inline-flex rounded-full bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-zinc-800"
+      className={className || "mt-4 inline-flex rounded-full bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-zinc-800"}
     >
-      Choose your Dab Pal finish
+      {children}
     </LocalizedClientLink>
   )
 }

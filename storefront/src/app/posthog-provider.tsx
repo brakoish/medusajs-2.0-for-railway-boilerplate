@@ -1,43 +1,36 @@
 "use client"
 
-import posthog from "posthog-js"
-import { PostHogProvider as PHProvider, usePostHog } from "posthog-js/react"
-import { useEffect } from "react"
-import { usePathname, useSearchParams } from "next/navigation"
-import { Suspense } from "react"
+import { Suspense, useEffect, useState } from "react"
+import { usePathname } from "next/navigation"
+import { ANALYTICS_CHOICE, track } from "@lib/util/analytics"
 
-if (typeof window !== "undefined") {
-  posthog.init("phc_pFJzDhQoduFoeRe7GaSbXcXQGjWpSEad75VAgTdd5eou", {
-    api_host: "https://us.i.posthog.com",
-    capture_pageview: false, // we fire manually for accurate SPA routing
-    capture_pageleave: true,
-    session_recording: { maskAllInputs: true },
-  })
-}
-
-function PageviewTracker() {
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const ph = usePostHog()
-
+function AnalyticsPreferences() {
+  const path = usePathname()
+  const [open, setOpen] = useState(false)
   useEffect(() => {
-    if (pathname) {
-      ph.capture("$pageview", {
-        $current_url: window.location.href,
-      })
-    }
-  }, [pathname, searchParams, ph])
-
-  return null
+    try { setOpen(!localStorage.getItem(ANALYTICS_CHOICE)) } catch { /* Essential-only mode. */ }
+    const show = () => setOpen(true)
+    window.addEventListener("dabpal-analytics-preferences", show)
+    return () => window.removeEventListener("dabpal-analytics-preferences", show)
+  }, [])
+  useEffect(() => {
+    if (!/^\/(checkout|account|order|reset-password)(\/|$)/.test(path)) void track("$pageview", { path })
+  }, [path])
+  function choose(choice: string) {
+    try { localStorage.setItem(ANALYTICS_CHOICE, choice) } catch { /* Essential-only mode. */ }
+    setOpen(false)
+    if (choice === "analytics" && !/^\/(checkout|account|order|reset-password)(\/|$)/.test(path)) void track("$pageview", { path })
+  }
+  if (!open) return null
+  return <aside className="analytics-choice" aria-label="Analytics preferences">
+    <p>Help us improve the shop? Optional analytics tell us which guides and products are useful. <a href="/privacy">Privacy details</a></p>
+    <div>
+      <button onClick={() => choose("essential")}>Essential only</button>
+      <button onClick={() => choose("analytics")}>Allow analytics</button>
+    </div>
+  </aside>
 }
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <PHProvider client={posthog}>
-      <Suspense fallback={null}>
-        <PageviewTracker />
-      </Suspense>
-      {children}
-    </PHProvider>
-  )
+  return <>{children}<Suspense fallback={null}><AnalyticsPreferences /></Suspense></>
 }

@@ -32,7 +32,7 @@ export const DabPalEmailLogo = () => (
 )
 
 const productImageUrl = (variantTitle?: string | null) =>
-  variantTitle?.toLowerCase().includes("white")
+  /white|marble/i.test(variantTitle || "")
     ? WHITE_PRODUCT_URL
     : BLACK_PRODUCT_URL
 

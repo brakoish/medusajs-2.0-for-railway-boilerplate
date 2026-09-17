@@ -12,7 +12,7 @@ export default function StoreTemplate({
 }) {
   void countryCode
   return (
-    <div className="studio-store">
+    <main className="studio-store">
       <div className="studio-container studio-store-intro">
         <span className="studio-eyebrow">A pal for every session</span>
         <p>Two finishes. One thoughtful little case.</p>
@@ -30,6 +30,6 @@ export default function StoreTemplate({
           Explore the field notes <ArrowRight />
         </LocalizedClientLink>
       </div>
-    </div>
+    </main>
   )
 }

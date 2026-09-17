@@ -4,6 +4,7 @@ import { convertToLocale } from "@lib/util/money"
 import React from "react"
 
 type CartTotalsProps = {
+  shippingPending?: boolean
   totals: {
     total?: number | null
     subtotal?: number | null
@@ -40,7 +41,7 @@ type CartTotalsProps = {
  * - The Taxes line shows total tax owed (items + shipping), which is what
  *   buyers expect on a receipt. Splitting it further reads as accountant-y.
  */
-const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
+const CartTotals: React.FC<CartTotalsProps> = ({ totals, shippingPending = false }) => {
   const {
     currency_code,
     total,
@@ -104,13 +105,13 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
         <div className="flex items-center justify-between">
           <span>Shipping</span>
           <span data-testid="cart-shipping" data-value={shippingSub}>
-            {convertToLocale({ amount: shippingSub, currency_code })}
+            {shippingPending ? "Calculated at checkout" : convertToLocale({ amount: shippingSub, currency_code })}
           </span>
         </div>
         <div className="flex justify-between">
           <span className="flex gap-x-1 items-center ">Taxes</span>
           <span data-testid="cart-taxes" data-value={orderTax}>
-            {convertToLocale({ amount: orderTax, currency_code })}
+            {shippingPending ? "Calculated at checkout" : convertToLocale({ amount: orderTax, currency_code })}
           </span>
         </div>
         {!!gift_card_total && (
@@ -129,7 +130,7 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
       </div>
       <div className="h-px w-full border-b border-gray-200 my-4" />
       <div className="flex items-center justify-between text-ui-fg-base mb-2 txt-medium ">
-        <span>Total</span>
+        <span>{shippingPending ? "Estimated total" : "Total"}</span>
         <span
           className="txt-xlarge-plus"
           data-testid="cart-total"

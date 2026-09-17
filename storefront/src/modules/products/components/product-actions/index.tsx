@@ -16,7 +16,7 @@ import { addToCart } from "@lib/data/cart"
 import { dispatchCartChange } from "@lib/util/cart-events"
 import { useSetSelectedVariantId } from "@modules/products/contexts/variant-context"
 import { HttpTypes } from "@medusajs/types"
-import { usePostHog } from "posthog-js/react"
+import { useAnalytics } from "@lib/util/analytics"
 
 const COUNTRY = "us"
 
@@ -58,7 +58,7 @@ export default function ProductActions({
   hideMobileActions,
   initialVariantSku = "DABPAL-BLK-SINGLE",
 }: ProductActionsProps) {
-  const posthog = usePostHog()
+  const posthog = useAnalytics()
   const [options, setOptions] = useState<Record<string, string | undefined>>(
     () => {
       // Pre-compute defaults so there's no "Select variant" flash on first render.

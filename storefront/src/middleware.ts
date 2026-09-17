@@ -38,6 +38,7 @@ export async function middleware(request: NextRequest) {
   }
 
   const canonicalRoutes: Record<string, string> = {
+    "/order/confirmed": "/checkout/return",
     "/products/dab-pal-black-speck": "/store/black-speck",
     "/products/dab-pal-white-speck": "/store/white-speck",
     "/blog/how-to-clean-a-puffco-peak-pro-proxy": "/blog/how-to-clean-puffco-peak-pro-proxy",
@@ -67,16 +68,17 @@ export async function middleware(request: NextRequest) {
 
   // 3. Carry through cart_id from query string into a cookie + send the
   //    user to the address step.
-  if (cartId && !checkoutStep) {
+  if (cartId && /^cart_[a-zA-Z0-9]+$/.test(cartId)) {
     const next = new URL(request.nextUrl.href)
-    next.searchParams.set("step", "address")
+    next.searchParams.delete("cart_id")
+    if (!checkoutStep) next.searchParams.set("step", "address")
     response = NextResponse.redirect(next.toString(), 307)
-    response.cookies.set("_medusa_cart_id", cartId, { maxAge: 60 * 60 * 24 })
+    response.cookies.set("_medusa_cart_id", cartId, { maxAge: 60 * 60 * 24, httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/" })
     return response
   }
 
   // 4. Onboarding flag from query string -> cookie.
-  if (isOnboarding && !onboardingCookie) {
+  if (process.env.NODE_ENV !== "production" && isOnboarding && !onboardingCookie) {
     response.cookies.set("_medusa_onboarding", "true", {
       maxAge: 60 * 60 * 24,
     })

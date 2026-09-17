@@ -15,7 +15,7 @@ export type EmailConfig = {
 const DEFAULT_CONFIG: Record<string, { subject: string; preview: string }> = {
   "order-placed": {
     subject: "Your Dab Pal is locked in",
-    preview: "Nice. Your Dab Pal is locked in and ships from Brooklyn soon.",
+    preview: "Your Dab Pal is made to order. Allow 3-5 business days before shipping.",
   },
   "order-shipped": {
     subject: "Your Dab Pal is out the door",

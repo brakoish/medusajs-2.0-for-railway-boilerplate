@@ -33,11 +33,11 @@ const faqs = [
   },
   {
     q: "Is it waterproof?",
-    a: "Water resistant... maybe. Splashes are fine. Submerging it is not.",
+    a: "It is not waterproof. Keep it dry, away from heat, and do not submerge it.",
   },
   {
     q: "Returns?",
-    a: "We accept returns within 14 days of delivery, including opened kits. Contact us on Instagram (@nslabs_) to arrange a return.",
+    a: "We accept returns within 14 days of delivery, including opened kits. Email hello@thedabpal.com to arrange a return. You pay change-of-mind return shipping; we cover damaged or incorrect items.",
   },
 ]
 

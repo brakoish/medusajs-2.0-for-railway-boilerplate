@@ -17,7 +17,7 @@ const sdk = {
   store: {
     customer: Object.fromEntries(["retrieve", "update", "create", "createAddress", "deleteAddress", "updateAddress"].map(name => [name, capture(name, { customer: { id: "customer-test" } })])),
     order: { retrieve: capture("order", { order: {} }), list: capture("orders", { orders: [] }) },
-    cart: { deleteLineItem: capture("deleteLineItem", {}) },
+    cart: { transferCart: capture("transferCart", {}), deleteLineItem: capture("deleteLineItem", {}) },
   },
 }
 const mocks = {
@@ -29,6 +29,7 @@ const mocks = {
   "./cookies": {
     getAuthHeaders: async () => ({ authorization: "Bearer test-token" }),
     getCartId: async () => "cart-test",
+    removeCartId: async () => {},
     setAuthToken: async token => { await new Promise(resolve => setTimeout(resolve, 10)); savedToken = token },
     removeAuthToken: async () => { await new Promise(resolve => setTimeout(resolve, 10)); savedToken = null },
   },
@@ -38,7 +39,7 @@ function load(relative, extra = {}) {
   const filename = path.join(__dirname, "../src", relative)
   const code = ts.transpileModule(fs.readFileSync(filename, "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, jsx: ts.JsxEmit.ReactJSX } }).outputText
   const module = { exports: {} }
-  vm.runInNewContext(code, { exports: module.exports, module, require: name => {
+  vm.runInNewContext(code, { process: { env: { NODE_ENV: "test" } }, exports: module.exports, module, require: name => {
     if (name in extra) return extra[name]
     if (name in mocks) return mocks[name]
     throw new Error(`Unmocked import: ${name}`)
@@ -75,6 +76,7 @@ async function main() {
 
   let cookieRead = false
   const templateMocks = {
+    "@modules/common/components/commerce-event": {},
     "react/jsx-runtime": { jsx: () => null, jsxs: () => null },
     "next/headers": { cookies: async () => ({ get: () => { cookieRead = true; return undefined } }) },
     "@medusajs/ui": {},

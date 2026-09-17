@@ -16,7 +16,7 @@ type Props = {
 }
 
 export function generateStaticParams() {
-  return shopProducts.map((product) => ({
+  return shopProducts.filter(product => product.handle !== "custom").map((product) => ({
     finish: product.handle,
   }))
 }

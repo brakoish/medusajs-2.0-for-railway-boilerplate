@@ -10,7 +10,7 @@ import { HttpTypes } from "@medusajs/types"
 export const dynamic = "force-dynamic"
 
 type Props = {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 async function getOrder(id: string) {
@@ -29,12 +29,13 @@ async function getOrder(id: string) {
 }
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: false },
   title: "Order Confirmed",
-  description: "You purchase was successful",
+  description: "Your purchase was successful",
 }
 
 export default async function OrderConfirmedPage({ params }: Props) {
-  const order = await getOrder(params.id)
+  const order = await getOrder((await params).id)
   if (!order) {
     return notFound()
   }

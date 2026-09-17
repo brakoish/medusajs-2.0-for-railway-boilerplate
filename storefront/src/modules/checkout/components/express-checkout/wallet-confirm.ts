@@ -13,7 +13,7 @@
 
 import {
   initiatePaymentSession,
-  placeOrder,
+  preparePaymentReturn,
   previewWalletTotals,
   setShippingMethod,
   updateCart,
@@ -25,7 +25,6 @@ import { enrichStripePaymentIntent } from "@lib/data/enrich-pi"
 import { buildStripeSessionData } from "@lib/util/build-pi-data"
 import { HttpTypes } from "@medusajs/types"
 import type { Stripe, StripeElements } from "@stripe/stripe-js"
-
 
 type WalletConfirmInput = {
   cart: HttpTypes.StoreCart
@@ -68,13 +67,14 @@ export async function fetchWalletShippingRates(
           ? o.amount
           : typeof o.calculated_price?.calculated_amount === "number"
           ? o.calculated_price.calculated_amount
-          : 0
+          : NaN
       return {
         id: o.id as string,
         displayName: (o.name as string) || "Shipping",
         amount: Math.round(dollars * 100),
       }
     })
+    .filter((rate) => Number.isFinite(rate.amount) && rate.amount >= 0)
     .sort((a, b) => a.amount - b.amount)
 }
 
@@ -99,7 +99,11 @@ export async function walletConfirm({
     throw new Error("Wallet did not return a shipping address")
   }
 
-  const shipFirst = (shipping.name?.split(" ")[0] || fbFirst || "Customer").trim()
+  const shipFirst = (
+    shipping.name?.split(" ")[0] ||
+    fbFirst ||
+    "Customer"
+  ).trim()
   const shipLast = shipping.name?.split(" ").slice(1).join(" ") || fbLast || ""
 
   const shipAddress = {
@@ -132,11 +136,14 @@ export async function walletConfirm({
 
   // ---------- 2. Write to cart ----------
   try {
-    await updateCart({
-      email: event.payerEmail || billing?.email || "",
-      shipping_address: shipAddress as any,
-      billing_address: billAddress as any,
-    }, buyNowCartId)
+    await updateCart(
+      {
+        email: event.payerEmail || billing?.email || "",
+        shipping_address: shipAddress as any,
+        billing_address: billAddress as any,
+      },
+      buyNowCartId
+    )
   } catch (err: any) {
     console.error("[walletConfirm] updateCart failed:", err)
     throw new Error(
@@ -151,14 +158,12 @@ export async function walletConfirm({
   // (e.g. Apple Pay on a single-rate flow).
   const pickedRateId: string | undefined = event.shippingRate?.id
   const methods = await fetchCartShippingMethods(cart.id)
-  console.log("[walletConfirm] shipping methods:", methods?.length ?? "null", methods)
   if (!methods?.length) {
     throw new Error(
-      "No shipping methods available (cart may need a shipping address; check the browser network tab for the actual API error)"
+      "We could not find shipping for this address. Check your address or use regular checkout."
     )
   }
-  const method =
-    methods.find((m: any) => m.id === pickedRateId) || methods[0]
+  const method = methods.find((m: any) => m.id === pickedRateId) || methods[0]
   await setShippingMethod({ cartId: cart.id, shippingMethodId: method.id })
 
   // ---------- 4. Create / refresh Stripe payment session ----------
@@ -179,7 +184,6 @@ export async function walletConfirm({
       provider_id: "pp_stripe_stripe",
       data: buildStripeSessionData(cartForPi),
     })
-    console.log("[walletConfirm] payment session created:", refreshed)
     // Fire-and-forget PI enrichment (receipt_email, descriptor, shipping).
     enrichStripePaymentIntent(cart.id).catch((e) =>
       console.warn("[walletConfirm] enrich-pi failed", e)
@@ -204,12 +208,12 @@ export async function walletConfirm({
   const { error: submitError } = await elements.submit()
   if (submitError) throw new Error(submitError.message || "Submit failed")
 
-  const country = shipAddress.country_code || defaultCountry
+  await preparePaymentReturn(buyNowCartId)
   const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
     elements,
     clientSecret,
     confirmParams: {
-      return_url: `${window.location.origin}/${country}/order/confirmed`,
+      return_url: `${window.location.origin}/checkout/return`,
     },
     redirect: "if_required",
   })
@@ -219,7 +223,7 @@ export async function walletConfirm({
       confirmError.payment_intent?.status === "succeeded" ||
       confirmError.payment_intent?.status === "requires_capture"
     ) {
-      await placeOrder(buyNowCartId)
+      window.location.assign("/checkout/return")
       return
     }
     throw new Error(confirmError.message || "Payment failed")
@@ -228,10 +232,15 @@ export async function walletConfirm({
   if (
     paymentIntent &&
     (paymentIntent.status === "succeeded" ||
-      paymentIntent.status === "requires_capture")
+      paymentIntent.status === "requires_capture" ||
+      paymentIntent.status === "processing")
   ) {
-    await placeOrder(buyNowCartId)
+    window.location.assign("/checkout/return")
+    return
   }
+  throw new Error(
+    "Payment status is unclear. Use Retry confirmation before paying again."
+  )
 }
 
 /**
@@ -274,9 +283,11 @@ function buildLineItems(totals: {
 export async function handleShippingAddressChange({
   event,
   cartId,
+  elements,
 }: {
   event: any
   cartId: string
+  elements: StripeElements | null
 }) {
   const a = event?.address || {}
   // Stripe gives us only postal_code + state + country before the
@@ -288,29 +299,21 @@ export async function handleShippingAddressChange({
     country_code: (a.country || "US").toLowerCase(),
   }
 
-  let totals
   try {
-    totals = await previewWalletTotals({
+    if (!elements) throw new Error("Payment is not ready")
+    await previewWalletTotals({ cartId, shippingAddress: partial })
+    const rates = await fetchWalletShippingRates(cartId)
+    if (!rates.length) throw new Error("No shipping rate is available")
+    const totals = await previewWalletTotals({
       cartId,
-      shippingAddress: partial,
+      shippingAddress: {},
+      shippingMethodId: rates[0].id,
     })
-  } catch (err) {
-    // If preview fails, reject so the wallet sheet shows an error rather
-    // than silently undercharging.
+    elements.update({ amount: Math.round(totals.total * 100) })
+    event.resolve({ shippingRates: rates, lineItems: buildLineItems(totals) })
+  } catch {
     event.reject?.()
-    console.error("[wallet] previewWalletTotals failed:", err)
-    return
   }
-
-  const rates = await fetchWalletShippingRates(cartId)
-  const lineItems = buildLineItems(totals)
-
-  event.resolve({
-    shippingRates: rates.length
-      ? rates
-      : [{ id: "standard", displayName: "Standard Shipping", amount: 700 }],
-    lineItems,
-  })
 }
 
 /**
@@ -323,18 +326,21 @@ export async function handleShippingAddressChange({
 export async function handleShippingRateChange({
   event,
   cartId,
+  elements,
 }: {
   event: any
   cartId: string
+  elements: StripeElements | null
 }) {
   const rateId = event?.shippingRate?.id
   if (!rateId) {
-    event.resolve({})
+    event.reject?.()
     return
   }
 
   let totals
   try {
+    if (!elements) throw new Error("Payment is not ready")
     // Pass the rate id; previewWalletTotals will set the shipping method
     // on the cart and re-read totals.
     totals = await previewWalletTotals({
@@ -348,6 +354,7 @@ export async function handleShippingRateChange({
     return
   }
 
+  elements!.update({ amount: Math.round(totals.total * 100) })
   event.resolve({
     lineItems: buildLineItems(totals),
   })
@@ -379,7 +386,7 @@ export async function buildWalletClickPayload(cartId?: string) {
       shippingRates: [
         // Sane default while the cart doesn't exist yet (PDP buy-now).
         // Real rates lock in during walletConfirm.
-        { id: "standard", displayName: "Standard Shipping", amount: 700 },
+        { id: "standard", displayName: "Estimated shipping", amount: 700 },
       ],
     }
   }
@@ -389,6 +396,6 @@ export async function buildWalletClickPayload(cartId?: string) {
     ...base,
     shippingRates: rates.length
       ? rates
-      : [{ id: "standard", displayName: "Standard Shipping", amount: 700 }],
+      : [{ id: "standard", displayName: "Estimated shipping", amount: 700 }],
   }
 }

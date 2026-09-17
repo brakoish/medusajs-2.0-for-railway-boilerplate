@@ -7,7 +7,7 @@ import { addToCart } from "@lib/data/cart"
 import { dispatchCartChange } from "@lib/util/cart-events"
 import { convertToLocale } from "@lib/util/money"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { usePostHog } from "posthog-js/react"
+import { useAnalytics } from "@lib/util/analytics"
 
 type Finish = {
   handle: string
@@ -33,7 +33,7 @@ export default function PalPickerClient({
   const [pending, setPending] = useState(false)
   const [error, setError] = useState("")
   const [added, setAdded] = useState("")
-  const posthog = usePostHog()
+  const posthog = useAnalytics()
   const finish = finishes.find((f) => f.handle === selected)
   const price =
     finish?.amount != null

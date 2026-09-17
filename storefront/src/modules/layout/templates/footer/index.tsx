@@ -38,12 +38,11 @@ export default function Footer() {
               Cleaning guides
             </LocalizedClientLink>
             <LocalizedClientLink href="/care">Case care</LocalizedClientLink>
-            <LocalizedClientLink href="/#faq">
+            <LocalizedClientLink href="/shipping-returns">
               Shipping & returns
             </LocalizedClientLink>
             <a
-              href="https://www.instagram.com/nslabs_/"
-              target="_blank"
+              href="mailto:hello@thedabpal.com"
               rel="noreferrer"
             >
               Get in touch
@@ -51,6 +50,8 @@ export default function Footer() {
           </div>
           <div>
             <h2>Your corner</h2>
+            <LocalizedClientLink href="/about">About Dab Pal</LocalizedClientLink>
+            <LocalizedClientLink href="/contact">Contact & help</LocalizedClientLink>
             <LocalizedClientLink href="/cart">Your cart</LocalizedClientLink>
             <LocalizedClientLink href="/account">
               Your account
@@ -59,7 +60,7 @@ export default function Footer() {
         </div>
         <div className="studio-footer-bottom">
           <span>© {new Date().getFullYear()} Dab Pal.</span>
-          <span>Small case. Good company.</span>
+          <div className="flex gap-6"><LocalizedClientLink href="/privacy">Privacy</LocalizedClientLink><LocalizedClientLink href="/terms">Terms</LocalizedClientLink></div>
         </div>
       </div>
     </footer>

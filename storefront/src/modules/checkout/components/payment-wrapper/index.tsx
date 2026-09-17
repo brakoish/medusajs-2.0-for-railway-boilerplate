@@ -22,7 +22,7 @@ const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
 
 const Wrapper: React.FC<WrapperProps> = ({ cart, children }) => {
   const paymentSession = cart.payment_collection?.payment_sessions?.find(
-    (s) => s.status === "pending"
+    (s) => ["pending", "authorized"].includes(s.status)
   )
 
   if (

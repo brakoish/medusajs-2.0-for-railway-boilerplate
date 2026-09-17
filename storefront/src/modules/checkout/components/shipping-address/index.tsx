@@ -46,6 +46,7 @@ const ShippingAddress = ({
         "shipping_address.first_name": address?.first_name || "",
         "shipping_address.last_name": address?.last_name || "",
         "shipping_address.address_1": address?.address_1 || "",
+        "shipping_address.address_2": address?.address_2 || "",
         "shipping_address.company": address?.company || "",
         "shipping_address.postal_code": address?.postal_code || "",
         "shipping_address.city": address?.city || "",
@@ -70,7 +71,7 @@ const ShippingAddress = ({
     if (cart && !cart.email && customer?.email) {
       setFormAddress(undefined, customer.email)
     }
-  }, [cart]) // Add cart as a dependency
+  }, [cart, customer?.email])
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -204,6 +205,13 @@ const ShippingAddress = ({
               ).toLowerCase(),
             }))
           }}
+        />
+        <Input
+          label="Apartment, suite, etc. (optional)"
+          name="shipping_address.address_2"
+          autoComplete="address-line2"
+          value={formData["shipping_address.address_2"] || ""}
+          onChange={handleChange}
         />
         <Input
           label="Company"

@@ -1,3 +1,4 @@
+import CommerceEvent from "@modules/common/components/commerce-event"
 import { Heading } from "@medusajs/ui"
 import { cookies } from "next/headers"
 
@@ -20,9 +21,10 @@ export default async function OrderCompletedTemplate({
   const isOnboarding = (await cookies()).get("_medusa_onboarding")?.value === "true"
 
   return (
-    <div className="py-6 min-h-[calc(100vh-64px)]">
+    <main className="py-6 min-h-[calc(100vh-64px)]">
+      <CommerceEvent event="purchase" value={order.total ?? 0} currency={order.currency_code} sessionKey={order.id} />
       <div className="content-container flex flex-col justify-center items-center gap-y-10 max-w-4xl h-full w-full">
-        {isOnboarding && <OnboardingCta orderId={order.id} />}
+        {process.env.NODE_ENV !== "production" && isOnboarding && <OnboardingCta orderId={order.id} />}
         <div
           className="flex flex-col gap-4 max-w-4xl h-full bg-white w-full py-10"
           data-testid="order-complete-container"
@@ -45,6 +47,6 @@ export default async function OrderCompletedTemplate({
           <Help />
         </div>
       </div>
-    </div>
+    </main>
   )
 }

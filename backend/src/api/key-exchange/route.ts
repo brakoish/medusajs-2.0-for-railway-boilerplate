@@ -6,7 +6,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
     const apiKeyModuleService: IApiKeyModuleService = req.scope.resolve(Modules.API_KEY);
     const apiKeys = await apiKeyModuleService.listApiKeys();
-    const defaultApiKey = apiKeys.find((apiKey) => apiKey.title === 'Webshop');
+    const defaultApiKey = apiKeys.find((apiKey) => apiKey.title === 'Webshop' && apiKey.type === 'publishable');
     if (!defaultApiKey) {
       res.json({});
     } else {

@@ -7,6 +7,7 @@ import { omit } from "lodash"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
+import { getPaymentReturnCartId, setPaymentReturnCartId, removePaymentReturnCartId } from "./cookies"
 import { getProductsById } from "./products"
 import { getRegion } from "./regions"
 import { expandPromotionCodes } from "@lib/util/promotion-codes"
@@ -54,7 +55,7 @@ export async function getOrSetCart(countryCode: string) {
   }
 
   if (!cart) {
-    const cartResp = await sdk.store.cart.create({ region_id: region.id })
+    const cartResp = await sdk.store.cart.create({ region_id: region.id }, {}, await getAuthHeaders())
     cart = cartResp.cart
     await setCartId(cart.id)
     revalidateTag("cart")
@@ -151,27 +152,18 @@ export async function previewWalletTotals({
     throw new Error("No existing cart found for wallet preview")
   }
 
-  // 1. Push the partial address. Medusa accepts a partial shipping_address
-  //    on update; the tax engine only needs country/province/postal_code.
-  await sdk.store.cart
-    .update(
+  // A rate-only change must preserve the address already selected in the wallet.
+  if (Object.keys(shippingAddress).length) {
+    await sdk.store.cart.update(
       cartId,
-      {
-        shipping_address: {
-          first_name: "Wallet",
-          last_name: "Preview",
-          address_1: shippingAddress.address_1 || "",
-          address_2: shippingAddress.address_2 || "",
-          city: shippingAddress.city || "",
-          province: shippingAddress.province || "",
-          postal_code: shippingAddress.postal_code || "",
-          country_code: (shippingAddress.country_code || "us").toLowerCase(),
-        } as any,
-      },
+      { shipping_address: {
+        ...shippingAddress,
+        country_code: (shippingAddress.country_code || "us").toLowerCase(),
+      } },
       {},
       await getAuthHeaders()
-    )
-    .catch(medusaError)
+    ).catch(medusaError)
+  }
 
   // 2. Optional: lock in a shipping method so tax + shipping line up in
   //    the wallet sheet. Stripe's onShippingRateChange gives us this.
@@ -200,7 +192,7 @@ export async function previewWalletTotals({
   // shipping_total / item_total mix tax in, so they don't sum cleanly.
   const c = cart as any
   return {
-    item_subtotal: (c.item_subtotal as number) ?? (c.subtotal as number) ?? 0,
+    item_subtotal: ((c.item_subtotal as number) ?? 0) - ((c.item_discount_total as number) ?? 0),
     shipping_subtotal: (c.shipping_subtotal as number) ?? 0,
     tax_total: (c.tax_total as number) ?? 0,
     total: (c.total as number) ?? 0,
@@ -413,9 +405,10 @@ export async function applyPromotions(codes: string[]) {
     throw new Error("No existing cart found")
   }
 
-  await updateCart({ promo_codes: expandPromotionCodes(codes) })
-    .then(() => {
+  return await updateCart({ promo_codes: expandPromotionCodes(codes) })
+    .then((cart) => {
       revalidateTag("cart")
+      return cart
     })
     .catch(medusaError)
 }
@@ -491,7 +484,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         first_name: formData.get("shipping_address.first_name"),
         last_name: formData.get("shipping_address.last_name"),
         address_1: formData.get("shipping_address.address_1"),
-        address_2: "",
+        address_2: formData.get("shipping_address.address_2") || "",
         company: formData.get("shipping_address.company"),
         postal_code: formData.get("shipping_address.postal_code"),
         city: formData.get("shipping_address.city"),
@@ -510,7 +503,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         first_name: formData.get("billing_address.first_name"),
         last_name: formData.get("billing_address.last_name"),
         address_1: formData.get("billing_address.address_1"),
-        address_2: "",
+        address_2: formData.get("billing_address.address_2") || "",
         company: formData.get("billing_address.company"),
         postal_code: formData.get("billing_address.postal_code"),
         city: formData.get("billing_address.city"),
@@ -523,9 +516,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     return e.message
   }
 
-  redirect(
-    `/${formData.get("shipping_address.country_code")}/checkout?step=delivery`
-  )
+  redirect("/checkout?step=delivery")
 }
 
 export async function placeOrder(cartId?: string) {
@@ -543,14 +534,26 @@ export async function placeOrder(cartId?: string) {
     .catch(medusaError)
 
   if (cartRes?.type === "order") {
-    const countryCode =
-      cartRes.order.shipping_address?.country_code?.toLowerCase()
-    // Only clear the session cart cookie if this was the session cart.
-    if (!cartId) await removeCartId()
+    if (id === await getCartId()) await removeCartId()
+    if (id === await getPaymentReturnCartId()) await removePaymentReturnCartId()
     redirect(`/order/confirmed/${cartRes?.order.id}`)
   }
 
-  return cartRes.cart
+  throw new Error("Your order is not confirmed yet. Please retry confirmation or contact hello@thedabpal.com before paying again.")
+}
+
+// Keep redirect-based payment recovery tied to this browser, not a URL cart ID.
+export async function preparePaymentReturn(cartId?: string) {
+  const id = cartId || await getCartId()
+  if (!id) throw new Error("Your cart could not be found. Please return to your cart.")
+  await setPaymentReturnCartId(id)
+}
+
+export async function completePaymentReturn() {
+  const id = await getPaymentReturnCartId()
+  if (!id) throw new Error("This payment session has expired. Check your email for an order confirmation or contact hello@thedabpal.com before paying again.")
+  // Medusa verifies the payment with its provider; URL payment status is never trusted.
+  await placeOrder(id)
 }
 
 /**

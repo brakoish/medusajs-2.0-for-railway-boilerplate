@@ -14,7 +14,7 @@ export default async function passwordResetHandler({
   event: { data },
   container,
 }: SubscriberArgs<PasswordResetEventData>) {
-  if (data.actor_type !== 'user') {
+  if (!['user', 'customer'].includes(data.actor_type)) {
     console.warn(`[password-reset] Unsupported actor type "${data.actor_type}", skipping reset email`)
     return
   }
@@ -23,7 +23,9 @@ export default async function passwordResetHandler({
     Modules.NOTIFICATION
   )
 
-  const resetLink = `${BACKEND_URL}/app/reset-password?token=${encodeURIComponent(data.token)}`
+  const isCustomer = data.actor_type === 'customer'
+  const resetBase = isCustomer ? 'https://thedabpal.com/reset-password' : `${BACKEND_URL}/app/reset-password`
+  const resetLink = `${resetBase}?token=${encodeURIComponent(data.token)}`
 
   try {
     await notificationModuleService.createNotifications({
@@ -33,10 +35,11 @@ export default async function passwordResetHandler({
       data: {
         emailOptions: {
           replyTo: 'hello@thedabpal.com',
-          subject: 'Reset your Dab Pal admin password',
+          subject: isCustomer ? 'Reset your Dab Pal password' : 'Reset your Dab Pal admin password',
         },
         resetLink,
-        preview: 'Reset your Dab Pal admin password.',
+        preview: isCustomer ? 'Reset your Dab Pal password.' : 'Reset your Dab Pal admin password.',
+        isCustomer,
       },
     })
   } catch (error) {

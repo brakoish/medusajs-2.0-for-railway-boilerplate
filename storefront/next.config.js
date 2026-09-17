@@ -8,14 +8,15 @@ checkEnvVariables()
 const nextConfig = {
   reactStrictMode: true,
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   images: {
-    unoptimized: true,
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
+      { protocol: "https", hostname: "bucket-production-a39d.up.railway.app" },
       {
         protocol: "http",
         hostname: "localhost",
@@ -49,6 +50,12 @@ const nextConfig = {
         hostname: process.env.NEXT_PUBLIC_MINIO_ENDPOINT,
       }] : []),
     ],
+  },
+  async headers() {
+    return [{ source: "/:path*", headers: [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+    ] }]
   },
   serverRuntimeConfig: {
     port: process.env.PORT || 3000

@@ -48,7 +48,7 @@ const flowDefinitions = () => [
     timing: "Immediately",
     status: "Live",
     editable: "Subject + preview",
-    strategy: "Confirm the order, show the exact kit, reinforce made-in-Brooklyn trust.",
+    strategy: "Confirm the order, show the exact kit, reinforce made-to-order details.",
   },
   {
     template: EmailTemplates.ORDER_SHIPPED,

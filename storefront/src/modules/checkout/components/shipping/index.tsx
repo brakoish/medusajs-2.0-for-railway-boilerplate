@@ -116,6 +116,12 @@ const Shipping: React.FC<ShippingProps> = ({
       </div>
       {isOpen ? (
         <div data-testid="delivery-options-container">
+          <p className="mb-4 text-sm text-gray-600">Made to order: ships in 3–5 business days. Carrier transit time is additional.</p>
+          {!availableShippingMethods?.length && <div role="status" className="mb-4 rounded-md border p-4 text-sm">
+            <p>We could not load shipping for this address. Check your US shipping address, then try again.</p>
+            <button className="underline mt-2" onClick={() => router.refresh()}>Reload shipping options</button>
+            <p className="mt-2">Still stuck? <a className="underline" href="mailto:hello@thedabpal.com">Email us</a>.</p>
+          </div>}
           <div className="pb-8">
             <RadioGroup value={selectedShippingMethod?.id} onChange={set}>
               {availableShippingMethods?.map((option) => {
@@ -160,7 +166,7 @@ const Shipping: React.FC<ShippingProps> = ({
             className="mt-6"
             onClick={handleSubmit}
             isLoading={isLoading}
-            disabled={!cart.shipping_methods?.[0]}
+            disabled={!selectedShippingMethod || isLoading}
             data-testid="submit-delivery-option-button"
           >
             Continue to payment

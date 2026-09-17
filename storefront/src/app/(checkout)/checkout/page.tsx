@@ -1,5 +1,6 @@
+import CommerceEvent from "@modules/common/components/commerce-event"
 import { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { redirect } from "next/navigation"
 
 import Wrapper from "@modules/checkout/components/payment-wrapper"
 import CheckoutForm from "@modules/checkout/templates/checkout-form"
@@ -54,8 +55,8 @@ const applyPromoFromQuery = async (
 
 const fetchCart = async (promoCode?: string) => {
   const cart = await retrieveCart()
-  if (!cart) {
-    return notFound()
+  if (!cart?.items?.length) {
+    return redirect("/cart")
   }
 
   const cartWithPromo = await applyPromoFromQuery(cart, promoCode)
@@ -78,10 +79,12 @@ export default async function Checkout({ searchParams }: CheckoutProps) {
 
   return (
     <div className="grid grid-cols-1 small:grid-cols-[1fr_416px] content-container gap-12 py-12">
-      <Wrapper cart={cart}>
+      <CommerceEvent event="begin_checkout" value={cart.total ?? 0} currency={cart.currency_code} sessionKey={cart.id} />
+      <h1 className="text-3xl font-semibold small:col-span-2">Checkout</h1>
+      <div className="small:col-start-2 small:row-start-2"><CheckoutSummary cart={cart} /></div>
+      <div className="small:col-start-1 small:row-start-2"><Wrapper cart={cart}>
         <CheckoutForm cart={cart} customer={customer} />
-      </Wrapper>
-      <CheckoutSummary cart={cart} />
+      </Wrapper></div>
     </div>
   )
 }

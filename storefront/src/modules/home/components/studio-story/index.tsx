@@ -51,7 +51,7 @@ export default function StudioStory() {
             muted
             playsInline
             preload="none"
-            poster="/dab-pal/product-front.png"
+            poster="/dab-pal/studio/black.webp"
             aria-label="See the Dab Pal slider in action"
           >
             <source
@@ -93,7 +93,7 @@ export default function StudioStory() {
           </LocalizedClientLink>
         </div>
         <div className="studio-notes-grid">
-          {blogArticles.slice(0, 3).map((article) => (
+          {blogArticles.filter((article) => ["how-to-clean-puffco-peak-pro-proxy", "best-swabs-for-dabs", "what-to-keep-in-a-dab-cleaning-kit"].includes(article.slug)).map((article) => (
             <LocalizedClientLink
               key={article.slug}
               href={`/blog/${article.slug}`}

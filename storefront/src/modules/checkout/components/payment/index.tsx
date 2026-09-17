@@ -8,6 +8,8 @@ import { CheckCircleSolid, CreditCard } from "@medusajs/icons"
 import { Button, Container, Heading, Text, Tooltip, clx } from "@medusajs/ui"
 import { PaymentElement } from "@stripe/react-stripe-js"
 
+import RecoveryPanel from "@modules/checkout/components/recovery-panel"
+import CartTotals from "@modules/common/components/cart-totals"
 import Divider from "@modules/common/components/divider"
 import PaymentContainer from "@modules/checkout/components/payment-container"
 import PaymentButton from "@modules/checkout/components/payment-button"
@@ -38,7 +40,8 @@ const Payment = ({
   )
 
   const activeSession = cart.payment_collection?.payment_sessions?.find(
-    (paymentSession: any) => paymentSession.status === "pending"
+    (paymentSession: any) =>
+      ["pending", "authorized"].includes(paymentSession.status)
   )
 
   const [isLoading, setIsLoading] = useState(false)
@@ -177,7 +180,7 @@ const Payment = ({
       <>
         <div className="mt-5 transition-all duration-150 ease-in-out">
           <Text className="txt-medium-plus text-ui-fg-base mb-1">
-            Choose how you'd like to pay:
+            Choose how you&apos;d like to pay:
           </Text>
 
           <PaymentElement
@@ -196,6 +199,7 @@ const Payment = ({
         </div>
 
         <div className="mt-6 flex flex-col gap-3">
+          <CartTotals totals={cart} />
           <PaymentButton cart={cart} data-testid="submit-order-button" />
           <Text className="txt-small text-ui-fg-subtle">
             By clicking Place Order, you agree to our{" "}
@@ -205,7 +209,11 @@ const Payment = ({
             >
               Terms
             </LocalizedClientLink>{" "}
-            and acknowledge our return policy.
+            and acknowledge our{" "}
+            <LocalizedClientLink href="/shipping-returns" className="underline">
+              Shipping &amp; returns policy
+            </LocalizedClientLink>
+            .
           </Text>
         </div>
       </>
@@ -256,14 +264,20 @@ const Payment = ({
       </div>
       <div>
         <div className={isOpen ? "block" : "hidden"}>
-          {!paidByGiftcard && visiblePaymentMethods?.length ? (
+          {activeSession?.status === "authorized" ? (
+            <>
+              <CartTotals totals={cart} />
+              <PaymentButton
+                cart={cart}
+                data-testid="confirm-existing-payment"
+              />
+            </>
+          ) : !paidByGiftcard && visiblePaymentMethods?.length ? (
             <>
               {visiblePaymentMethods.length > 1 && (
                 <RadioGroup
                   value={selectedPaymentMethod}
-                  onChange={(value: string) =>
-                    setSelectedPaymentMethod(value)
-                  }
+                  onChange={(value: string) => setSelectedPaymentMethod(value)}
                 >
                   {visiblePaymentMethods
                     .sort((a, b) => {
@@ -283,7 +297,9 @@ const Payment = ({
               )}
               {renderStripeContent()}
             </>
-          ) : null}
+          ) : (
+            <RecoveryPanel message="Payment options are unavailable right now. Your cart is saved. Please try again." />
+          )}
 
           {paidByGiftcard && (
             <div className="flex flex-col w-1/3">
@@ -308,10 +324,10 @@ const Payment = ({
               Stripe session as soon as the step opens, so PaymentButton
               picks up an `activeSession` and renders "Place order"
               immediately — no separate "Continue to review" click. */}
-          {activeSession && isStripe && !canMountStripe ? (
-            <Button size="large" className="mt-6" disabled>
-              Loading payment...
-            </Button>
+          {activeSession?.status === "authorized" ? null : activeSession &&
+            isStripe &&
+            !canMountStripe ? (
+            <RecoveryPanel message="The secure payment form could not load. Please try again." />
           ) : !activeSession || !isStripe ? (
             <Button
               size="large"

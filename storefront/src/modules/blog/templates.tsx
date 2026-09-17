@@ -45,6 +45,12 @@ export const BlogIndexTemplate = () => {
         </div>
       </section>
 
+      <nav aria-label="Guide topics" className="content-container pt-8 flex flex-wrap gap-4">
+        <LocalizedClientLink className="studio-text-link" href="/blog/how-to-clean-puffco-peak-pro-proxy">Puffco by model</LocalizedClientLink>
+        <LocalizedClientLink className="studio-text-link" href="/blog/best-swabs-for-dabs">Swab selection</LocalizedClientLink>
+        <LocalizedClientLink className="studio-text-link" href="/blog/how-to-clean-a-quartz-banger">Banger care</LocalizedClientLink>
+        <LocalizedClientLink className="studio-text-link" href="/blog/dab-terms-glossary">Dab dictionary</LocalizedClientLink>
+      </nav>
       <section className="content-container py-10 small:py-16">
         <div className="grid grid-cols-1 small:grid-cols-2 gap-4 small:gap-6">
           {blogArticles.map((article) => (
@@ -105,7 +111,7 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
                 {article.description}
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-gray-500">
-                <span>By Dab Pal</span>
+                <LocalizedClientLink href="/about" className="underline">By Dab Pal</LocalizedClientLink>
                 <span aria-hidden>•</span>
                 <span>Updated {formatDate(article.updatedAt)}</span>
                 <span aria-hidden>•</span>
@@ -123,6 +129,10 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
               ))}
             </div>
 
+            <nav aria-label="On this page" className="mt-8 border-y border-gray-200 py-5">
+              <h2 className="font-semibold mb-3">In this guide</h2>
+              <ul className="grid gap-2">{article.sections.map((section, index) => <li key={section.heading}><a className="underline text-sm leading-6" href={`#guide-section-${index}`}>{section.heading}</a></li>)}</ul>
+            </nav>
             {article.howTo && (
               <section className="mt-10 rounded-lg border border-gray-200 bg-zinc-50 p-5 small:p-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -213,8 +223,8 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
 
 
             <div className="mt-10 space-y-10">
-              {article.sections.map((section) => (
-                <section key={section.heading}>
+              {article.sections.map((section, index) => (
+                <section key={section.heading} id={`guide-section-${index}`} className="scroll-mt-36">
                   <h2 className="text-2xl small:text-3xl font-semibold tracking-tight text-gray-950">
                     {section.heading}
                   </h2>
@@ -271,18 +281,18 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
                 clean vs dirty swabs. Swabs and iso are not included.
               </p>
               <div className="mt-4 grid gap-2">
-                <LocalizedClientLink
+                <GuideProductLink slug={article.slug} placement="article_sidebar"
                   href="/store/black-speck"
                   className="inline-flex rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800"
                 >
                   Shop Slate
-                </LocalizedClientLink>
-                <LocalizedClientLink
+                </GuideProductLink>
+                <GuideProductLink slug={article.slug} placement="article_sidebar"
                   href="/store/white-speck"
                   className="inline-flex rounded-full border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-950 transition hover:border-amber-300"
                 >
                   Shop Marble
-                </LocalizedClientLink>
+                </GuideProductLink>
               </div>
             </div>
 

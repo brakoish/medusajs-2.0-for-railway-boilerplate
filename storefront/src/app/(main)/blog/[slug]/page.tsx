@@ -69,6 +69,7 @@ export default async function ArticlePage({ params }: Props) {
     author: {
       "@type": "Organization",
       name: "Dab Pal",
+      url: `${getBaseURL()}/about`,
     },
     publisher: {
       "@type": "Organization",

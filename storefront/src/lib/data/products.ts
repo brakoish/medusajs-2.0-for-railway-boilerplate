@@ -46,12 +46,12 @@ export const getProductsList = cache(async function ({
   countryCode,
 }: {
   pageParam?: number
-  queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductParams
+  queryParams?: HttpTypes.StoreProductListParams
   countryCode: string
 }): Promise<{
   response: { products: HttpTypes.StoreProduct[]; count: number }
   nextPage: number | null
-  queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductParams
+  queryParams?: HttpTypes.StoreProductListParams
 }> {
   const limit = queryParams?.limit || 12
   const validPageParam = Math.max(pageParam, 1);
@@ -100,13 +100,13 @@ export const getProductsListWithSort = cache(async function ({
   countryCode,
 }: {
   page?: number
-  queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductParams
+  queryParams?: HttpTypes.StoreProductListParams
   sortBy?: SortOptions
   countryCode: string
 }): Promise<{
   response: { products: HttpTypes.StoreProduct[]; count: number }
   nextPage: number | null
-  queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductParams
+  queryParams?: HttpTypes.StoreProductListParams
 }> {
   const limit = queryParams?.limit || 12
 

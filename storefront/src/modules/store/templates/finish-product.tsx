@@ -8,7 +8,6 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import ProductActions from "@modules/products/components/product-actions"
 import { VariantProvider } from "@modules/products/contexts/variant-context"
 import ProductActionsWrapper from "@modules/products/templates/product-actions-wrapper"
-import CustomizerPreview from "@modules/store/components/customizer-preview"
 import { ShopProduct } from "./shop-products"
 import { getBaseURL } from "@lib/util/env"
 import { buildProductSchema } from "@lib/util/product-schema"
@@ -19,7 +18,7 @@ const VIDEO_URL =
 const details = [
   ["Included", "Dab Pal case, empty 1oz bottle, and clean/dirty slider. Q-tips and iso are not included."],
   ["Capacity", "Holds 30 regular Q-tips. Specialty swab fit varies."],
-  ["Returns", "14-day returns, including opened kits. Contact @nslabs_ on Instagram to arrange a return."],
+  ["Returns", "14-day returns from delivery, including opened kits. Email hello@thedabpal.com to arrange a return."],
   ["Closed dimensions", "80 × 80 × 25 mm. Exterior dimensions; specialty swab fit varies."],
   ["Fit", "An independent organizer for Puffco and quartz banger cleaning supplies."],
   ["Shipping", "Made to order in NY. Allow 3–5 business days before shipping."],
@@ -32,23 +31,6 @@ const instructions = [
   "Slide used swabs behind the slider, toward the hinge, until you can toss them.",
 ]
 
-const reviews = [
-  {
-    quote:
-      "Great little tool, will work great with my erig when I'm on the go.",
-    name: "RichyFlows",
-  },
-  {
-    quote:
-      "Made from a durable plastic with a moveable piece for separating used from unused.",
-    name: "Verified buyer",
-  },
-  {
-    quote: "Product is as described. This definitely exceeded my expectations.",
-    name: "Martin K.",
-  },
-]
-
 const FinishProductTemplate = async ({
   product,
   countryCode,
@@ -56,21 +38,6 @@ const FinishProductTemplate = async ({
   product: ShopProduct
   countryCode: string
 }) => {
-  if (product.handle === "custom") {
-    const region = await getRegion(countryCode)
-    if (!region) notFound()
-    const medusaProduct = product.medusaHandle
-      ? await getProductByHandle(product.medusaHandle, region.id)
-      : null
-
-    return (
-      <CustomizerPreview
-        product={medusaProduct}
-        ordersEnabled={product.available}
-      />
-    )
-  }
-
   if (!product.available || !product.sku || !product.medusaHandle) {
     return <ComingSoonProduct product={product} />
   }
@@ -104,7 +71,7 @@ const FinishProductTemplate = async ({
             <ProductMedia product={product} />
           </div>
 
-          <div className="order-2 min-w-0 small:sticky small:top-28">
+          <div className="order-2 min-w-0 small:row-span-2 small:sticky small:top-28">
             <span className="text-xs uppercase tracking-[0.25em] text-amber-700">
               {product.subtitle}
             </span>
@@ -138,11 +105,11 @@ const FinishProductTemplate = async ({
               </VariantProvider>
             </div>
 
-            <div className="small:hidden mt-6"><ProductMediaExtras product={product} /></div>
-            <ProductReviewSnippets />
+
             <ProductDetails />
             <ProductInstructions />
           </div>
+          <div className="order-3 small:col-start-1"><ProductMediaExtras product={product} /></div>
         </div>
       </section>
     </main>
@@ -177,7 +144,6 @@ const ProductMedia = ({ product }: { product: ShopProduct }) => {
         />
       </div>
 
-      <div className="hidden small:block"><ProductMediaExtras product={product} /></div>
     </div>
   )
 }
@@ -191,8 +157,8 @@ const ProductMediaExtras = ({ product }: { product: ShopProduct }) => {
           controls
           muted
           playsInline
-          preload="metadata"
-          poster={product.image}
+          preload="none"
+          poster={product.handle === "white-speck" ? "/dab-pal/studio/white.webp" : "/dab-pal/studio/black.webp"}
           className="block aspect-video w-full bg-black object-contain"
           aria-label="Dab Pal product demo video"
         >
@@ -211,7 +177,7 @@ const ProductMediaExtras = ({ product }: { product: ShopProduct }) => {
               className="object-contain"
             />
           </div>
-          <figcaption className="mt-2 text-xs uppercase tracking-[0.18em] text-gray-400">
+          <figcaption className="mt-2 text-xs uppercase tracking-[0.18em] text-gray-600">
             Finish lineup
           </figcaption>
         </figure>
@@ -225,7 +191,7 @@ const ProductMediaExtras = ({ product }: { product: ShopProduct }) => {
               className="object-contain"
             />
           </div>
-          <figcaption className="mt-2 text-xs uppercase tracking-[0.18em] text-gray-400">
+          <figcaption className="mt-2 text-xs uppercase tracking-[0.18em] text-gray-600">
             {alternate.label}
           </figcaption>
         </figure>
@@ -235,10 +201,6 @@ const ProductMediaExtras = ({ product }: { product: ShopProduct }) => {
 }
 
 const ComingSoonProduct = ({ product }: { product: ShopProduct }) => {
-  if (product.handle === "custom") {
-    return <CustomizerPreview />
-  }
-
   return (
     <main className="bg-zinc-950 text-white">
       <section className="content-container grid min-h-[calc(100vh-160px)] grid-cols-1 small:grid-cols-[0.9fr_1.1fr] gap-8 small:gap-16 items-center py-12 small:py-20">
@@ -289,27 +251,6 @@ const ProductDetails = ({ className = "" }: { className?: string }) => (
       </div>
     ))}
   </div>
-)
-
-const ProductReviewSnippets = () => (
-  <section className="border-b border-gray-200 pb-5">
-    <div className="flex items-center justify-between gap-3">
-      <h2 className="text-sm font-semibold text-gray-950">Buyer notes</h2>
-      <span className="text-xs font-semibold text-amber-700">Rated 5/5</span>
-    </div>
-    <div className="mt-3 grid gap-3">
-      {reviews.map((review) => (
-        <figure key={review.quote} className="text-sm leading-relaxed">
-          <blockquote className="text-gray-700">
-            &ldquo;{review.quote}&rdquo;
-          </blockquote>
-          <figcaption className="mt-1 text-xs text-gray-500">
-            {review.name}{review.name !== "Verified buyer" && " · Verified buyer"}
-          </figcaption>
-        </figure>
-      ))}
-    </div>
-  </section>
 )
 
 const ProductInstructions = ({ className = "" }: { className?: string }) => (

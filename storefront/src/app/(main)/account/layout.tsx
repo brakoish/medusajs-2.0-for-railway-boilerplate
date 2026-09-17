@@ -1,3 +1,7 @@
+import { Metadata } from "next"
+
+export const metadata: Metadata = { robots: { index: false, follow: false } }
+
 import { getCustomer } from "@lib/data/customer"
 import AccountLayout from "@modules/account/templates/account-layout"
 

@@ -38,6 +38,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     ...coreRoutes,
+    ...["about", "contact", "shipping-returns", "privacy", "terms"].map(path => ({ url: `${base}/${path}` })),
     {
       url: `${base}/blog`,
       changeFrequency: "weekly",

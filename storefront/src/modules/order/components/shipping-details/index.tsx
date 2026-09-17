@@ -2,6 +2,7 @@ import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
 import { Heading, Text } from "@medusajs/ui"
 
+import { orderTracking } from "@lib/util/order-tracking"
 import Divider from "@modules/common/components/divider"
 
 type ShippingDetailsProps = {
@@ -14,9 +15,9 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
       <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
         Delivery
       </Heading>
-      <div className="flex items-start gap-x-8">
+      <div className="grid grid-cols-1 small:grid-cols-3 gap-6">
         <div
-          className="flex flex-col w-1/3"
+          className="flex flex-col min-w-0"
           data-testid="shipping-address-summary"
         >
           <Text className="txt-medium-plus text-ui-fg-base mb-1">
@@ -40,7 +41,7 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
         </div>
 
         <div
-          className="flex flex-col w-1/3 "
+          className="flex flex-col min-w-0 "
           data-testid="shipping-contact-summary"
         >
           <Text className="txt-medium-plus text-ui-fg-base mb-1">Contact</Text>
@@ -51,21 +52,27 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
         </div>
 
         <div
-          className="flex flex-col w-1/3"
+          className="flex flex-col min-w-0"
           data-testid="shipping-method-summary"
         >
           <Text className="txt-medium-plus text-ui-fg-base mb-1">Method</Text>
           <Text className="txt-medium text-ui-fg-subtle">
-            {(order as any).shipping_methods[0]?.name} (
+            {order.shipping_methods?.[0]?.name} (
             {convertToLocale({
-              amount: order.shipping_methods?.[0].total ?? 0,
+              amount: order.shipping_methods?.[0]?.total ?? 0,
               currency_code: order.currency_code,
-            })
-              .replace(/,/g, "")
-              .replace(/\./g, ",")}
+            })}
             )
           </Text>
         </div>
+      </div>
+      <div className="mt-6 space-y-3">
+        {orderTracking(order.fulfillments).map(shipment => <div key={shipment.id} className="rounded-lg border p-4 text-sm">
+          <p className="font-semibold">{shipment.status}</p>
+          {shipment.number && <p className="mt-1 break-words">Tracking: {shipment.number}</p>}
+          {shipment.url && <a className="underline mt-2 inline-block" href={shipment.url} target="_blank" rel="noreferrer">View carrier tracking</a>}
+        </div>)}
+        {!order.fulfillments?.length && <p className="text-sm">Tracking will appear here once a label is ready. Label creation does not mean the carrier has received your parcel.</p>}
       </div>
       <Divider className="mt-8" />
     </div>

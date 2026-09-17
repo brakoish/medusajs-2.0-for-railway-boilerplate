@@ -7,7 +7,7 @@ import { useElements, useStripe } from "@stripe/react-stripe-js"
 import React, { useState } from "react"
 import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
-import { placeOrder } from "@lib/data/cart"
+import { placeOrder, preparePaymentReturn } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { isManual, isPaypal, isStripe } from "@lib/constants"
 
@@ -35,7 +35,13 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   //   return <GiftCardPaymentButton />
   // }
 
-  const paymentSession = cart.payment_collection?.payment_sessions?.[0]
+  const paymentSession = cart.payment_collection?.payment_sessions?.find(
+    (session) => ["pending", "authorized"].includes(session.status)
+  )
+
+  if (paymentSession?.status === "authorized") {
+    return <AuthorizedPaymentButton notReady={notReady} />
+  }
 
   switch (true) {
     case isStripe(paymentSession?.provider_id):
@@ -61,6 +67,37 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     default:
       return <Button disabled>Select a payment method</Button>
   }
+}
+
+const AuthorizedPaymentButton = ({ notReady }: { notReady: boolean }) => {
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const confirm = async () => {
+    if (busy) return
+    setBusy(true)
+    setError(null)
+    try {
+      await placeOrder()
+    } catch {
+      setError(
+        "We could not finish confirming your order. Retry confirmation or email hello@thedabpal.com before paying again."
+      )
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <>
+      <p className="mb-3 text-sm">
+        Your payment is authorized. Finish confirming this order without
+        entering payment details again.
+      </p>
+      <Button onClick={confirm} disabled={notReady || busy} isLoading={busy}>
+        Confirm existing payment
+      </Button>
+      <ErrorMessage error={error} />
+    </>
+  )
 }
 
 const GiftCardPaymentButton = () => {
@@ -108,94 +145,112 @@ const StripePaymentButton = ({
   const elements = useElements()
 
   const session = cart.payment_collection?.payment_sessions?.find(
-    (s) => s.status === "pending"
+    (s) =>
+      isStripe(s.provider_id) && ["pending", "authorized"].includes(s.status)
   )
 
   const disabled = !stripe || !elements ? true : false
 
   const handlePayment = async () => {
     setSubmitting(true)
-
-    if (!stripe || !elements || !cart) {
-      setSubmitting(false)
-      return
-    }
-
-    // Validate the PaymentElement before confirming. Catches missing fields
-    // and surfaces a nice inline error instead of a Stripe console warning.
-    const { error: submitError } = await elements.submit()
-    if (submitError) {
-      setErrorMessage(submitError.message || null)
-      setSubmitting(false)
-      return
-    }
-
-    // confirmPayment handles cards, Apple Pay, Google Pay, Link, etc.
-    // Wallets and 3DS may redirect; return_url brings the buyer back to the
-    // order confirmation flow on success.
-    const returnUrl = `${window.location.origin}/${cart.region?.countries?.[0]?.iso_2 || "us"}/order/confirmed`
-
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      clientSecret: session?.data.client_secret as string,
-      confirmParams: {
-        return_url: returnUrl,
-        payment_method_data: {
-          billing_details: {
-            name:
-              (cart.billing_address?.first_name || "") +
-              " " +
-              (cart.billing_address?.last_name || ""),
-            address: {
-              city: cart.billing_address?.city ?? undefined,
-              country: cart.billing_address?.country_code ?? undefined,
-              line1: cart.billing_address?.address_1 ?? undefined,
-              line2: cart.billing_address?.address_2 ?? undefined,
-              postal_code: cart.billing_address?.postal_code ?? undefined,
-              state: cart.billing_address?.province ?? undefined,
-            },
-            email: cart.email,
-            phone: cart.billing_address?.phone ?? undefined,
-          },
-        },
-      },
-      // Stay on this page when no redirect is needed (cards, Apple Pay
-      // sheet, Google Pay sheet that confirm inline). Stripe will only
-      // redirect when a method requires it (3DS challenge, BNPL, etc.).
-      redirect: "if_required",
-    })
-
-    if (error) {
-      const pi = error.payment_intent
-
-      if (
-        (pi && pi.status === "requires_capture") ||
-        (pi && pi.status === "succeeded")
-      ) {
-        onPaymentCompleted()
+    setErrorMessage(null)
+    try {
+      if (!stripe || !elements || !cart) {
+        setSubmitting(false)
         return
       }
 
-      setErrorMessage(error.message || null)
+      if (session?.status === "authorized") return await onPaymentCompleted()
+
+      // Validate the PaymentElement before confirming. Catches missing fields
+      // and surfaces a nice inline error instead of a Stripe console warning.
+      const { error: submitError } = await elements.submit()
+      if (submitError) {
+        setErrorMessage(submitError.message || null)
+        setSubmitting(false)
+        return
+      }
+
+      // confirmPayment handles cards, Apple Pay, Google Pay, Link, etc.
+      // Wallets and 3DS may redirect; return_url brings the buyer back to the
+      // order confirmation flow on success.
+      await preparePaymentReturn()
+      const returnUrl = `${window.location.origin}/checkout/return`
+
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        clientSecret: session?.data.client_secret as string,
+        confirmParams: {
+          return_url: returnUrl,
+          payment_method_data: {
+            billing_details: {
+              name:
+                (cart.billing_address?.first_name || "") +
+                " " +
+                (cart.billing_address?.last_name || ""),
+              address: {
+                city: cart.billing_address?.city ?? undefined,
+                country: cart.billing_address?.country_code ?? undefined,
+                line1: cart.billing_address?.address_1 ?? undefined,
+                line2: cart.billing_address?.address_2 ?? undefined,
+                postal_code: cart.billing_address?.postal_code ?? undefined,
+                state: cart.billing_address?.province ?? undefined,
+              },
+              email: cart.email,
+              phone: cart.billing_address?.phone ?? undefined,
+            },
+          },
+        },
+        // Stay on this page when no redirect is needed (cards, Apple Pay
+        // sheet, Google Pay sheet that confirm inline). Stripe will only
+        // redirect when a method requires it (3DS challenge, BNPL, etc.).
+        redirect: "if_required",
+      })
+
+      if (error) {
+        const pi = error.payment_intent
+
+        if (
+          (pi && pi.status === "requires_capture") ||
+          (pi && pi.status === "succeeded")
+        ) {
+          await onPaymentCompleted()
+          return
+        }
+
+        setErrorMessage(error.message || null)
+        setSubmitting(false)
+        return
+      }
+
+      if (
+        paymentIntent &&
+        (paymentIntent.status === "requires_capture" ||
+          paymentIntent.status === "succeeded")
+      ) {
+        return await onPaymentCompleted()
+      }
+
+      setErrorMessage(
+        "Your payment is still processing. Please wait and check your confirmation email before trying again."
+      )
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error
+          ? err.message
+          : "Payment could not be confirmed. Please try again."
+      )
+    } finally {
       setSubmitting(false)
-      return
     }
-
-    if (
-      paymentIntent &&
-      (paymentIntent.status === "requires_capture" ||
-        paymentIntent.status === "succeeded")
-    ) {
-      return onPaymentCompleted()
-    }
-
-    setSubmitting(false)
   }
 
   return (
     <>
       <Button
-        disabled={disabled || notReady}
+        disabled={
+          disabled || notReady || submitting || !session?.data?.client_secret
+        }
         onClick={handlePayment}
         size="large"
         isLoading={submitting}
@@ -234,7 +289,8 @@ const PayPalPaymentButton = ({
   }
 
   const session = cart.payment_collection?.payment_sessions?.find(
-    (s) => s.status === "pending"
+    (s) =>
+      isPaypal(s.provider_id) && ["pending", "authorized"].includes(s.status)
   )
 
   const handlePayment = async (

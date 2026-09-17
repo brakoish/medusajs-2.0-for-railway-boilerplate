@@ -7,6 +7,9 @@ const StructuredData = () => {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Dab Pal",
+    email: "hello@thedabpal.com",
+    sameAs: ["https://www.instagram.com/nslabs_/"],
+    contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: "hello@thedabpal.com", availableLanguage: "English" },
     url,
     logo: `${url}/icon-512.png`,
     description:

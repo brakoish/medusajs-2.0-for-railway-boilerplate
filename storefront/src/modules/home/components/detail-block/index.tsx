@@ -39,7 +39,7 @@ export default function DetailBlock() {
                 The details
               </span>
               <h2 className="text-3xl small:text-5xl font-semibold tracking-tight mt-4 leading-tight">
-                Everything your Puffco needs. Nothing it doesn't.
+                Everything your Puffco needs. Nothing it doesn&apos;t.
               </h2>
               <p className="text-white/70 mt-4 max-w-md leading-relaxed">
                 Built for daily Puffco, e-rig, and quartz banger users who care

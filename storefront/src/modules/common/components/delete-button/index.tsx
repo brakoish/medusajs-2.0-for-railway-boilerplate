@@ -16,14 +16,17 @@ const DeleteButton = ({
   className?: string
 }) => {
   const [isDeleting, setIsDeleting] = useState(false)
+  const [error, setError] = useState("")
 
   const handleDelete = async (id: string) => {
+    if (isDeleting) return
     setIsDeleting(true)
-    await deleteLineItem(id).catch(() => {
-      // swallow; UI will recover on next fetch
-    })
-    dispatchCartChange()
-    setIsDeleting(false)
+    setError("")
+    try {
+      await deleteLineItem(id)
+      dispatchCartChange()
+    } catch { setError("Could not remove this item. Please try again.") }
+    finally { setIsDeleting(false) }
   }
 
   return (
@@ -42,6 +45,7 @@ const DeleteButton = ({
         {isDeleting ? <Spinner className="animate-spin" /> : <Trash />}
         <span>{children}</span>
       </button>
+      {error && <p role="alert" className="text-sm text-red-800">{error}</p>}
     </div>
   )
 }

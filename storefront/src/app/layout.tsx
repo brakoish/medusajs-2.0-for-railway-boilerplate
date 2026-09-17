@@ -23,8 +23,9 @@ export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" data-mode="light" data-scroll-behavior="smooth">
       <body>
+        <a className="skip-link" href="#main-content">Skip to content</a>
         <PostHogProvider>
-          <main className="relative">{props.children}</main>
+          <div className="relative">{props.children}</div>
         </PostHogProvider>
       </body>
     </html>

@@ -187,12 +187,13 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
                   <span className="text-xs small:text-sm font-medium">{v}</span>
                   <span
                     className={clx(
-                      "text-[9px] small:text-[10px] font-semibold mt-0.5 uppercase tracking-normal small:tracking-wide",
-                      hint.savings ? "text-amber-600" : "text-gray-400"
+                      "text-xs font-semibold mt-1",
+                      "text-gray-800"
                     )}
                   >
-                    {hint.savings ?? hint.totalPrice}
+                    {hint.totalPrice}
                   </span>
+                  {hint.savings && <span className="text-xs text-amber-800 mt-1">{hint.savings}</span>}
                 </div>
               ) : (
                 v

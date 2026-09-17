@@ -1,3 +1,7 @@
+import { Metadata } from "next"
+
+export const metadata: Metadata = { robots: { index: false, follow: false } }
+
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import ChevronDown from "@modules/common/icons/chevron-down"
 import { DabPalLogoLong } from "@modules/common/components/dab-pal-logo"
@@ -35,7 +39,7 @@ export default function CheckoutLayout({
           <div className="flex-1 basis-0" />
         </nav>
       </div>
-      <div className="relative" data-testid="checkout-container">{children}</div>
+      <main id="main-content" tabIndex={-1} className="relative" data-testid="checkout-container">{children}</main>
       <div className="py-4 w-full flex items-center justify-center">
         <p className="text-sm text-ui-fg-subtle">Dab Pal · Made to order in New York.</p>
       </div>

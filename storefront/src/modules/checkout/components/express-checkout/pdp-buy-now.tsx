@@ -25,7 +25,7 @@ import {
 } from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
 import { useRouter } from "next/navigation"
-import { useMemo, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { createBuyNowCart, retrieveCartById } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import {
@@ -54,11 +54,12 @@ const PdpBuyNow: React.FC<Props> = ({
   quantity = 1,
   disabled,
 }) => {
+  const [hasWalletButtons, setHasWalletButtons] = useState(false)
   if (!stripeKey || !stripePromise) return null
   if (disabled || !variant?.id || !inStock) return null
 
   // Pull amount + currency from the variant's calculated price.
-  // Medusa stores in the smallest unit (USD cents, $25 -> 2500).
+  // Medusa returns prices in major currency units (USD dollars).
   const amount = (variant as any)?.calculated_price?.calculated_amount as
     | number
     | undefined
@@ -73,21 +74,10 @@ const PdpBuyNow: React.FC<Props> = ({
   //
   // IMPORTANT: Medusa 2.x returns prices as decimal dollars (e.g. 25 for
   // $25), but Stripe wants cents (2500). Multiply by 100.
-  const itemCents = useMemo(
-    () => Math.round(amount * 100 * quantity),
-    [amount, quantity]
-  )
-  const totalCents = useMemo(() => Math.max(50, itemCents + 700), [itemCents])
-
-  // Human-readable label for the wallet sheet line item.
-  // variant.title is Medusa's combined option string e.g. "1-Pack / Slate".
-  const variantLabel = useMemo(() => {
-    const base = "Dab Pal"
-    const title = (variant as any)?.title as string | undefined
-    if (title) return `${base} – ${title.replace(" / ", " · ")}`
-    return base
-  }, [(variant as any)?.title])
-  const [hasWalletButtons, setHasWalletButtons] = useState(false)
+  const itemCents = Math.round(amount * 100 * quantity)
+  const totalCents = Math.max(50, itemCents + 700)
+  const finish = variant.sku?.startsWith("DABPAL-WHT") ? "Marble" : "Slate"
+  const variantLabel = `${finish} Dab Pal · ${variant.title}`
 
   return (
     <div
@@ -114,7 +104,7 @@ const PdpBuyNow: React.FC<Props> = ({
           appearance: {
             theme: "stripe",
             variables: {
-              colorPrimary: "#f59e0b",
+              colorPrimary: "#b4492c",
               borderRadius: "8px",
             },
           },
@@ -162,6 +152,9 @@ const PdpBuyNowInner: React.FC<{
   const cartReadyRef = useRef<Promise<string | null> | null>(null)
 
   const handleClick = (event: any) => {
+    cartIdRef.current = null
+    cartReadyRef.current = null
+    setError(null)
     // CRITICAL: resolve synchronously — iOS Safari kills the wallet sheet
     // if the user-gesture chain is broken by an awaited Promise.
     // We create a fresh isolated cart in the background (never touches
@@ -174,10 +167,10 @@ const PdpBuyNowInner: React.FC<{
       allowedShippingCountries: ["US"],
       lineItems: [
         { name: variantLabel, amount: itemCents },
-        { name: "Shipping", amount: 700 },
+        { name: "Estimated shipping", amount: 700 },
       ],
       shippingRates: [
-        { id: "standard", displayName: "Standard Shipping", amount: 700 },
+        { id: "standard", displayName: "Estimated shipping", amount: 700 },
       ],
     })
 
@@ -206,28 +199,24 @@ const PdpBuyNowInner: React.FC<{
     return await Promise.race([cartReadyRef.current, timeout])
   }
 
-  const FALLBACK_RATES = [
-    { id: "standard", displayName: "Standard Shipping", amount: 700 },
-  ]
-
   const handleAddressChange = async (event: any) => {
     const cartId = await ensureCartId()
     if (!cartId) {
       // Cart not ready — resolve with flat-rate fallback so the sheet
       // doesn't hit its deadline. Real total locks in on confirm.
-      event.resolve({ shippingRates: FALLBACK_RATES })
+      event.reject?.()
       return
     }
-    await handleShippingAddressChange({ event, cartId })
+    await handleShippingAddressChange({ event, cartId, elements })
   }
 
   const handleRateChange = async (event: any) => {
     const cartId = await ensureCartId()
     if (!cartId) {
-      event.resolve({})
+      event.reject?.()
       return
     }
-    await handleShippingRateChange({ event, cartId })
+    await handleShippingRateChange({ event, cartId, elements })
   }
 
   const handleConfirm = async (event: any) => {
@@ -235,7 +224,6 @@ const PdpBuyNowInner: React.FC<{
     try {
       // Wait for the eager addToCart from handleClick to complete, with a
       // generous timeout — confirm has more headroom than address-change.
-      await ensureCartId(12000)
       const cartId = await ensureCartId(12000)
       if (!cartId) throw new Error("Could not create buy-now cart")
       const cart = await retrieveCartById(cartId)
@@ -289,7 +277,7 @@ const PdpBuyNowInner: React.FC<{
       />
       {error && (
         <p className="text-ui-fg-error text-sm mt-2" role="alert">
-          {error}
+          {error} <a href="/checkout/return" className="underline">Retry confirmation</a>
         </p>
       )}
     </>

@@ -30,7 +30,7 @@ const CountrySelect = forwardRef<
   }, [region])
 
   return (
-    <NativeSelect
+    <NativeSelect aria-label="Country"
       ref={innerRef}
       placeholder={placeholder}
       defaultValue={defaultValue}

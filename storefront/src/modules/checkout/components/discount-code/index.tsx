@@ -22,6 +22,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const [message, setMessage] = React.useState<string | null>(null)
 
+  const [removing, setRemoving] = React.useState(false)
   const { items = [], promotions = [] } = cart
   const visiblePromotions = promotions.filter(
     (promotion) =>
@@ -32,11 +33,13 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
       (promotion) => promotion.code !== code
     )
 
-    await applyPromotions(
-      validPromotions
-        .filter((p) => p.code !== undefined)
-        .map((p) => p.code!)
-    )
+    if (removing) return
+    setRemoving(true)
+    setMessage(null)
+    try {
+      await applyPromotions(validPromotions.filter(p => p.code !== undefined).map(p => p.code!))
+    } catch { setMessage("Could not remove that code. Please try again.") }
+    finally { setRemoving(false) }
   }
 
   const addPromotionCode = async (formData: FormData) => {
@@ -57,7 +60,11 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
 
     setMessage(null)
     try {
-      await applyPromotions(codes)
+      const updated = await applyPromotions(codes)
+      if (!updated?.promotions?.some(p => p.code === code.toString().trim().toUpperCase())) {
+        setMessage("That code is not eligible for this cart. Check the offer requirements.")
+        return
+      }
       if (input) input.value = ""
     } catch {
       setMessage("That code could not be applied. Check it and try again.")
@@ -145,7 +152,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
                               "percentage"
                                 ? `${promotion.application_method.value}%`
                                 : convertToLocale({
-                                    amount: promotion.application_method.value,
+                                    amount: Number(promotion.application_method.value),
                                     currency_code:
                                       promotion.application_method
                                         .currency_code,
@@ -171,6 +178,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
                           removePromotionCode(promotion.code)
                         }}
                         data-testid="remove-discount-button"
+                        disabled={removing}
                       >
                         <Trash size={14} />
                         <span className="sr-only">

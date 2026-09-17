@@ -9,6 +9,7 @@ import { getCustomer } from "@lib/data/customer"
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: false },
   title: "Cart",
   description: "View your cart",
 }

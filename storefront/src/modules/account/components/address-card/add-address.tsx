@@ -93,7 +93,7 @@ const AddAddress = ({ region }: { region: HttpTypes.StoreRegion }) => {
                 autoComplete="address-line2"
                 data-testid="address-2-input"
               />
-              <div className="grid grid-cols-[144px_1fr] gap-x-2">
+              <div className="grid grid-cols-1 small:grid-cols-2 gap-2">
                 <Input
                   label="Postal code"
                   name="postal_code"
@@ -131,7 +131,7 @@ const AddAddress = ({ region }: { region: HttpTypes.StoreRegion }) => {
             </div>
             {formState.error && (
               <div
-                className="text-rose-500 text-small-regular py-2"
+                role="alert" className="text-red-800 text-sm py-2"
                 data-testid="address-error"
               >
                 {formState.error}

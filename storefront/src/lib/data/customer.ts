@@ -6,7 +6,7 @@ import { HttpTypes } from "@medusajs/types"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import { cache } from "react"
-import { getAuthHeaders, removeAuthToken, setAuthToken } from "./cookies"
+import { getAuthHeaders, getCartId, removeAuthToken, removeCartId, setAuthToken } from "./cookies"
 
 export const getCustomer = cache(async function () {
   return await sdk.store.customer
@@ -26,6 +26,14 @@ export const updateCustomer = cache(async function (
   revalidateTag("customer")
   return updateRes
 })
+
+async function transferCustomerCart() {
+  const cartId = await getCartId()
+  if (cartId) {
+    await sdk.store.cart.transferCart(cartId, {}, await getAuthHeaders())
+    revalidateTag("cart")
+  }
+}
 
 export async function signup(_currentState: unknown, formData: FormData) {
   const password = formData.get("password") as string
@@ -58,6 +66,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
     if (typeof loginToken !== "string") throw new Error("Additional sign-in verification is required.")
     await setAuthToken(loginToken)
 
+    await transferCustomerCart()
     revalidateTag("customer")
     return createdCustomer
   } catch (error: any) {
@@ -75,6 +84,7 @@ export async function login(_currentState: unknown, formData: FormData) {
       .then(async (token) => {
         if (typeof token !== "string") throw new Error("Additional sign-in verification is required.")
         await setAuthToken(token)
+        await transferCustomerCart()
         revalidateTag("customer")
       })
   } catch (error: any) {
@@ -85,6 +95,8 @@ export async function login(_currentState: unknown, formData: FormData) {
 export async function signout(countryCode: string) {
   await sdk.auth.logout()
   await removeAuthToken()
+  await removeCartId()
+  revalidateTag("cart")
   revalidateTag("auth")
   revalidateTag("customer")
   redirect(`/account`)
@@ -127,9 +139,7 @@ export const deleteCustomerAddress = async (
       revalidateTag("customer")
       return { success: true, error: null }
     })
-    .catch((err) => {
-      return { success: false, error: err.toString() }
-    })
+    .catch(medusaError)
 }
 
 export const updateCustomerAddress = async (

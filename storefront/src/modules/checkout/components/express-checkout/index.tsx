@@ -18,7 +18,7 @@ import {
 } from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
 import { useRouter } from "next/navigation"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { retrieveCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import {
@@ -87,10 +87,7 @@ const ExpressCheckout: React.FC<Props> = ({ cart, showDivider = true }) => {
   // "$0.50" before tapping; estimate items + a placeholder $7 standard
   // shipping. Real total locks in during walletConfirm when we set the
   // shipping method and create the payment session.
-  const totalCents = useMemo(() => {
-    const estimate = itemTotalCents + 700 // +$7 placeholder Standard
-    return Math.max(50, Math.round(estimate))
-  }, [itemTotalCents])
+  const totalCents = Math.max(50, itemTotalCents + 700)
 
   return (
     <div className={hasVisibleWalletButtons ? "mb-6" : ""}>
@@ -104,7 +101,7 @@ const ExpressCheckout: React.FC<Props> = ({ cart, showDivider = true }) => {
           appearance: {
             theme: "stripe",
             variables: {
-              colorPrimary: "#f59e0b",
+              colorPrimary: "#b4492c",
               borderRadius: "8px",
             },
           },
@@ -143,11 +140,11 @@ const ExpressInner: React.FC<{
   }
 
   const handleAddressChange = async (event: any) => {
-    await handleShippingAddressChange({ event, cartId: cart.id })
+    await handleShippingAddressChange({ event, cartId: cart.id, elements })
   }
 
   const handleRateChange = async (event: any) => {
-    await handleShippingRateChange({ event, cartId: cart.id })
+    await handleShippingRateChange({ event, cartId: cart.id, elements })
   }
 
   const handleConfirm = async (event: any) => {
@@ -197,7 +194,7 @@ const ExpressInner: React.FC<{
       />
       {error && (
         <p className="text-ui-fg-error text-sm mt-2" role="alert">
-          {error}
+          {error} <a href="/checkout/return" className="underline">Retry confirmation</a>
         </p>
       )}
     </>

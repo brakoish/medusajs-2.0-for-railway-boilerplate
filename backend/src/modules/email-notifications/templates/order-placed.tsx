@@ -1,3 +1,4 @@
+import { orderLineDescription } from "../../../lib/order-line-description"
 import { Text, Section, Hr, Link, Html, Head, Preview, Body, Container, Row, Column } from '@react-email/components'
 import * as React from 'react'
 import { OrderDTO, OrderAddressDTO } from '@medusajs/framework/types'
@@ -49,7 +50,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
 } = ({ order, shippingAddress, preview }) => {
   const firstName = shippingAddress.first_name || 'there'
   const total = order.summary?.raw_current_order_total?.value ?? 0
-  const previewText = preview || `Nice. Your Dab Pal is locked in and ships from Brooklyn soon.`
+  const previewText = preview || `Your Dab Pal is made to order. Allow 3-5 business days before shipping.`
 
   return (
     <Html>
@@ -68,7 +69,7 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             <Text style={S.h1}>Your Dab Pal is locked in</Text>
             <Text style={S.subtitle}>Good choice, {firstName}. Future you just got a cleaner table.</Text>
 
-            <Text style={S.badge}>Made in Brooklyn. Ships in 2-3 business days.</Text>
+            <Text style={S.badge}>Made to order in Astoria, NY. Ships in 3-5 business days.</Text>
 
             {/* Order info */}
             <Text style={S.label}>Order</Text>
@@ -77,17 +78,16 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
             {/* Items */}
             <Text style={S.label}>Your kit</Text>
             {(order.items || []).map((item) => {
-              const variantTitle = (item as any).variant_title || item.title || ''
-              // Clean up "Single / Black Speck" → "Single, Black Speck"
-              const cleanTitle = variantTitle.replace(' / ', ', ')
+              const line = orderLineDescription(item)
               return (
                 <Row key={item.id} style={S.itemRow}>
                   <Column style={S.itemPhotoCol}>
-                    <DabPalProductImage variantTitle={variantTitle} />
+                    <DabPalProductImage variantTitle={line.finish} />
                   </Column>
                   <Column>
-                    <Text style={S.itemName}>Dab Pal</Text>
-                    <Text style={S.itemMeta}>{cleanTitle} &times; {item.quantity}</Text>
+                    <Text style={S.itemName}>{line.title}</Text>
+                    <Text style={S.itemMeta}>{line.pack} &times; {item.quantity}</Text>
+                    {line.colors && <Text style={S.itemMeta}>{line.colors}</Text>}
                   </Column>
                   <Column style={{ width: '80px', verticalAlign: 'top' }}>
                     <Text style={S.itemPrice}>{fmt(item.unit_price * item.quantity)}</Text>
@@ -111,9 +111,9 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
 
           {/* Footer */}
           <Section style={S.footer}>
-            <Text style={S.footerText}>Need anything? DM us on Instagram</Text>
+            <Text style={S.footerText}>Need help with your order?</Text>
             <Text style={{ ...S.footerText, margin: '0 0 8px' }}>
-              <Link href="https://instagram.com/nslabs_" style={S.link}>@nslabs_</Link>
+              <Link href="mailto:hello@thedabpal.com" style={S.link}>hello@thedabpal.com</Link>
             </Text>
             <Text style={{ ...S.footerText, margin: '0' }}>
               <Link href="https://thedabpal.com" style={S.link}>thedabpal.com</Link>

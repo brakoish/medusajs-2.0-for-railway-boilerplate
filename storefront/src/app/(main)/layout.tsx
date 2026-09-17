@@ -91,7 +91,7 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
   return (
     <div className="studio-surface">
       <Nav />
-      {props.children}
+      <div id="main-content" tabIndex={-1}>{props.children}</div>
       <Footer />
     </div>
   )

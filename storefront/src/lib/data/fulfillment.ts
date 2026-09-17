@@ -15,7 +15,16 @@ async function fetchCartShippingMethods(cartId: string) {
     const { shipping_options } = await sdk.store.fulfillment.listCartOptions({
       cart_id: cartId,
     })
-    return shipping_options
+    const priced = await Promise.all(shipping_options.map(async (option) => {
+      if (option.price_type !== "calculated") return option
+      try {
+        const { shipping_option } = await sdk.store.fulfillment.calculate(option.id, { cart_id: cartId })
+        return { ...option, amount: shipping_option.calculated_price?.calculated_amount }
+      } catch { return null }
+    }))
+    return priced.filter((option): option is NonNullable<typeof option> & { amount: number } =>
+      option !== null && typeof option.amount === "number" && Number.isFinite(option.amount) && option.amount >= 0
+    )
   } catch (err) {
     if (typeof window !== "undefined") {
       console.error("[listCartShippingMethods] failed:", err)

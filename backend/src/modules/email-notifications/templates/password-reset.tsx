@@ -6,6 +6,7 @@ export const PASSWORD_RESET = 'password-reset'
 export interface PasswordResetEmailProps {
   resetLink: string
   preview?: string
+  isCustomer?: boolean
 }
 
 export const isPasswordResetData = (data: unknown): data is PasswordResetEmailProps => {
@@ -24,6 +25,7 @@ export const isPasswordResetData = (data: unknown): data is PasswordResetEmailPr
 export const PasswordResetEmail = ({
   resetLink,
   preview = 'Reset your Dab Pal admin password.',
+  isCustomer = false,
 }: PasswordResetEmailProps) => {
   return (
     <Base preview={preview}>
@@ -32,10 +34,10 @@ export const PasswordResetEmail = ({
           DAB PAL
         </Text>
         <Text className="text-black text-[18px] font-semibold leading-[28px]">
-          Reset your admin password
+          {isCustomer ? 'Reset your password' : 'Reset your admin password'}
         </Text>
         <Text className="text-[#52525b] text-[14px] leading-[22px]">
-          Use the button below to choose a new Medusa admin password. This link expires in 15 minutes.
+          Use the button below to choose a new {isCustomer ? 'Dab Pal account' : 'admin'} password. If the link has expired, request a new one.
         </Text>
         <Section className="mt-6 mb-[28px]">
           <Button
