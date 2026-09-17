@@ -28,7 +28,7 @@ type OrderItem = {
   quantity: number
   requires_shipping?: boolean | null
   variant_sku?: string
-  detail?: { fulfilled_quantity?: number }
+  detail?: { quantity?: number | string; fulfilled_quantity?: number }
   variant?: { weight?: number }
 }
 
@@ -77,12 +77,12 @@ const fromAddress = (): ShippoAddress => ({
 const parcelForOrder = (items: OrderItem[]): ShippoParcel => {
   const totalGrams = items.reduce((sum, item) => {
     const weight = item.variant?.weight ?? 0
-    return sum + weight * Number(item.quantity || 1)
+    return sum + weight * Number(item.detail?.quantity ?? item.quantity ?? 1)
   }, 0)
   const totalOz = Math.max(1, Math.round((totalGrams / 28.3495) * 100) / 100)
   const skus = items.map((item) => item.variant_sku ?? "")
-  const has6 = skus.some((sku) => sku.includes("-6-"))
-  const has3 = skus.some((sku) => sku.includes("-3-"))
+  const has6 = skus.some((sku) => /-6(?:-|$)/.test(sku))
+  const has3 = skus.some((sku) => /-3(?:-|$)/.test(sku))
   const [length, width, height] = has6
     ? ["8", "9", "3"]
     : has3
@@ -216,7 +216,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           "shipping_address.country_code",
           "shipping_address.phone",
           "items.id",
-          "items.quantity",
+          "items.quantity", "items.detail.quantity",
           "items.requires_shipping",
           "items.variant_sku",
           "items.detail.fulfilled_quantity",

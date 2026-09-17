@@ -26,14 +26,14 @@ export function describeOperation(order: any, production?: any) {
   const paid = due > 0 ? captured >= due : (order.payment_collections || []).some((p: any) => p.status === "completed")
   const unpaid = !paid
   const fullyRefunded = captured > 0 && refunded >= captured
-  const remaining = (order.items || []).some((i: any) => i.requires_shipping !== false && Number(i.quantity) > Number(i.detail?.fulfilled_quantity || 0))
+  const remaining = (order.items || []).some((i: any) => i.requires_shipping !== false && Number(i.detail?.quantity ?? i.quantity ?? 0) > Number(i.detail?.fulfilled_quantity || 0))
   const stage = canceled ? "canceled" : fullyRefunded ? "refunded" : unpaid ? "awaiting_payment" : remaining ? production?.stage || "to_make" : "shipping"
   return {
     id: order.id, display_id: order.display_id, created_at: order.created_at, currency_code: order.currency_code,
     customer: [order.shipping_address?.first_name, order.shipping_address?.last_name].filter(Boolean).join(" ") || "Customer",
     stage, captured, refunded, authorized, paid, shipments,
     production: { stage: production?.stage || "to_make", note: production?.note || "", version: production?.version || 0, updated_at: production?.updated_at || null },
-    items: (order.items || []).map((i: any) => ({ id: i.id, title: i.product_title || i.title, sku: i.variant_sku, variant_title: i.variant_title, quantity: Number(i.quantity), remaining: Math.max(0, Number(i.quantity) - Number(i.detail?.fulfilled_quantity || 0)), metadata: i.variant_sku === "DABPAL-CUSTOM-SINGLE" ? i.metadata : undefined })),
+    items: (order.items || []).map((i: any) => ({ id: i.id, title: i.product_title || i.title, sku: i.variant_sku, variant_title: i.variant_title, quantity: Number(i.detail?.quantity ?? i.quantity ?? 0), remaining: Math.max(0, Number(i.detail?.quantity ?? i.quantity ?? 0) - Number(i.detail?.fulfilled_quantity || 0)), metadata: i.variant_sku === "DABPAL-CUSTOM-SINGLE" ? i.metadata : undefined })),
   }
 }
 
@@ -46,7 +46,7 @@ export async function listOperations(scope: MedusaContainer) {
   for (let skip = 0; ; skip += 100) {
     const { data } = await query.graph({ entity: "order", filters: { is_draft_order: false }, fields: [
       "id", "display_id", "created_at", "status", "canceled_at", "currency_code", "shipping_address.first_name", "shipping_address.last_name",
-      "items.id", "items.title", "items.product_title", "items.variant_title", "items.variant_sku", "items.quantity", "items.requires_shipping", "items.detail.fulfilled_quantity", "items.metadata",
+      "items.id", "items.title", "items.product_title", "items.variant_title", "items.variant_sku", "items.quantity", "items.detail.quantity", "items.requires_shipping", "items.detail.fulfilled_quantity", "items.metadata",
       "payment_collections.captured_amount", "payment_collections.refunded_amount", "payment_collections.authorized_amount", "payment_collections.amount", "payment_collections.status",
       "fulfillments.id", "fulfillments.data", "fulfillments.created_at", "fulfillments.shipped_at", "fulfillments.delivered_at", "fulfillments.canceled_at", "fulfillments.labels.*",
     ], pagination: { take: 100, skip, order: { created_at: "DESC", id: "ASC" } } })

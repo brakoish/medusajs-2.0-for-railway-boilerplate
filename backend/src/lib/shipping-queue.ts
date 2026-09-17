@@ -29,7 +29,7 @@ export async function shippingQueue(
         "shipping_address.*",
         "items.id",
         "items.title",
-        "items.quantity",
+        "items.quantity", "items.detail.quantity",
         "items.variant_sku",
         "items.requires_shipping",
         "items.metadata",
@@ -46,7 +46,7 @@ export async function shippingQueue(
       ],
       pagination: { take: 100, skip, order: { created_at: "DESC", id: "ASC" } },
     })
-    orders.push(...data)
+    orders.push(...data.map(order => ({ ...order, items: (order.items || []).map(item => ({ ...item, quantity: Number(item.detail?.quantity ?? item.quantity ?? 0) })) })))
     if (data.length < 100) break
   }
   const progress = orders.flatMap((order) => {

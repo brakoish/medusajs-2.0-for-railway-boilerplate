@@ -148,3 +148,18 @@ test("duplicate orders and incomplete addresses never create paid work", async (
   expect(mockRun).not.toHaveBeenCalled()
   expect(mockCreateBatch).not.toHaveBeenCalled()
 })
+
+test.each([
+  ["DABPAL-WHT-6", "9", "3"],
+  ["DABPAL-BLK-3", "8", "2"],
+  ["DABPAL-6-WHT", "9", "3"],
+  ["DABPAL-3-BLK", "8", "2"],
+])("batch parcels use relation-backed quantities and pack dimensions for %s", async (sku, width, height) => {
+  const ctx = setup()
+  ;(ctx.order as any).items = [{ id: "item_1", variant_sku: sku, detail: { quantity: "2", fulfilled_quantity: 0 }, variant: { weight: 283.495 } }]
+  await POST(ctx.req, ctx.res)
+  expect(mockCreateBatch).toHaveBeenCalledTimes(1)
+  expect(JSON.stringify(mockCreateBatch.mock.calls[0])).toContain('"weight":"20"')
+  expect(JSON.stringify(mockCreateBatch.mock.calls[0])).toContain(`"width":"${width}"`)
+  expect(JSON.stringify(mockCreateBatch.mock.calls[0])).toContain(`"height":"${height}"`)
+})

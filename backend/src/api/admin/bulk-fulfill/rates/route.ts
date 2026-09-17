@@ -26,7 +26,7 @@ type RateOrder = Omit<ShippableOrder, "items"> & {
     quantity?: number | string | null
     requires_shipping?: boolean | null
     variant_sku?: string | null
-    detail?: { fulfilled_quantity?: number | string | null } | null
+    detail?: { quantity?: number | string | null; fulfilled_quantity?: number | string | null } | null
     variant?: { weight?: number | string | null } | null
   }[] | null
 }
@@ -78,7 +78,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
             "shipping_address.postal_code",
             "shipping_address.country_code",
             "items.id",
-            "items.quantity",
+            "items.quantity", "items.detail.quantity",
             "items.requires_shipping",
             "items.variant_sku",
             "items.detail.fulfilled_quantity",
@@ -110,13 +110,13 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         const items = order.items || []
         const totalGrams = items.reduce((sum, item) => {
           const weight = Number(item.variant?.weight ?? 0)
-          return sum + weight * Number(item.quantity || 1)
+          return sum + weight * Number(item.detail?.quantity ?? item.quantity ?? 1)
         }, 0)
         const totalOz = Math.max(1, Math.round((totalGrams / 28.3495) * 100) / 100)
 
         const skus = items.map((item) => item.variant_sku ?? "")
-        const has6 = skus.some((s: string) => s.includes("-6-"))
-        const has3 = skus.some((s: string) => s.includes("-3-"))
+        const has6 = skus.some((s: string) => /-6(?:-|$)/.test(s))
+        const has3 = skus.some((s: string) => /-3(?:-|$)/.test(s))
         const [pLen, pWid, pHgt] = has6 ? ["8","9","3"] : has3 ? ["8","8","2"] : ["4","6","1"]
 
         const shipment = await client.createShipment({

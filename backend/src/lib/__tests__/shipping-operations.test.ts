@@ -6,10 +6,20 @@ jest.mock("pg", () => {
 import { defaultSettings, readSettings, saveSettings, settingsSchema, validateCustomBuild } from "../dabpal-settings"
 import { describeOperation, operationsSummary, saveProduction } from "../dabpal-operations"
 import { isActiveOperation } from "../dabpal-order-state"
+import { remainingQuantity } from "../shippable-orders"
 beforeAll(() => { process.env.DATABASE_URL = "postgres://isolated-test-only" })
 test("a delivered partial shipment stays active until all items are fulfilled", () => {
   expect(isActiveOperation({ stage: "printing", items: [{ remaining: 1 }], shipments: [{ stage: "delivered" }] })).toBe(true)
   expect(isActiveOperation({ stage: "shipping", items: [{ remaining: 0 }], shipments: [{ stage: "delivered" }] })).toBe(false)
+  expect(isActiveOperation({ stage: "shipping", items: [{ remaining: 0 }], shipments: [{ stage: "canceled" }, { stage: "delivered" }] })).toBe(false)
+})
+test("Medusa relation-backed quantities drive production and shipping", () => {
+  const item = { detail: { quantity: "3", fulfilled_quantity: "1" } }
+  expect(remainingQuantity(item)).toBe(2)
+  const order = describeOperation({ payment_collections: [{ amount: 25, captured_amount: 25 }], items: [item] })
+  expect(order.stage).toBe("to_make")
+  expect(order.items[0].quantity).toBe(3)
+  expect(order.items[0].remaining).toBe(2)
 })
 afterAll(async () => { await (require("pg") as any).closeTestDatabase() })
 

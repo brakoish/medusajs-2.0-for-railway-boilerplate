@@ -27,7 +27,8 @@ export async function GET(
       "shipping_address.province",
       "shipping_address.postal_code",
       "shipping_address.country_code",
-      "items.quantity",
+      "items.quantity", "items.detail.quantity",
+      "items.variant_sku",
       "items.variant.weight",
     ],
   })
@@ -54,7 +55,7 @@ export async function GET(
   const totalGrams = items.reduce((sum: number, item: Record<string, unknown>) => {
     const variant = item.variant as Record<string, unknown> | undefined
     const perUnit = (variant?.weight as number | undefined) ?? 0
-    return sum + perUnit * Number(item.quantity || 1)
+    return sum + perUnit * Number((item.detail as Record<string, unknown> | undefined)?.quantity ?? item.quantity ?? 1)
   }, 0)
   // Variant weights are actual packaged weights — no extra padding needed
   const totalOz = Math.max(1, Math.round((totalGrams / 28.3495) * 100) / 100)
@@ -63,8 +64,8 @@ export async function GET(
   // 1-pack: 6x9 poly mailer; 3-pack: 8x8; 6-pack: 8x9.
   // If an order mixes pack sizes, use the largest.
   const skus = items.map((i) => (i.variant_sku as string | undefined) ?? "")
-  const has6 = skus.some((s) => s.includes("-6-"))
-  const has3 = skus.some((s) => s.includes("-3-"))
+  const has6 = skus.some((s) => /-6(?:-|$)/.test(s))
+  const has3 = skus.some((s) => /-3(?:-|$)/.test(s))
   const [pLen, pWid, pHgt] = has6 ? ["8","9","3"] : has3 ? ["8","8","2"] : ["4","6","1"]
 
   const toCity = shippingAddr.city as string

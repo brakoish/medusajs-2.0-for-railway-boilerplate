@@ -11,6 +11,7 @@ export type ShippableLineItem = {
   quantity?: number | string | null
   requires_shipping?: boolean | null
   detail?: {
+    quantity?: number | string | null
     fulfilled_quantity?: number | string | null
   } | null
 }
@@ -38,7 +39,7 @@ export const isUnshippedReminderSuppressed = (order: ShippableOrder) =>
   Boolean(order.metadata?.[UNSHIPPED_REMINDER_SUPPRESSED_AT])
 
 export const remainingQuantity = (item: ShippableLineItem) => {
-  const quantity = Number(item.quantity ?? 0)
+  const quantity = Number(item.detail?.quantity ?? item.quantity ?? 0)
   const fulfilled = Number(item.detail?.fulfilled_quantity ?? 0)
 
   return Math.max(0, quantity - fulfilled)
