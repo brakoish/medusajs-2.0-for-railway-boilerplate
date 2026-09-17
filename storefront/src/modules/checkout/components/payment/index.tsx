@@ -184,6 +184,12 @@ const Payment = ({
           </Text>
 
           <PaymentElement
+            onReady={() => {
+              const section = document.getElementById("checkout-payment")
+              if (section && document.activeElement === section) {
+                section.scrollIntoView({ block: "start" })
+              }
+            }}
             options={{
               layout: "tabs",
               wallets: {
