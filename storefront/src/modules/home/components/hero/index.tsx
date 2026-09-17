@@ -23,7 +23,7 @@ export default function Hero() {
       <div className="studio-hero-image">
         <Image
           src="/dab-pal/studio/hero.webp"
-          alt="Black Dab Pal case with a bottle and example swabs, shown open"
+          alt="Slate Dab Pal case with a bottle and example swabs, shown open"
           fill
           priority
           sizes="(max-width: 700px) 100vw, 50vw"

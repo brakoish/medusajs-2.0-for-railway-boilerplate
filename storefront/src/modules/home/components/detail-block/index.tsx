@@ -7,7 +7,7 @@ const specs = [
   { label: "Closure", value: "Friction-fit hinge lid (no magnets, no clasps)" },
   { label: "Internal slider", value: "Separates used from unused swabs" },
   { label: "Weight", value: "~4 oz packaged" },
-  { label: "Colors", value: "Black Speck or White Speck" },
+  { label: "Colors", value: "Slate or Marble" },
   {
     label: "Construction",
     value: "3D printed in a strong speckled polymer, hand-finished",

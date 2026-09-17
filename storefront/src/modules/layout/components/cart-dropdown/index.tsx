@@ -162,7 +162,7 @@ const CartDropdown = ({
                           className="w-24"
                         >
                           <Thumbnail
-                            alt={`${item.variant?.sku?.startsWith("DABPAL-WHT") ? "White Speck" : "Black Speck"} Dab Pal`}
+                            alt={`${item.variant?.sku?.startsWith("DABPAL-WHT") ? "Marble" : "Slate"} Dab Pal`}
                             thumbnail={
                               item.variant?.thumbnail ||
                               item.variant?.product?.thumbnail

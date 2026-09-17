@@ -80,7 +80,7 @@ const PdpBuyNow: React.FC<Props> = ({
   const totalCents = useMemo(() => Math.max(50, itemCents + 700), [itemCents])
 
   // Human-readable label for the wallet sheet line item.
-  // variant.title is Medusa's combined option string e.g. "1-Pack / Black Speck".
+  // variant.title is Medusa's combined option string e.g. "1-Pack / Slate".
   const variantLabel = useMemo(() => {
     const base = "Dab Pal"
     const title = (variant as any)?.title as string | undefined

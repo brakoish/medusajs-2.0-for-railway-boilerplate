@@ -4,13 +4,13 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 
 const finishes = [
   {
-    name: "Black Speck",
+    name: "Slate",
     href: "/store/black-speck",
     image: "/dab-pal/product-front.png",
     swatch: "bg-zinc-950",
   },
   {
-    name: "White Speck",
+    name: "Marble",
     href: "/store/white-speck",
     image: "/dab-pal/product-front-white.jpg",
     swatch: "bg-white",

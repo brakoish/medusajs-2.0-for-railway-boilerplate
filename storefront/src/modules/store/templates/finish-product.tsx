@@ -153,13 +153,13 @@ const getAlternateFinish = (product: ShopProduct) =>
   product.handle === "black-speck"
     ? {
         src: "/dab-pal/product-front-white.jpg",
-        alt: "White Speck Dab Pal finish",
-        label: "White Speck",
+        alt: "Marble Dab Pal finish",
+        label: "Marble",
       }
     : {
         src: "/dab-pal/product-front.png",
-        alt: "Black Speck Dab Pal finish",
-        label: "Black Speck",
+        alt: "Slate Dab Pal finish",
+        label: "Slate",
       }
 
 const ProductMedia = ({ product }: { product: ShopProduct }) => {
@@ -205,7 +205,7 @@ const ProductMediaExtras = ({ product }: { product: ShopProduct }) => {
           <div className="relative aspect-[4/3]">
             <Image
               src="/dab-pal/lineup.png"
-              alt="Dab Pal Black and White finish lineup"
+              alt="Dab Pal Slate and Marble finish lineup"
               fill
               sizes="(max-width: 800px) 50vw, 28vw"
               className="object-contain"
@@ -256,8 +256,8 @@ const ComingSoonProduct = ({ product }: { product: ShopProduct }) => {
             Custom Dab Pal.
           </h1>
           <p className="mt-5 max-w-xl text-base small:text-lg leading-relaxed text-white/70">
-            We are testing custom colorways and name plates next. Black Speck
-            and White Speck are available now.
+            We are testing custom colorways and name plates next. Slate
+            and Marble are available now.
           </p>
           <LocalizedClientLink
             href="/store"

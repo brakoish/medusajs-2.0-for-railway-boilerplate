@@ -21,7 +21,7 @@ export default async function PalPicker({
         const amount = variant?.calculated_price?.calculated_amount
         return {
           handle: item.handle,
-          name: item.handle === "black-speck" ? "Black" : item.title,
+          name: item.title,
           image:
             item.handle === "black-speck"
               ? "/dab-pal/studio/black.webp"

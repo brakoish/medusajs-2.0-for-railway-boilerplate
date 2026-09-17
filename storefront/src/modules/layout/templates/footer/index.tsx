@@ -26,10 +26,10 @@ export default function Footer() {
               Shop all finishes
             </LocalizedClientLink>
             <LocalizedClientLink href="/store/black-speck">
-              Black
+              Slate
             </LocalizedClientLink>
             <LocalizedClientLink href="/store/white-speck">
-              White Speck
+              Marble
             </LocalizedClientLink>
           </div>
           <div>

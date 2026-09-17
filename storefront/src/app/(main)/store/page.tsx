@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Shop Dab Pal Puffco Cleaning Kits",
     description:
-      "Black Speck and White Speck dab swab cases with Q-tip storage, iso bottle storage, and a clean/dirty slider.",
+      "Slate and Marble dab swab cases with Q-tip storage, iso bottle storage, and a clean/dirty slider.",
     url: `${base}/store`,
     images: ["/dab-pal/lineup.png"],
   },

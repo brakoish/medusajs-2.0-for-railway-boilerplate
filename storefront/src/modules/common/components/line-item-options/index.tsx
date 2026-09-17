@@ -17,7 +17,7 @@ const LineItemOptions = ({
 }: LineItemOptionsProps) => {
   const customColorSummary = getCustomColorSummary(metadata)
 
-  const finish = variant?.sku?.startsWith("DABPAL-WHT") ? "White Speck" : variant?.sku?.startsWith("DABPAL-BLK") ? "Black Speck" : null
+  const finish = variant?.sku?.startsWith("DABPAL-WHT") ? "Marble" : variant?.sku?.startsWith("DABPAL-BLK") ? "Slate" : null
 
   return (
     <span className="block">

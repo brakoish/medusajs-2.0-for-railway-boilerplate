@@ -275,13 +275,13 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
                   href="/store/black-speck"
                   className="inline-flex rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800"
                 >
-                  Shop Black Speck
+                  Shop Slate
                 </LocalizedClientLink>
                 <LocalizedClientLink
                   href="/store/white-speck"
                   className="inline-flex rounded-full border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-950 transition hover:border-amber-300"
                 >
-                  Shop White Speck
+                  Shop Marble
                 </LocalizedClientLink>
               </div>
             </div>
