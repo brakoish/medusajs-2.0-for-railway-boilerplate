@@ -18,6 +18,7 @@ const LineItemOptions = ({
   const customColorSummary = getCustomColorSummary(metadata)
 
   const finish = variant?.sku?.startsWith("DABPAL-WHT") ? "Marble" : variant?.sku?.startsWith("DABPAL-BLK") ? "Slate" : null
+  const variantTitle = finish ? variant?.title?.replace(new RegExp(`^${finish}\\s*[/·—-]\\s*`, "i"), "") : variant?.title
 
   return (
     <span className="block">
@@ -26,7 +27,7 @@ const LineItemOptions = ({
         data-value={dataValue}
         className="inline-block txt-medium text-ui-fg-subtle w-full overflow-hidden text-ellipsis"
       >
-        {finish && `${finish} · `}{variant?.title}
+        {finish && `${finish} · `}{variantTitle}
       </Text>
       {customColorSummary && (
         <Text className="mt-1 block text-xs leading-5 text-ui-fg-subtle whitespace-normal">

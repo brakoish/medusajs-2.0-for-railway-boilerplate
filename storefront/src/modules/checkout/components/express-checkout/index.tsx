@@ -90,7 +90,8 @@ const ExpressCheckout: React.FC<Props> = ({ cart, showDivider = true }) => {
   const totalCents = Math.max(50, itemTotalCents + 700)
 
   return (
-    <div className={hasVisibleWalletButtons ? "mb-6" : ""}>
+    <div>
+      {hasVisibleWalletButtons && <h2 className="mb-3">Express checkout</h2>}
       <Elements
         stripe={stripePromise}
         options={{
@@ -115,9 +116,9 @@ const ExpressCheckout: React.FC<Props> = ({ cart, showDivider = true }) => {
         </div>
       </Elements>
       {showDivider && hasVisibleWalletButtons && (
-        <div className="flex items-center gap-x-3 my-6 text-ui-fg-subtle text-sm">
+        <div className="flex items-center gap-x-3 mt-5 text-ui-fg-subtle text-sm">
           <div className="flex-1 h-px bg-ui-border-base" />
-          <span>Or continue with</span>
+          <span>Or continue with email</span>
           <div className="flex-1 h-px bg-ui-border-base" />
         </div>
       )}
@@ -190,6 +191,7 @@ const ExpressInner: React.FC<{
         options={{
           buttonHeight: 48,
           buttonTheme: { applePay: "black", googlePay: "black" },
+          layout: { maxColumns: 1, overflow: "never" },
         }}
       />
       {error && (

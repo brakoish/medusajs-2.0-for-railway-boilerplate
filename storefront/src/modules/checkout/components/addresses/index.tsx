@@ -49,7 +49,7 @@ const Addresses = ({
           level="h2"
           className="flex flex-row text-3xl-regular gap-x-2 items-baseline"
         >
-          Shipping Address
+          Contact & delivery
           {!isOpen && isAddressComplete && <CheckCircleSolid />}
         </Heading>
         {!isOpen && isAddressComplete && (
