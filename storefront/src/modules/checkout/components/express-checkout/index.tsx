@@ -179,6 +179,7 @@ const ExpressInner: React.FC<{
             Boolean(
               methods?.applePay ||
                 methods?.googlePay ||
+                methods?.link ||
                 methods?.amazonPay ||
                 methods?.paypal
             )
