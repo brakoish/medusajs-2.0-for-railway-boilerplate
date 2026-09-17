@@ -66,7 +66,7 @@ const FinishProductTemplate = async ({
           <span className="text-gray-900">{product.title}</span>
         </div>
 
-        <div className="grid grid-cols-1 small:grid-cols-[1.08fr_0.92fr] gap-8 small:gap-16 items-start">
+        <div className="grid grid-cols-1 small:grid-cols-[1.08fr_0.92fr] small:grid-rows-[auto_1fr] gap-8 small:gap-16 items-start">
           <div className="order-1 grid grid-cols-1 gap-3 small:gap-4">
             <ProductMedia product={product} />
           </div>
