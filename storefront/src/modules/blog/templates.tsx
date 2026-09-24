@@ -2,6 +2,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { BlogArticle, blogArticles } from "./articles"
 import { BlogTextCover } from "./text-cover"
 import { GuideProductLink } from "./product-link"
+import { AffiliateDisclosure, AffiliateSupplies } from "./affiliate-supplies"
 
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat("en-US", {
@@ -129,6 +130,34 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
               ))}
             </div>
 
+            {article.affiliateProducts && <div className="mt-6"><AffiliateDisclosure /></div>}
+            {article.comparison && (
+              <section className="mt-8">
+                <h2 className="text-2xl font-semibold text-gray-950">
+                  Compare your options
+                </h2>
+                <div className="mt-4 grid gap-4">
+                  {article.comparison.map((item) => (
+                    <div
+                      key={item.type}
+                      className="rounded-lg border border-gray-200 p-5"
+                    >
+                      <h3 className="font-semibold text-gray-950">
+                        {item.type}
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-gray-700">
+                        {item.use}
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-gray-600">
+                        {item.check}
+                      </p>
+                      {item.source && <a href={item.source.url} className="mt-2 inline-block py-2 text-sm leading-6 text-amber-800 underline underline-offset-4">{item.source.label}</a>}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
             <nav aria-label="On this page" className="mt-8 border-y border-gray-200 py-5">
               <h2 className="font-semibold mb-3">In this guide</h2>
               <ul className="grid gap-2">{article.sections.map((section, index) => <li key={section.heading}><a className="underline text-sm leading-6" href={`#guide-section-${index}`}>{section.heading}</a></li>)}</ul>
@@ -178,33 +207,7 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
               </nav>
             )}
 
-            {article.comparison && (
-              <section className="mt-8">
-                <h2 className="text-2xl font-semibold text-gray-950">
-                  Compare your options
-                </h2>
-                <div className="mt-4 grid gap-4">
-                  {article.comparison.map((item) => (
-                    <div
-                      key={item.type}
-                      className="rounded-lg border border-gray-200 p-5"
-                    >
-                      <h3 className="font-semibold text-gray-950">
-                        {item.type}
-                      </h3>
-                      <p className="mt-2 text-sm leading-6 text-gray-700">
-                        {item.use}
-                      </p>
-                      <p className="mt-2 text-sm leading-6 text-gray-600">
-                        {item.check}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            <section className="mt-8 rounded-lg border border-amber-200 bg-amber-50 p-5">
+            {!article.affiliateProducts && <section className="mt-8 rounded-lg border border-amber-200 bg-amber-50 p-5">
               <h2 className="text-lg font-semibold text-gray-950">
                 A place for your cleaning supplies
               </h2>
@@ -214,13 +217,11 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
                 in NY; allow 3–5 business days before shipping.
               </p>
               <GuideProductLink slug={article.slug} />
-            </section>
+            </section>}
 
             <div className="mt-8 overflow-hidden rounded-lg">
               <BlogTextCover article={article} />
             </div>
-
-
 
             <div className="mt-10 space-y-10">
               {article.sections.map((section, index) => (
@@ -237,7 +238,20 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
               ))}
             </div>
 
-            {article.sourceUrl && (
+            {article.affiliateProducts && <AffiliateSupplies slug={article.slug} productIds={article.affiliateProducts} />}
+
+            {article.sources && (
+              <section className="mt-8 text-sm leading-6 text-gray-600" aria-label="Sources">
+                <h2 className="font-semibold text-gray-950">Sources</h2>
+                <ul className="mt-2 space-y-2">
+                  {article.sources.map((source) => <li key={source.url}>
+                    <a href={source.url} className="underline underline-offset-4 hover:text-amber-900">{source.label}</a>
+                  </li>)}
+                </ul>
+              </section>
+            )}
+
+            {article.sourceUrl && !article.sources && (
               <p className="mt-10 rounded-lg border border-gray-200 bg-zinc-50 p-4 text-sm leading-relaxed text-gray-600">
                 Care reference:{" "}
                 <a
@@ -269,10 +283,15 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
                 ))}
               </div>
             </section>
+            {article.affiliateProducts && <section className="mt-8 rounded-lg border border-gray-200 p-5">
+              <h2 className="text-lg font-semibold text-gray-950">Need a case for your supplies?</h2>
+              <p className="mt-2 text-sm leading-6 text-gray-700">Dab Pal holds 30 regular Q-tips, with a slider to separate clean and used swabs and an empty 1oz bottle. Swabs and alcohol are not included.</p>
+              <GuideProductLink slug={article.slug} placement="article_end">See Dab Pal</GuideProductLink>
+            </section>}
           </div>
 
           <aside className="large:sticky large:top-28 self-start space-y-4">
-            <div className="rounded-lg border border-gray-200 bg-zinc-50 p-5">
+            {!article.affiliateProducts && <div className="rounded-lg border border-gray-200 bg-zinc-50 p-5">
               <h2 className="text-sm font-semibold text-gray-950">
                 Keep the kit together
               </h2>
@@ -294,7 +313,7 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
                   Shop Marble
                 </GuideProductLink>
               </div>
-            </div>
+            </div>}
 
             <div className="rounded-lg border border-gray-200 p-5">
               <h2 className="text-sm font-semibold text-gray-950">

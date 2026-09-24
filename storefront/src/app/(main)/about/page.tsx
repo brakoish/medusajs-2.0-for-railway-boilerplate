@@ -3,5 +3,5 @@ import SupportPage from "@modules/support/template"
 import { supportPages } from "@modules/support/pages"
 import { getBaseURL } from "@lib/util/env"
 const page = supportPages["about"]
-export const metadata: Metadata = { title: `${page.title} · Dab Pal`, description: page.description, alternates: { canonical: `${getBaseURL()}/about` } }
+export const metadata: Metadata = { title: { absolute: page.title }, description: page.description, alternates: { canonical: `${getBaseURL()}/about` } }
 export default function Page() { return <SupportPage page={page} privacy={false} /> }

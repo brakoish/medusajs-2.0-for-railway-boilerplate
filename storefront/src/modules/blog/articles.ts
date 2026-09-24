@@ -32,10 +32,12 @@ export type BlogArticle = {
   keywords: string[]
   sourceLabel?: string
   sourceUrl?: string
+  sources?: { label: string; url: string }[]
+  affiliateProducts?: ("qtips" | "globMops")[]
   cover: BlogCover
   howTo?: BlogHowTo
   guideLinks?: { slug: string; label: string; description: string }[]
-  comparison?: { type: string; use: string; check: string }[]
+  comparison?: { type: string; use: string; check: string; source?: { label: string; url: string } }[]
   intro: string[]
   sections: BlogSection[]
   faq: BlogFAQ[]
@@ -187,9 +189,9 @@ export const blogArticles: BlogArticle[] = [
     title: "What Should Be in a Dab Cleaning Kit?",
     eyebrow: "Cleaning kit checklist",
     description:
-      "A practical dab cleaning kit checklist covering Q-tips, iso, swab storage, banger care, e-rig cleanup, and travel organization.",
+      "Build a dab cleaning kit with the supplies you actually need: cotton swabs, the right cleaner, separate used-swab storage, and equipment for deeper cleaning.",
     publishedAt: "2026-07-08",
-    updatedAt: "2026-07-08",
+    updatedAt: "2026-09-24",
     readingMinutes: 4,
     keywords: [
       "dab cleaning kit",
@@ -202,60 +204,67 @@ export const blogArticles: BlogArticle[] = [
       title: ["Keep it", "together."],
       subtitle: "Your cleaning kit checklist",
     },
+    sources: [
+      { label: "Puffco Proxy care and component guidance", url: "https://www.puffco.com/pages/proxy-support" },
+      { label: "Q-tips materials and storage guidance", url: "https://www.qtips.com/pages/faq" },
+    ],
+    affiliateProducts: ["qtips"],
     intro: [
-      "A good dab cleaning kit is not complicated. It just needs to make the clean thing easy to do every time.",
-      "The basics are cotton swabs, isopropyl alcohol, a small bottle, and a way to keep clean swabs separate from the ones you already used.",
+      "Start with cotton swabs, the cleaner specified for your device, and somewhere to put used swabs. For deeper cleaning, add a suitable soaking container and a stable place to let the removable parts dry. You may already own most of the kit.",
+      "Keep the everyday supplies within reach and the soaking equipment at your cleaning station. A pocket case does not need to carry everything required for a full disassembly.",
+    ],
+    comparison: [
+      { type: "Routine cleanup", use: "Fresh cotton swabs and any cleaner required by your device's care guide.", check: "Keep unused swabs covered and give used swabs a separate place." },
+      { type: "Deep cleaning", use: "Manufacturer-approved cleaner, a compatible container, and a clear drying area.", check: "Identify each removable part before deciding what may be soaked or rinsed." },
+      { type: "Optional storage", use: "A small case, divider, or existing organizer that suits your supplies.", check: "Check swab fit and bottle closure. Storage does not replace the cleaner's handling instructions." },
     ],
     sections: [
       {
-        heading: "The essentials",
+        heading: "Cotton swabs: start with the ones your routine calls for",
         body: [
-          "Start with regular Q-tips or cotton swabs. They are the workhorse for Puffco bowls, e-rig chambers, and quartz bangers. Keep enough on hand that you are not trying to stretch one swab too far.",
-          "Add a small bottle of isopropyl alcohol. A 1oz bottle is enough for regular cleanup and small enough to fit in a pocket case or dab bag.",
+          "Regular cotton swabs are a sensible starting point when your device maker specifies them. Buy specialty tips only if their shape solves an access problem. A pointed tip and a larger cotton head do different jobs; neither is automatically an upgrade for every chamber.",
+          "Keep fresh swabs covered. Q-tips recommends a cool, dry storage location away from dampness. Set aside used swabs for disposal, then empty that space before restocking so sticky ends do not mix with the fresh supply.",
         ],
       },
       {
-        heading: "Clean and dirty storage",
+        heading: "Cleaner: match the device and the part",
         body: [
-          "Most kits forget the dirty side. Used swabs are sticky, messy, and not something you want floating around next to clean ones.",
-          "A divider or slider keeps the kit usable after the first clean. Dab Pal was built around that exact problem, clean swabs on one side, used swabs on the other.",
+          "Check the bottle label against the care instructions for your exact model. For example, Puffco specifies 90% or stronger isopropyl alcohol for Proxy cleaning. That is a model-specific instruction, not a reason to prescribe one concentration for every device, finish, or accessory.",
+          "The part matters just as much as the cleaner. A Proxy chamber can be removed for soaking, while the electronic base cannot. The New Proxy Core cup also must not be soaked. Keep those distinctions in your routine before you fill a container.",
         ],
       },
       {
-        heading: "For quartz bangers",
+        heading: "For deep cleaning, make room to work",
         body: [
-          "For a quartz banger, swabs and iso are the daily tools. Clean after each session while residue is still manageable. Let the surface cool enough that you are not scorching cotton into the banger.",
-          "A cleaning kit will not save a banger that gets abused for weeks, but it makes the right habit easier.",
+          "Use a container compatible with the specified cleaner and large enough for the parts approved for soaking. Keep the electronic base outside it. Leave a clear, stable area for drying so you can account for small parts before putting everything back together.",
+          "A brush is optional. Add one only if the component maker permits it and it fits the opening without force. You do not need to buy a brush set, scraper, or second cleaner just to call your supplies a complete kit.",
+          "Follow the separate rinse and drying directions for each component. A glass rinse instruction does not automatically apply to a chamber. The end of a soak timer does not mean the device is ready to reassemble.",
         ],
       },
       {
-        heading: "For Puffco and e-rigs",
+        heading: "A portable kit needs less",
         body: [
-          "For Puffco and e-rig users, keep swabs nearby for the bowl and contact areas. Use isopropyl alcohol carefully, and do not flood the base or ports.",
-          "A compact kit is better than a drawer full of supplies because it is there when you need it.",
+          "Pack the supplies for the cleanup you expect to do: fresh swabs, a closed cleaner bottle if needed, and a separate space for used swabs. Keep larger soaking supplies at the cleaning station. Follow the cleaner label's storage and handling directions wherever you keep the kit.",
+          "A covered swab container and a separate used-swab container can do this job. Choose an organizer if keeping everything in one place makes the routine easier for you.",
         ],
       },
       {
-        heading: "The simple checklist",
+        heading: "What Dab Pal includes",
         body: [
-          "Your dab cleaning kit should have Q-tips, a small iso bottle, clean/dirty swab separation, a pocketable case, and a shape that fits into a dab bag or glove box.",
-          "That is the Dab Pal formula: storage for 30 Q-tips, an empty 1oz bottle, and a built-in slider in a made-to-order case. Swabs and iso are not included.",
+          "Dab Pal includes the case, clean/dirty slider, and an empty 1oz bottle. It holds 30 regular Q-tips. Swabs and isopropyl alcohol are purchased separately; specialty-swab fit has not been tested.",
+          "Move used swabs behind the slider toward the hinge until you can discard them. Dab Pal is made to order with a 3–5 business day production time before shipping, so keep using your existing supplies while your case is being made.",
         ],
       },
     ],
+    guideLinks: [
+      { slug: "best-swabs-for-dabs", label: "Regular Q-tips or specialty swabs?", description: "Compare materials, tip shapes, and storage fit." },
+      { slug: "how-to-clean-puffco-proxy", label: "Build a Proxy cleaning routine", description: "Separate chamber, glass, base, and Core cup care." },
+      { slug: "how-to-clean-puffco-peak-pro-proxy", label: "Find your Puffco model", description: "Choose the care guide that matches your device." },
+    ],
     faq: [
-      {
-        q: "What is the most important item in a dab cleaning kit?",
-        a: "Swabs. Q-tips or cotton swabs do most of the daily cleaning work for Puffco bowls, e-rigs, and quartz bangers.",
-      },
-      {
-        q: "Should my kit include iso?",
-        a: "Yes, but store it safely. Dab Pal ships with an empty 1oz bottle so you can fill it with your preferred isopropyl alcohol.",
-      },
-      {
-        q: "Why separate clean and dirty swabs?",
-        a: "It keeps residue off the clean side of your kit and makes cleanup less gross when you are away from home.",
-      },
+      { q: "Do I need a preassembled dab cleaning kit?", a: "No. Start with the swabs and cleaner your device requires, plus separate places for fresh and used swabs. Add equipment for deep cleaning only as your care instructions require it." },
+      { q: "Should every dab cleaning kit contain 99% alcohol?", a: "Choose the concentration specified for your device and component. For example, Puffco's Proxy guidance calls for 90%+ isopropyl alcohol. Check the actual product label before buying." },
+      { q: "Does Dab Pal include swabs or alcohol?", a: "No. It includes the case, clean/dirty slider, and an empty 1oz bottle. Add your own regular Q-tips and the cleaner specified by your device maker." },
     ],
   },
   {
@@ -347,98 +356,106 @@ export const blogArticles: BlogArticle[] = [
   },
   {
     publishedAt: "2026-07-08",
-    updatedAt: "2026-09-16",
-    readingMinutes: 3,
+    updatedAt: "2026-09-24",
+    readingMinutes: 4,
     slug: "best-swabs-for-dabs",
     title: "Dab Q-tips & Swabs: Regular vs Specialty Tips",
     eyebrow: "Swab selection",
     description:
-      "Compare regular Q-tips, pointed cotton swabs, and specialty dab swabs by tip shape, access, and case fit. A practical selection guide, without brand rankings.",
+      "Compare Q-tips, Glob Mops XL 2.0, and Puffco Dual Tool by tip shape, materials, pack size, and storage fit. Find the swab that suits your cleaning routine.",
     keywords: [
       "best swabs for dabs",
       "dab q tips",
       "q tips for dabs",
+      "Glob Mops vs Q-tips",
       "cotton swabs for dabbing",
       "dab swab case",
-      "heady swabs",
     ],
     cover: {
       title: ["Choose", "your swab."],
-      subtitle: "Q-tips / cotton / specialty swabs",
+      subtitle: "Regular Q-tips / specialty tips",
       dark: true,
     },
+    sources: [
+      { label: "Q-tips: cotton and paper-stick materials", url: "https://www.qtips.com/pages/faq" },
+      { label: "Glob Mops XL 2.0: maker specifications and tip photos", url: "https://globmops.com/products/xl-2-0" },
+      { label: "Puffco Dual Tool: materials and Single Pack option", url: "https://www.puffco.com/products/the-puffco-dual-tool" },
+    ],
+    affiliateProducts: ["qtips", "globMops"],
     intro: [
-      "Dab swabs are cotton swabs used to wipe residue during clean-up. Regular Q-tips are one option; pointed and larger specialty tips serve different shapes. Compare tip shape, shaft length, price per swab, and storage fit.",
-      "This is a selection guide, not a hands-on brand test. We have not ranked brands for absorbency, lint, or durability. Dab Pal is sized for regular Q-tips; we do not claim universal specialty-swab compatibility.",
+      "If regular cotton swabs reach the surfaces your device maker tells you to clean, you may not need specialty dab swabs. Consider a different tip when you have a specific problem to solve, such as reaching an edge with a rounded head.",
+      "Regular Q-tips use cotton ends and a paper stick. Glob Mops XL 2.0 use a bamboo stick with pointed and rounded cotton ends. Those are useful design differences; they do not establish which cleans better. This comparison uses manufacturer specifications and product photos, not hands-on absorbency, lint, or durability testing.",
     ],
     comparison: [
       {
-        type: "Regular Q-tips",
-        use: "A starting point for a kit built around regular cotton swabs.",
-        check:
-          "Dab Pal holds 30 regular Q-tips. Swabs are purchased separately.",
+        type: "Q-tips Original · 750 count × 3 packs",
+        use: "100% cotton tips on a paper stick. A familiar choice when your care guide calls for ordinary cotton swabs. The linked pack is a bulk refill; a smaller local pack is enough to start.",
+        check: "Dab Pal holds 30 regular Q-tips. Check your device's cleaning directions before use.",
       },
       {
-        type: "Pointed cotton swabs",
-        use: "An option when a rounded tip cannot reach an area described in your care guide.",
-        check:
-          "Check the tip, shaft length, and care instructions. Do not force the tip into an opening.",
+        type: "Glob Mops XL 2.0 · 300-count tub",
+        use: "Bamboo stick with pointed and rounded cotton ends. Consider the tip shapes if a regular swab does not reach the area you need to wipe.",
+        check: "Specialty-swab fit in Dab Pal is untested. We have not compared cleaning performance with Q-tips.",
       },
       {
-        type: "Specialty / heady swabs",
-        use: "Compare the specific product rather than relying on the “dab swab” label.",
-        check:
-          "Tip sizes and shafts vary. Check measurements and case fit before buying a large pack.",
+        type: "Puffco Dual Tool · Single Pack",
+        use: "A hardwood loading end and a cotton swab in one tool. Consider it if you want a loading tool as well as a swab, rather than two cotton ends.",
+        check: "Puffco does not state the swab count for its Single Pack in the product description. Check the pack details before ordering. Dab Pal fit is untested.",
+        source: { label: "See Dual Tool at Puffco (not an affiliate link)", url: "https://www.puffco.com/products/the-puffco-dual-tool" },
       },
     ],
     guideLinks: [
-      {
-        slug: "what-to-keep-in-a-dab-cleaning-kit",
-        label: "Build a cleaning kit",
-        description: "Organize the supplies you already use.",
-      },
-      {
-        slug: "how-to-clean-puffco-peak-pro-proxy",
-        label: "Find your Puffco guide",
-        description: "Choose the routine for your device.",
-      },
+      { slug: "what-to-keep-in-a-dab-cleaning-kit", label: "Build a cleaning kit", description: "Separate everyday supplies from deep-cleaning equipment." },
+      { slug: "how-to-clean-puffco-proxy", label: "Cleaning a Puffco Proxy", description: "Choose the routine for your Proxy configuration." },
     ],
     sections: [
       {
-        heading: "What to compare before buying",
+        heading: "Regular Q-tips: start with the familiar option",
         body: [
-          "Look at the actual tip shape, shaft length, pack quantity, and cost per swab. Those are more useful shopping details than an unsupported “best for dabs” badge.",
-          "Check a new swab for loose cotton or damage before use. Follow the device maker’s cleaning method, and avoid scraping or forcing a swab into small openings.",
+          "Q-tips identifies its tips as 100% cotton and its applicator as bonded paper and paperboard. That distinction matters when comparing them with bamboo-shaft swabs: regular Q-tips do not have wooden sticks.",
+          "If the swabs already in your kit do the job your care guide describes, keep using that format. A specialty label alone is not a reason to replace them. Check a fresh swab for loose cotton or damage and use the pressure and cleaning method recommended for the component.",
         ],
       },
       {
-        heading: "Check fit before filling your case",
+        heading: "Glob Mops XL 2.0: compare the tip shapes",
         body: [
-          "Dab Pal is designed to hold 30 regular Q-tips beside an empty 1oz bottle. Larger tips or longer shafts may change capacity or prevent the lid from closing. We have not verified every specialty swab.",
-          "The closed case measures 80 × 80 × 25 mm. These are exterior dimensions, not the available space inside the swab compartment. Keep the lid and slider moving freely.",
+          "Glob Mops lists bamboo sticks for XL 2.0, and its product photos show one pointed end and one rounded end. The pointed end is a shape to consider for an edge that a rounded tip cannot reach; check access without forcing it into an opening.",
         ],
       },
       {
-        heading: "Keep fresh and used swabs separate",
+        heading: "Puffco Dual Tool: a loading end instead of a second swab",
         body: [
-          "Load fresh swabs on the clean side. Move used swabs behind the divider toward the hinge until you can discard them. Empty the used side before restocking.",
-          "The kit includes the case, slider, and empty bottle. Q-tips and iso are not included.",
+          "Puffco describes Dual Tool as a hardwood loading tool with a cotton swab at the other end. It is a different format from the two cotton tips on regular Q-tips and Glob Mops. If you already have a loading tool you like, you may not need that extra function.",
+          "The Single Pack listing did not state a swab count and was sold out when checked on September 24, 2026. Check Puffco's page for current pack details and availability. We have not tested its cleaning performance or fit in Dab Pal.",
+        ],
+      },
+      {
+        heading: "What to check before buying a pack",
+        body: [
+          "Look at the tip you will actually use, the overall length, and the pack quantity. Compare cost per swab using the current pack price divided by the number of swabs. That gives you a starting cost, although a real cost-per-clean comparison would also need to count how many you use.",
+          "Try a small quantity of an unfamiliar shape before buying several tubs. Keep the swabs you already like as the alternative. A cleaning swab also does not replace the loading tool your device uses to handle concentrate.",
+        ],
+      },
+      {
+        heading: "Will specialty dab swabs fit in Dab Pal?",
+        body: [
+          "Dab Pal holds 30 regular Q-tips beside its included empty 1oz bottle. We have not tested Glob Mops XL 2.0 or other specialty swabs for lid closure, slider movement, or capacity. Larger tips and longer sticks may fit differently.",
+          "Check a few swabs before filling the case, and keep both the lid and slider moving freely. The case's outside dimensions do not tell you the usable space inside the swab compartment.",
+        ],
+      },
+      {
+        heading: "Keep a place for the used swabs",
+        body: [
+          "Whichever swab you choose, keep the unused supply separate from sticky ends awaiting disposal. In Dab Pal, the used side is behind the slider toward the hinge. Empty it before restocking.",
+          "The case comes with the clean/dirty slider and an empty 1oz bottle. Swabs and isopropyl alcohol are not included. Dab Pal is made to order with a 3–5 business day production time before shipping.",
         ],
       },
     ],
     faq: [
-      {
-        q: "Are Q-tips included with Dab Pal?",
-        a: "No. Add your own Q-tips and iso.",
-      },
-      {
-        q: "Do all heady swabs fit?",
-        a: "We have not verified universal fit. Dab Pal holds 30 regular Q-tips; specialty swab dimensions and capacity vary.",
-      },
-      {
-        q: "Which swab brand is best?",
-        a: "We do not have comparative hands-on results to name a winner. Compare fit, tip shape, quantity, and your device’s care requirements.",
-      },
+      { q: "Can I use regular Q-tips for dab cleanup?", a: "Regular Q-tips are an option when your device's care instructions call for cotton swabs and the tips reach the intended surface. Follow that component's directions for temperature, cleaner, and pressure." },
+      { q: "Are Glob Mops better than regular Q-tips?", a: "We have not run a comparative cleaning test. XL 2.0 has a bamboo stick and pointed/rounded ends; regular Q-tips use a paper stick. The useful difference is whether the tip reaches what you need to clean." },
+      { q: "Do Glob Mops XL 2.0 fit in Dab Pal?", a: "Their fit has not been tested. Dab Pal's stated capacity is 30 regular Q-tips; do not assume that capacity or fit carries over to specialty swabs." },
+      { q: "Are Q-tips included with Dab Pal?", a: "No. Dab Pal includes the case, slider, and an empty 1oz bottle. Add your own swabs and cleaner." },
     ],
   },
   {
@@ -773,90 +790,85 @@ export const blogArticles: BlogArticle[] = [
     title: "How to Clean a Puffco Proxy",
     eyebrow: "Puffco Proxy cleaning",
     description:
-      "How to clean a Puffco Proxy chamber, base, glass, and contact points with cotton swabs and 90%+ iso.",
+      "Clean your Puffco Proxy by configuration: chamber, glass, base, and New Proxy Core parts. Know what can soak and why the Core cup needs spot cleaning only.",
     publishedAt: "2026-07-08",
-    updatedAt: "2026-07-08",
+    updatedAt: "2026-09-24",
     readingMinutes: 4,
     keywords: [
       "how to clean puffco proxy",
       "puffco proxy cleaning kit",
       "puffco proxy chamber cleaning",
-      "puffco proxy swab holder",
+      "Puffco Proxy Core cleaning",
       "90% iso puffco proxy",
     ],
     cover: {
       title: ["Proxy."],
-      subtitle: "A guide for your model",
+      subtitle: "Pipe / Core / part-by-part care",
     },
-    sourceLabel: "Puffco Proxy cleaning guidance",
-    sourceUrl:
-      "https://puffco.zendesk.com/hc/en-us/articles/6771963837211-How-do-I-clean-my-Puffco-Proxy",
-    howTo: {
-      totalTime: "PT30M",
-      supplies: ["90%+ isopropyl alcohol", "Cotton swabs", "Clean towel"],
-      tools: ["Dab Pal or another Puffco cleaning kit"],
-      steps: [
-        "Let the Proxy cool before removing the glass and chamber.",
-        "Swab the chamber and gold contact points with 90%+ iso.",
-        "For deeper cleaning, submerge the chamber in 90%+ iso for 20 to 30 minutes.",
-        "Clean the base contact points and airpath with an iso-dipped swab.",
-        "Let the chamber and glass fully dry before reassembly.",
-      ],
-    },
+    sourceLabel: "Puffco New Proxy and Core support",
+    sourceUrl: "https://www.puffco.com/pages/proxy-support",
+    sources: [
+      { label: "Puffco New Proxy and Core care guidance", url: "https://www.puffco.com/pages/proxy-support" },
+      { label: "Puffco Core manual: cleaning, pages 07–08", url: "https://cdn.shopify.com/s/files/1/0319/5549/files/Puffco_Proxy_Core_Digital-IM_MultiLanguage.pdf?v=1773764503" },
+      { label: "Puffco OG Proxy care guidance", url: "https://www.puffco.com/pages/proxy-pipe-support-page" },
+    ],
+    affiliateProducts: ["qtips"],
     intro: [
-      "The Proxy is modular, which makes cleaning straightforward as long as you separate chamber, base, and glass care.",
-      "Puffco's Proxy guidance calls for 90%+ isopropyl alcohol for chamber cleaning, careful swabbing around contact points, and a fully dry chamber before use.",
+      "Identify your Proxy setup before cleaning. The removable chamber, electronic base, glass pipe, and Core cup have different care instructions. In particular, the New Proxy Core cup must never be soaked: remove it and spot-clean with iso.",
+      "Below, choose the section for your attachment. These steps follow Puffco's support pages and Core manual; check the linked guide for your exact hardware if you have changed chambers or accessories.",
     ],
     sections: [
       {
-        heading: "Start cool",
+        heading: "First, identify your configuration",
         body: [
-          "Let the Proxy cool before taking it apart. Do not handle the base, chamber, or glass while they are still hot.",
-          "Once it is cool, remove the glass and chamber so each part can be cleaned the right way.",
+          "OG Proxy uses the original base. New Proxy is app-enabled and can use the Core attachment or compatible glass. Core's cup is anodized aluminum with a silicone foot, not a glass piece; Core is not compatible with the OG base.",
+          "Set out cotton swabs and 90%+ isopropyl alcohol. Before disassembly or alcohol cleaning, let the parts cool completely. Keep the base out of any soaking container.",
         ],
       },
       {
-        heading: "Light clean the chamber",
+        heading: "After use: a gentle swab",
         body: [
-          "For light cleaning, use a cotton swab dipped in 90%+ iso to remove residue from the chamber.",
-          "Gently swab the gold contact points too. Keeping those points clean helps avoid connection issues.",
+          "Puffco calls for gently wiping the chamber with a cotton swab while the contents are still warm. Use a circular motion without pressing hard. This quick wipe is separate from disassembling cooled parts for an alcohol clean.",
         ],
       },
       {
-        heading: "Deep clean the chamber",
+        heading: "OG or New Proxy with a glass pipe",
         body: [
-          "For deeper cleaning, Puffco says the Proxy chamber can be submerged in 90%+ iso for 20 to 30 minutes.",
-          "Let the chamber fully dry before use. Iso is flammable, and wet parts do not belong near electronics.",
+          "Remove the cooled chamber. For light cleaning, wipe residue with a swab dipped in 90%+ iso. Puffco's general Proxy guidance gives a 20–30 minute chamber soak for a deeper clean, followed by complete air-drying. Do not rinse the chamber with water.",
+          "Remove the glass from the base and soak the glass separately in iso. Rinse the glass thoroughly with water, then let it dry fully. Puffco advises against abrasive materials or other cleaning solutions for its glass. For third-party attachments, use the attachment maker's instructions.",
         ],
       },
       {
-        heading: "Base and glass",
+        heading: "New Proxy Core: separate the cup, chamber, and mouthpiece",
         body: [
-          "Clean the base contact points and airpath with an iso-dipped swab. Do not flood or soak the base, and keep the USB port dry.",
-          "The glass can be soaked separately in iso, rinsed, and dried completely before reattaching.",
+          "Remove the cooled chamber from the base, then remove the Core mouthpiece and optional terp pearl. The Core manual specifies a 20-minute iso soak for the chamber and mouthpiece, no water rinse, and complete air-drying before reassembly. Puffco's Core support also permits soaking the removed terp pearl in 90%+ iso.",
+          "Keep the Core cup out of the soak. Remove the base from the cup and spot-clean the cup with a cotton swab dipped in 90%+ iso. Let it air-dry before refitting. A removable part is not automatically a soakable part.",
         ],
       },
       {
-        heading: "Proxy travel cleaning",
+        heading: "Base and reassembly",
         body: [
-          "Proxy users often travel with the device, so loose swabs get annoying fast. Keep clean swabs separate from used swabs.",
-          "Dab Pal keeps 30 Q-tips and a 1oz bottle together, with the dirty side behind the slider toward the hinge.",
+          "With the chamber and attachment removed, gently swab the base contacts and airpath with iso. Do not flood, rinse, or soak the base, and keep its USB port dry.",
+          "Give cleaned parts time to air-dry completely before reassembly or use. The soak time excludes drying. Refit the chamber without force and check that the attachment is seated correctly.",
+        ],
+      },
+      {
+        heading: "Keep the everyday supplies together",
+        body: [
+          "You do not need a special organizer to follow these steps. Keep fresh cotton swabs covered and a separate place for used ones. Leave your soaking container and drying area at the cleaning station.",
+          "For compact storage, Dab Pal includes a case, clean/dirty slider, and empty 1oz bottle, with room for 30 regular Q-tips. Swabs and iso are not included, and specialty-swab fit is untested. Production takes 3–5 business days before shipping.",
         ],
       },
     ],
+    guideLinks: [
+      { slug: "what-to-keep-in-a-dab-cleaning-kit", label: "Check your cleaning supplies", description: "Everyday essentials and optional deep-cleaning equipment." },
+      { slug: "best-swabs-for-dabs", label: "Compare cotton swabs", description: "Regular Q-tips, specialty shapes, and case fit." },
+      { slug: "how-to-clean-puffco-peak-pro-proxy", label: "Cleaning a different Puffco?", description: "Choose your device's guide." },
+    ],
     faq: [
-      {
-        q: "What iso does Puffco recommend for Proxy cleaning?",
-        a: "Puffco recommends 90%+ isopropyl alcohol for Proxy chamber cleaning.",
-      },
-      {
-        q: "Can I soak the Proxy base?",
-        a: "No. Do not soak or flood the base. Use a cotton swab around contact points and keep the USB port dry.",
-      },
-      {
-        q: "Can I soak the Proxy chamber?",
-        a: "Yes, Puffco's guidance says the chamber can be submerged in 90%+ iso for 20 to 30 minutes, then fully dried.",
-      },
+      { q: "Can I soak the whole Puffco Proxy?", a: "No. The electronic base must stay out of liquid. If you use Core, its cup is also spot-clean only. Identify the removable component before using any soak instructions." },
+      { q: "Can I soak the New Proxy Core cup?", a: "No. Puffco directs you to spot-clean the removed cup with iso and let it air-dry. The removable chamber, mouthpiece, and terp pearl have separate cleaning instructions." },
+      { q: "Does a 20-minute soak mean I can use it after 20 minutes?", a: "No. All cleaned parts must finish air-drying before reassembly and use. A soak timer does not account for drying." },
     ],
   },
   {

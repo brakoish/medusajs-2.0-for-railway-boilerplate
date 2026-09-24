@@ -17,9 +17,11 @@ function AnalyticsPreferences() {
     if (!/^\/(checkout|account|order|reset-password)(\/|$)/.test(path)) void track("$pageview", { path })
   }, [path])
   function choose(choice: string) {
+    let previouslyAllowed = false
+    try { previouslyAllowed = localStorage.getItem(ANALYTICS_CHOICE) === "analytics" } catch { /* Essential-only mode. */ }
     try { localStorage.setItem(ANALYTICS_CHOICE, choice) } catch { /* Essential-only mode. */ }
     setOpen(false)
-    if (choice === "analytics" && !/^\/(checkout|account|order|reset-password)(\/|$)/.test(path)) void track("$pageview", { path })
+    if (choice === "analytics" && !previouslyAllowed && !/^\/(checkout|account|order|reset-password)(\/|$)/.test(path)) void track("$pageview", { path })
   }
   if (!open) return null
   return <aside className="analytics-choice" aria-label="Analytics preferences">

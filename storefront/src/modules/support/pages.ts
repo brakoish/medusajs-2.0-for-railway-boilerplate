@@ -109,6 +109,12 @@ export const supportPages = {
         ]
       },
       {
+        "heading": "Amazon affiliate links",
+        "body": [
+          "Some guides contain paid links to Amazon. As an Amazon Associate I earn from qualifying purchases. Following one of these links takes you to Amazon, which handles its own cookies, purchase information and affiliate attribution under its privacy policy. With optional analytics enabled, we record which article and product link you clicked; we do not receive your Amazon order details from that click."
+        ]
+      },
+      {
         "heading": "Emails and your choices",
         "body": [
           "Order, shipping and account-recovery emails help us provide the service you requested. Cart-recovery emails include an unsubscribe link. Email hello@thedabpal.com to ask about access, correction or deletion of your information. Some transaction records may need to be retained for accounting, security or legal obligations."
@@ -117,7 +123,7 @@ export const supportPages = {
       {
         "heading": "Questions",
         "body": [
-          "Contact hello@thedabpal.com with privacy questions. This page was updated September 17, 2026."
+          "Contact hello@thedabpal.com with privacy questions. This page was updated September 24, 2026."
         ]
       }
     ]
