@@ -1,6 +1,18 @@
+import type { AffiliateProductId } from "./affiliate-supplies"
+import { careGuides } from "./new-guides-care"
+import { accessoryGuides } from "./new-guides-accessories"
+
 export type BlogSection = {
   heading: string
   body: string[]
+  photo?: {
+    src: string
+    alt: string
+    width: number
+    height: number
+    caption: string
+    credit?: { label: string; url: string; license: string; licenseUrl: string }
+  }
 }
 
 export type BlogFAQ = {
@@ -33,7 +45,7 @@ export type BlogArticle = {
   sourceLabel?: string
   sourceUrl?: string
   sources?: { label: string; url: string }[]
-  affiliateProducts?: ("qtips" | "globMops")[]
+  affiliateProducts?: AffiliateProductId[]
   cover: BlogCover
   howTo?: BlogHowTo
   guideLinks?: { slug: string; label: string; description: string }[]
@@ -44,6 +56,8 @@ export type BlogArticle = {
 }
 
 export const blogArticles: BlogArticle[] = [
+  ...careGuides,
+  ...accessoryGuides,
   {
     slug: "dab-terms-glossary",
     title: "Dab Terms: A Plain-English Guide to Gear & Cleaning",
@@ -149,6 +163,8 @@ export const blogArticles: BlogArticle[] = [
         label: "Plus",
         description: "For the pen-style Plus.",
       },
+      { slug: "how-to-clean-puffco-hot-knife", label: "Hot Knife accessory", description: "Clean the ceramic tip without soaking the powered tool." },
+      { slug: "how-long-puffco-dry-after-cleaning", label: "Drying after cleaning", description: "Know what to check before reassembly." },
     ],
     sections: [
       {
@@ -250,6 +266,11 @@ export const blogArticles: BlogArticle[] = [
       },
       {
         heading: "What Dab Pal includes",
+        photo: {
+          src: "/dab-pal/product-front.png", width: 1024, height: 1024,
+          alt: "Open Slate Dab Pal case with cotton swabs beside the capped bottle",
+          caption: "Dab Pal shown with swabs loaded. Swabs and alcohol are not included; the included 1 oz bottle ships empty.",
+        },
         body: [
           "Dab Pal includes the case, clean/dirty slider, and an empty 1oz bottle. It holds 30 regular Q-tips. Swabs and isopropyl alcohol are purchased separately; specialty-swab fit has not been tested.",
           "Move used swabs behind the slider toward the hinge until you can discard them. Dab Pal is made to order with a 3–5 business day production time before shipping, so keep using your existing supplies while your case is being made.",
@@ -260,6 +281,8 @@ export const blogArticles: BlogArticle[] = [
       { slug: "best-swabs-for-dabs", label: "Regular Q-tips or specialty swabs?", description: "Compare materials, tip shapes, and storage fit." },
       { slug: "how-to-clean-puffco-proxy", label: "Build a Proxy cleaning routine", description: "Separate chamber, glass, base, and Core cup care." },
       { slug: "how-to-clean-puffco-peak-pro-proxy", label: "Find your Puffco model", description: "Choose the care guide that matches your device." },
+      { slug: "91-vs-99-isopropyl-alcohol-puffco", label: "91% or 99% ISO?", description: "Match the cleaner to your model's instructions." },
+      { slug: "cleaning-brush-for-narrow-glass", label: "Choose a brush that fits", description: "Check the opening, reach, and permitted cleaning method." },
     ],
     faq: [
       { q: "Do I need a preassembled dab cleaning kit?", a: "No. Start with the swabs and cleaner your device requires, plus separate places for fresh and used swabs. Add equipment for deep cleaning only as your care instructions require it." },
@@ -338,6 +361,11 @@ export const blogArticles: BlogArticle[] = [
           "Dab Pal holds the basics in one case, so the next clean is ready before the banger cools too far.",
         ],
       },
+    ],
+    guideLinks: [
+      { slug: "how-to-clean-terp-pearls", label: "Clean terp pearls by material", description: "Keep quartz, ruby, and sapphire care separate." },
+      { slug: "how-to-clean-a-glass-carb-cap", label: "Clean the glass carb cap", description: "Clear residue from the underside and airflow openings." },
+      { slug: "how-to-clean-a-silicone-dab-mat", label: "Wash the dab mat", description: "Start with soap and water, then dry both sides." },
     ],
     faq: [
       {
@@ -431,6 +459,15 @@ export const blogArticles: BlogArticle[] = [
       },
       {
         heading: "What to check before buying a pack",
+        photo: {
+          src: "/dab-pal/guides/cotton-swabs.jpg", width: 6720, height: 4480,
+          alt: "White cotton swabs with wooden stems on a pale marble surface",
+          caption: "Plain cotton swabs shown for illustration. These wooden-stem swabs are not the paper-stick Q-tips or the other products linked below.",
+          credit: {
+            label: "Kaboompics / Pexels", url: "https://www.pexels.com/photo/pile-of-cotton-ear-buds-on-marble-table-4202384/",
+            license: "Pexels license", licenseUrl: "https://www.pexels.com/license/",
+          },
+        },
         body: [
           "Look at the tip you will actually use, the overall length, and the pack quantity. Compare cost per swab using the current pack price divided by the number of swabs. That gives you a starting cost, although a real cost-per-clean comparison would also need to count how many you use.",
           "Try a small quantity of an unfamiliar shape before buying several tubs. Keep the swabs you already like as the alternative. A cleaning swab also does not replace the loading tool your device uses to handle concentrate.",
@@ -854,6 +891,11 @@ export const blogArticles: BlogArticle[] = [
       },
       {
         heading: "Keep the everyday supplies together",
+        photo: {
+          src: "/dab-pal/product-front-white.jpg", width: 1024, height: 1024,
+          alt: "Open Marble Dab Pal case with cotton swabs and its capped bottle",
+          caption: "An optional case for everyday supplies, not a case for the Proxy itself. Swabs and alcohol are not included; the bottle ships empty.",
+        },
         body: [
           "You do not need a special organizer to follow these steps. Keep fresh cotton swabs covered and a separate place for used ones. Leave your soaking container and drying area at the cleaning station.",
           "For compact storage, Dab Pal includes a case, clean/dirty slider, and empty 1oz bottle, with room for 30 regular Q-tips. Swabs and iso are not included, and specialty-swab fit is untested. Production takes 3–5 business days before shipping.",

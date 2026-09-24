@@ -9,14 +9,14 @@ const base = getBaseURL()
 export const metadata: Metadata = {
   title: "Dab Cleaning Guides",
   description:
-    "Puffco cleaning, quartz banger care, dab swab storage, and travel cleaning kit guides from Dab Pal.",
+    "Cleaning guides for Puffco, Dr. Dabber, quartz bangers, and glass. Compare dab swabs, choose supplies, and follow care instructions for your exact gear.",
   alternates: {
     canonical: `${base}/blog`,
   },
   openGraph: {
     title: "Dab Cleaning Guides | Dab Pal",
     description:
-      "Practical Puffco, e-rig, quartz banger, and dab swab cleaning guides.",
+      "Practical cleaning guides for Puffco, Dr. Dabber, quartz bangers, glass, and dab swabs.",
     url: `${base}/blog`,
   },
 }

@@ -14,7 +14,27 @@ const products = {
     asin: "B08RCSCWGB",
     note: "A bamboo stick with pointed and rounded cotton tips. Consider these if you want a different tip shape. We have not tested their cleaning performance or fit in Dab Pal.",
   },
+  iso99: {
+    name: "Amazon Basics 99% isopropyl alcohol",
+    pack: "16 fl oz · one bottle",
+    asin: "B07NFSFBXQ",
+    note: "An option when your device maker specifies 99% isopropyl alcohol for the part you are cleaning. This is a separate refill, not included with Dab Pal. Check the label and delivery restrictions; keep it away from heat and flames.",
+  },
+  microfiber: {
+    name: "Amazon Basics microfiber cleaning cloths",
+    pack: "24 cloths · 16 × 12 inches · blue, white and yellow",
+    asin: "B009FUF6DM",
+    note: "For wiping the outside of cooled glass and keeping a clean work surface. A clean cloth you already own may be enough; this multipack is optional. Wash before first use and keep cloths used with cleaning chemicals separate from kitchen cloths.",
+  },
+  bottleBrushes: {
+    name: "OXO Good Grips Water Bottle Cleaning Set",
+    pack: "Bottle brush, straw brush and detail cleaner",
+    asin: "B008HMF9LS",
+    note: "Three nylon-bristle shapes for accessible bottle openings and crevices. Measure the opening first; these are not chamber tools, and we have not tested their fit in a particular rig. Never force a brush past an internal glass feature.",
+  },
 }
+
+export type AffiliateProductId = keyof typeof products
 
 export function AffiliateDisclosure() {
   return <p className="text-sm leading-6 text-gray-600">
@@ -25,11 +45,11 @@ export function AffiliateDisclosure() {
 
 export function AffiliateSupplies({ slug, productIds }: {
   slug: string
-  productIds: (keyof typeof products)[]
+  productIds: AffiliateProductId[]
 }) {
   return (
     <section id="supplies" aria-labelledby="supplies-heading" className="mt-10 scroll-mt-36 border-y border-gray-200 py-7">
-      <h2 id="supplies-heading" className="text-2xl font-semibold text-gray-950">If you need more swabs</h2>
+      <h2 id="supplies-heading" className="text-2xl font-semibold text-gray-950">Supplies, if you need them</h2>
       <div className="mt-3"><AffiliateDisclosure /></div>
       <ul className="mt-5 divide-y divide-gray-200">
         {productIds.map((id) => {

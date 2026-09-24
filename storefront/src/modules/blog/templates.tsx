@@ -1,3 +1,4 @@
+import Image from "next/image"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { BlogArticle, blogArticles } from "./articles"
 import { BlogTextCover } from "./text-cover"
@@ -35,12 +36,12 @@ export const BlogIndexTemplate = () => {
               Field notes
             </span>
             <h1 className="mt-4 text-4xl small:text-6xl font-semibold tracking-tight leading-[1.05] text-gray-950">
-              Puffco, banger, and dab swab cleaning guides.
+              Cleaning guides for your dab gear.
             </h1>
             <p className="mt-5 max-w-2xl text-base small:text-lg leading-relaxed text-gray-600">
-              Practical cleaning notes for Puffco, e-rig, and quartz banger
-              users who want swabs, iso, and gear organized without making a
-              whole thing out of it.
+              Find the routine for your Puffco, Dr. Dabber, glass, or quartz
+              banger. Compare swabs and cleaning supplies, and check which
+              parts need different care.
             </p>
           </div>
         </div>
@@ -50,6 +51,8 @@ export const BlogIndexTemplate = () => {
         <LocalizedClientLink className="studio-text-link" href="/blog/how-to-clean-puffco-peak-pro-proxy">Puffco by model</LocalizedClientLink>
         <LocalizedClientLink className="studio-text-link" href="/blog/best-swabs-for-dabs">Swab selection</LocalizedClientLink>
         <LocalizedClientLink className="studio-text-link" href="/blog/how-to-clean-a-quartz-banger">Banger care</LocalizedClientLink>
+        <LocalizedClientLink className="studio-text-link" href="/blog/how-to-clean-dr-dabber-switch-2">Dr. Dabber Switch 2</LocalizedClientLink>
+        <LocalizedClientLink className="studio-text-link" href="/blog/how-to-clean-dr-dabber-boost-evo">Dr. Dabber Boost Evo</LocalizedClientLink>
         <LocalizedClientLink className="studio-text-link" href="/blog/dab-terms-glossary">Dab dictionary</LocalizedClientLink>
       </nav>
       <section className="content-container py-6 small:py-16">
@@ -123,7 +126,7 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
         </header>
 
         <div className="content-container grid grid-cols-1 large:grid-cols-[minmax(0,760px)_minmax(260px,1fr)] gap-10 large:gap-16 py-10 small:py-16">
-          <div className="min-w-0">
+          <div className="min-w-0 w-full max-w-[760px]">
             <div className="space-y-5 text-lg leading-8 text-gray-700">
               {article.intro.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
@@ -207,18 +210,6 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
               </nav>
             )}
 
-            {!article.affiliateProducts && <section className="mt-8 rounded-lg border border-amber-200 bg-amber-50 p-5">
-              <h2 className="text-lg font-semibold text-gray-950">
-                A place for your cleaning supplies
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-gray-700">
-                Dab Pal holds 30 regular Q-tips with a clean/dirty slider and an
-                empty 1oz bottle. Swabs and iso are not included. Made to order
-                in NY; allow 3–5 business days before shipping.
-              </p>
-              <GuideProductLink slug={article.slug} />
-            </section>}
-
             <div className="mt-8 overflow-hidden rounded-lg">
               <BlogTextCover article={article} />
             </div>
@@ -234,6 +225,13 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
                       <p key={paragraph}>{paragraph}</p>
                     ))}
                   </div>
+                  {section.photo && <figure className="mt-6 max-w-xl">
+                    <Image src={section.photo.src} alt={section.photo.alt} width={section.photo.width} height={section.photo.height} sizes="(max-width: 640px) 90vw, 576px" className="h-auto w-full rounded-lg" />
+                    <figcaption className="mt-3 text-sm leading-6 text-gray-600">
+                      {section.photo.caption}
+                      {section.photo.credit && <> Photo: <a href={section.photo.credit.url} className="underline">{section.photo.credit.label}</a> (<a href={section.photo.credit.licenseUrl} className="underline">{section.photo.credit.license}</a>).</>}
+                    </figcaption>
+                  </figure>}
                 </section>
               ))}
             </div>
@@ -283,38 +281,14 @@ export const BlogArticleTemplate = ({ article }: { article: BlogArticle }) => {
                 ))}
               </div>
             </section>
-            {article.affiliateProducts && <section className="mt-8 rounded-lg border border-gray-200 p-5">
+            <section className="mt-8 rounded-lg border border-gray-200 p-5">
               <h2 className="text-lg font-semibold text-gray-950">Need a case for your supplies?</h2>
               <p className="mt-2 text-sm leading-6 text-gray-700">Dab Pal holds 30 regular Q-tips, with a slider to separate clean and used swabs and an empty 1oz bottle. Swabs and alcohol are not included.</p>
               <GuideProductLink slug={article.slug} placement="article_end">See Dab Pal</GuideProductLink>
-            </section>}
+            </section>
           </div>
 
-          <aside className="large:sticky large:top-28 self-start space-y-4">
-            {!article.affiliateProducts && <div className="rounded-lg border border-gray-200 bg-zinc-50 p-5">
-              <h2 className="text-sm font-semibold text-gray-950">
-                Keep the kit together
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-gray-600">
-                Dab Pal holds 30 Q-tips, a 1oz iso bottle, and a slider for
-                clean vs dirty swabs. Swabs and iso are not included.
-              </p>
-              <div className="mt-4 grid gap-2">
-                <GuideProductLink slug={article.slug} placement="article_sidebar"
-                  href="/store?finish=slate"
-                  className="inline-flex rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800"
-                >
-                  Shop Slate
-                </GuideProductLink>
-                <GuideProductLink slug={article.slug} placement="article_sidebar"
-                  href="/store?finish=marble"
-                  className="inline-flex rounded-full border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-950 transition hover:border-amber-300"
-                >
-                  Shop Marble
-                </GuideProductLink>
-              </div>
-            </div>}
-
+          <aside className="large:sticky large:top-28 self-start w-full max-w-[760px] space-y-4">
             <div className="rounded-lg border border-gray-200 p-5">
               <h2 className="text-sm font-semibold text-gray-950">
                 More guides
