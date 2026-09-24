@@ -4,7 +4,7 @@ Review date: September 24, 2026. Reviewer: fresh independent SEO, editorial, and
 
 ## Current decision
 
-**Accepted for publication: the ten new guides and five truthful photo placements.** All six findings below are closed after source/code corrections and a fresh review of the rebuilt production preview. This accepts the reviewed editorial/photo fallback; exact Amazon SKU photography remains unavailable and is not counted as completed. Live production verification follows deployment.
+**Accepted and production spot check passed: the ten new guides and five truthful photo placements.** All six findings below are closed after source/code corrections and a fresh review of the rebuilt production preview. This accepts the reviewed editorial/photo fallback; exact Amazon SKU photography remains unavailable and is not counted as completed.
 
 ## Findings raised and closed
 
@@ -69,4 +69,15 @@ The current implementation contains two owned Dab Pal photos and three licensed 
 
 ## Acceptance boundary
 
-All six findings are closed. Acceptance covers the ten publishable guides and the five reviewed photo placements only. It does not certify exact Amazon product photography, physical product fit, firsthand cleaning tests, legal compliance, indexing, rankings, or revenue. The implementation agent may deploy this reviewed version; live verification must follow before reporting production completion. Material content, product or layout changes after this review require a targeted recheck.
+All six findings are closed. Acceptance covers the ten publishable guides and the five reviewed photo placements only. It does not certify exact Amazon product photography, physical product fit, firsthand cleaning tests, legal compliance, indexing, rankings, or revenue. Material content, product or layout changes after this review require a targeted recheck.
+
+## Production spot check
+
+After the implementation agent reported Railway deployment `b24f5671-4ae9-461d-8a3d-2a47df696d0d` successful for source `ff9b42f`, independently opened the live pages at [thedabpal.com](https://thedabpal.com/blog).
+
+- At 1280px, the live Hot Knife page has the correct production canonical, 760px reading column, and the reviewed cool-completely-first instructions. Its swab and cloth links retain the verified ASINs, `dabpal-20` tag, paid-link wording and `sponsored noopener` attributes.
+- The live Boost Evo page preserves the no-soak rule, up-to-91% glass/atomizer limit and up-to-75% base/adapter limit. Its sole Amazon recommendation is the verified swab product; no 99% ISO affiliate recommendation appears.
+- The live brush page loads the final 576px illustration, keeps the ordinary-glass/non-OXO caption, and links to the verified OXO ASIN. The live mat page loads the final cloth illustration at 257px on a 320px viewport, with its non-Amazon-pack caption legible.
+- The live cloudy-glass page at 320px has no overflow, no Amazon recommendation, and one case CTA after its instructions, sources and quick answers. The CTA and button render legibly.
+- The live index exposes all 22 distinct guide destinations, including all ten new guides, and has no horizontal overflow at 320px.
+- No purchases, cart changes or consent changes were performed. Temporary viewport override was reset. No release-blocking discrepancy from the accepted preview was found.

@@ -39,6 +39,13 @@ Exact Amazon SKU photography remains unavailable through an authorized account i
 
 ## Independent review and deployment
 
-See `ten-guide-validator.md` for the independent review, factual corrections, and rendered-page checks. Deployment and production results will be recorded after that review closes.
+The fresh validator accepted the revised local production build for publication after the source, mobile, desktop, link, and photo reviews. See `ten-guide-validator.md` for the evidence and acceptance boundary.
+
+- Source commit: `ff9b42f`, pushed to the production `master` branch.
+- Railway Storefront deployment: `b24f5671-4ae9-461d-8a3d-2a47df696d0d`, status `SUCCESS`.
+- Live site: https://thedabpal.com/blog . The library visibly contains the new guides.
+- Live read-only HTTP crawl: 31 sitemap pages, 39 total paths, zero failures.
+- All five live responsive photo requests returned HTTP 200/WebP at 640px. Owned Slate and Marble photos were 18,706 and 16,654 bytes respectively; new licensed photo sizes matched local checks.
+- Independent production browser spot-check results are recorded in the validator report.
 
 This release does not establish physical product compatibility, firsthand cleaning performance, search indexing, ranking, affiliate earnings, or sales results.
