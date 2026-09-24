@@ -1,10 +1,28 @@
 # Independent affiliate pilot validation
 
-Reviewed September 24, 2026 against the current source and local storefront at `http://localhost:8000`.
+Reviewed September 24, 2026 against the current source, local storefront, and deployed production pages at `https://thedabpal.com`.
+
+## Production follow-up
+
+Independently checked `https://thedabpal.com` after root confirmed Railway deployment `030d9a59-437e-4d36-85dd-38e905dc5fda` / source `acb7b33` successful.
+
+**Final production acceptance: PASS. No remaining release blockers within the deployed three-guide pilot.** The first live review found `/contact` still rendered `Contact Dab Pal · Dab Pal`. After root confirmed corrective deployment `651ae406-296e-4db7-accf-3aeb5f721d0f` successful, the validator independently retrieved production Contact again: HTTP 200, exact title `Contact Dab Pal`, canonical `https://thedabpal.com/contact`, and no `noindex`. This targeted check closes the final finding; the unchanged article checks below remain applicable.
+
+- All three guides, About, Privacy, Contact, Terms, and Shipping & returns returned HTTP 200, had the correct HTTPS public self-canonical, and had no `noindex` in the checked HTML.
+- All three original article titles were retained. About rendered `About Dab Pal`; Privacy, Terms, and Shipping & returns had one brand suffix.
+- The three exact swab products, comparison-first order, Core spot-clean/soak distinctions, checklist content, dated review, exclusions, and restrained own-product CTA are present in the live rendered pages.
+- Live affiliate anchors have the expected public tag, ASINs, new-tab target and `sponsored noopener` qualification. Disclosure appears beside the shopping section and after the introduction. Privacy describes external Amazon attribution.
+- The validator personally clicked both live swab-page paid links. Amazon opened Q-tips Original **750 Count (Pack of 3)** and Glob Mops XL 2.0 with its **300-piece tub**; both retained `tag=dabpal-20`. No cart action, purchase, or account change was made. This supersedes the earlier reliance on root's destination check.
+- Independently viewed desktop swab/header, Proxy/Core and checklist/shopping layouts, plus 320 × 760 views of all three guides. All three narrow pages had `scrollWidth === clientWidth === 305`; the 1280-pixel desktop Proxy view had matching widths of 1265. The 15-pixel differences are browser scrollbars. No horizontal clipping or unreadable disclosure was observed.
+- Temporary Amazon tabs were closed. Viewport override was reset and the published swab guide was left open as the deliverable, tab `783922268`.
+
+These production checks establish page delivery and reader-facing link behavior. They do not establish actual PostHog ingestion, consent coverage, paid-order attribution, Google indexing/rankings, Amazon final site approval, or earnings. No new commercial claim is warranted.
+
+Product photos are an optional subsequent enhancement, outside this implemented text-link pilot. Unestablished photo rights are not an implementation failure. Any future image use or disclosure-placement change needs its own review; this acceptance covers the current text-only recommendations with disclosures near the recommendations, not a proposed bottom-only disclosure arrangement.
 
 ## Verdict
 
-**PASS — bounded local pilot is ready for production release verification.** No remaining must-fix finding in the three articles, affiliate presentation, consent-gated click implementation, or About title after the corrections below. This is not a declaration that the wider SEO sprint, production deployment, analytics ingestion, physical fit tests, or commercial outcome is complete.
+**PASS — bounded pilot deployed and independently verified in production.** No remaining must-fix finding in the three articles, affiliate presentation, consent-gated click implementation, or reviewed support titles after the corrections below. This is not a declaration that the wider SEO sprint, analytics ingestion, physical fit tests, or commercial outcome is complete.
 
 The scope is three existing URLs, not 30 new articles. No ranking or commission result is guaranteed.
 
@@ -33,7 +51,7 @@ Some repetition remains between comparison cards, body, shopping notes, and quic
 ## Release and measurement boundaries
 
 - Root's recorded browser evidence, not a separate validator Amazon session, establishes that both paid links opened the exact live Amazon packs and retained the tag. The validator independently checked rendered anchor identity and the manufacturer's underlying product facts. Seller/stock/shipping can change; no seller endorsement is implied.
-- Verify the deployed versions of all three pages and About, their public canonicals, disclosure/links, and narrow layout after release.
+- Production versions, public canonicals, disclosure/links, narrow layout, and reviewed support titles have passed the production follow-up above.
 - Do not call analytics measurement complete until actual consented pageview/affiliate receipt, route transitions, essential-only suppression, and deduplication have been checked in production. The retained mock checks are useful but narrower.
 - The existing purchase-event limitations, incomplete attribution, GSC query/page evidence, performance tests, and original demonstration review remain separately recorded work. Do not present this pilot pass as completion of every SEO-PLAN.md investigation.
 - Physical specialty-swab fit, cleaning superiority, Amazon account final review, rankings, qualifying purchases, and commissions remain unproved. Keep the explicit limitations in the public copy and use Amazon reports for qualifying earnings.

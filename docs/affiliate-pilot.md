@@ -39,3 +39,11 @@ All three existing article titles and URLs are preserved. Their descriptions now
 After 30–60 days, compare GSC query/page traffic, consented article views, affiliate clicks, guide-to-Dab-Pal clicks and paid orders. Use the dedicated ID's Amazon report for qualifying shipped earnings. Record earnings per 100 affiliate clicks and per 1,000 article visits, noting consent coverage and small sample sizes. Check linked packs/sellers and maintenance time before expanding. This is a review plan, not a scheduled automation.
 
 The 30-topic bank remains a research queue. Physical-fit evidence, fresh original demonstrations and distinct search intent determine later publishing; do not turn overlapping topics into thin pages.
+
+## Product photos and disclosure follow-up
+
+The owner requested product photos where possible. A read-only account check on September 24 found no configured Creators API applications; the legacy Product Advertising API page showed its access-request button disabled and directed applicants to Creators API. No credentials were created. API image access and current eligibility have not been established.
+
+Manufacturer galleries were available, but no commercial reuse grant was established for Q-tips, Glob Mops or Puffco. Listing photos were therefore not copied into the site. Exact-product photos remain pending an authorized Amazon content integration, manufacturer permission, or original photography. Generic or historical pack photos would not accurately illustrate the linked pack sizes.
+
+The existing nearby disclosures remain in place. The words “paid link” are one accepted disclosure format, not the only format; moving all disclosure to the article bottom would be inadequate for recommendations encountered earlier. The required Amazon Associate statement is already visible in the article. Sources: https://affiliate-program.amazon.com/help/node/topic/GHQNZAU6669EZS98 and https://www.ftc.gov/business-guidance/resources/ftcs-endorsement-guides-what-people-are-asking .
