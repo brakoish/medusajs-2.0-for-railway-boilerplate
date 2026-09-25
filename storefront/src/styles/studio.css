@@ -3,7 +3,7 @@
 @font-face { font-family: "DM Sans"; src: url("/fonts/dm-sans-bold.woff2") format("woff2"); font-weight: 600 900; font-display: swap; }
 
 :root, .light, .dark {
-  --studio-cream: #f1eadf; --studio-ink: #20211e; --studio-orange: #eb5729; --studio-line: #c9c2b6;
+  --studio-cream: #f1eadf; --studio-ink: #20211e; --studio-orange: #ff7626; --studio-line: #c9c2b6;
   --fg-interactive: #9b371c; --fg-interactive-hover: #752711;
   --bg-interactive: #20211e; --border-interactive: #20211e;
 }
