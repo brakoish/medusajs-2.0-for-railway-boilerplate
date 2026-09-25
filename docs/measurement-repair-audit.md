@@ -2,6 +2,8 @@
 
 Checked September 25, 2026 against local source and installed Medusa types. The initial audit was read-only; the minimal correction below was subsequently approved and implemented locally. No live orders, payment mutations, or database calls were made.
 
+**Final release status:** the parent task subsequently deployed and verified both repairs. Final source `7c265d8` is live; production receipt and consent checks are recorded in [the traffic sprint report](traffic-sprint-2026-09-25.md#final-release-and-verification). Earlier pending-deployment statements below describe the audit stages, not current status. No live paid-order or confirmation-event validation is claimed.
+
 ## Recommended smallest correction
 
 Rename the browser `purchase` event to `order_confirmation_viewed` and stop attaching `value` and `currency` to that event. Keep `begin_checkout` and its amounts unchanged. Treat the new event as a consented confirmation-view attempt, suppressed on repeated renders in the same tab. It is not a paid-order count or revenue metric.

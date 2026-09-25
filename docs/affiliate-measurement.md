@@ -2,6 +2,8 @@
 
 Checked September 24, 2026 against the current storefront source. Read-only source review and isolated Node checks only: no production events, orders, deployment, database tests, or browser activity were performed for this check.
 
+**September 25 follow-up:** the source-only findings below were followed by two production repairs and real browser receipt/consent checks. The final deployed source is `7c265d8`; see [the traffic sprint report](traffic-sprint-2026-09-25.md#final-release-and-verification) for release identity, the reconciled eight-event final QA run, consent suppression, referrer scope and remaining limitations. The historical source-check limitations below should not be read as the final release status.
+
 ## Measurement that exists now
 
 - `src/app/posthog-provider.tsx` explicitly requests `$pageview` when the public pathname changes and when analytics is allowed. Checkout, account, order and password-reset routes are excluded. The SEO plan's earlier statement that no explicit pageview was found is superseded by current source.

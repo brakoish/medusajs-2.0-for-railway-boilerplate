@@ -2,9 +2,9 @@
 
 Reviewer: fresh independent agent, September 25, 2026. This review separates local source/tests, parent-reported browser evidence, and physical/commercial outcomes. The reviewer has not operated the parent's Search Console or PostHog browser sessions, placed an order, changed account settings, or watched the product video firsthand.
 
-## Status: review in progress
+## Status: accepted within the completed scope
 
-Both local analytics repairs passed independent review. Final sprint acceptance is pending the follow-up release/receipt evidence. Search Console reporting now includes completed inspection outcomes and query-to-page decisions; those account observations were supplied by the parent reviewer.
+Both analytics repairs, the Search Console investigation/report, and the original-proof/distribution preparation are accepted. No unresolved source-code must-fix remains. This is acceptance of the completed investigation, repair and preparation, not of filmed product proof, outreach, ranking growth, revenue measurement or sales outcomes. The live account/deployment observations below were supplied by the parent reviewer; the source, SDK mechanics, retained tests and cited prospect sources were independently checked.
 
 ## Findings established independently
 
@@ -44,6 +44,10 @@ These establish relevance, not acceptance, deliverability, audience size, demand
 
 1. **Passed locally:** final source diff inspected; 36 application/SDK assertions and whitespace check pass. Denied-consent/nonproduction suppression and existing privacy exclusions remain; serialized events retain the routing token and false profile-processing flag. Automatic performance/exception settings and hook-level consent recheck are covered.
 2. **Passed as an account-evidence report:** Search Console report now distinguishes old snapshots, discovery, indexing, accepted requests, and pending ranking outcomes. It includes two dated exact-query/page mappings and a restrained decision to strengthen existing relevant pages with original proof. These live account facts are parent-observed, not independently accessed by this reviewer.
-3. Record release identity/status and real receipt evidence separately from offline test success. Controlled QA traffic must remain distinguished from customer demand. Do not claim essential-only suppression, route transitions, preference deduplication, or referrer receipt unless tested at that stated level.
-4. Record the deployment cutoff for the misleading legacy event if deployed; retain historical data with its view-based limitation. Do not describe the new confirmation event as actually ingested without an appropriate real observation.
-5. Keep physical media/testing, outreach, indexing/ranking results, and commercial lift explicitly pending wherever not completed.
+3. **Passed as a release/receipt report:** final source `7c265d8`, Railway release `09717db0-003a-4a73-9cbe-89e5d9705e37`, SUCCESS observed at 16:23:55 UTC September 25; parent reports local/Railway build success and live health 200. The parent reconciled the persisted PostHog table to 15 QA events: seven from the first release and eight from the final release. Final events comprised six expected pageviews, one affiliate click and one guide click. Initial Essential-only browsing, repeated consent grant, and later revocation produced no extra events in the observed session. Final Web vitals/exception events were absent. Same-site hostname-only referrer and false profile flag were observed; external/Google referrer coverage remains unverified. The report correctly distinguishes this evidence from independent offline checks and from customer demand.
+4. **Passed with explicit limits:** source `09e64bf` / first Railway release `d18dca37-8a8b-4d8c-990b-c4d1e27bac6c` identifies the confirmation-event deployment cutoff, with old-tab limitations. Historical records remain intact. No real confirmation event, paid order, refund or commission was fabricated or represented as verified by browser QA.
+5. **Passed as a bounded handoff:** physical filming/fit tests, final media accessibility work, outreach, future indexing/ranking results and commercial lift remain explicitly pending. No monitoring automation was claimed installed.
+
+## Final review limits
+
+This reviewer did not repeat the parent-owned browser sessions or independently inspect Railway/PostHog accounts. Final live acceptance is based on the parent's direct observations recorded in `traffic-sprint-2026-09-25.md`, critically checked for internal consistency and overclaims. Browser checks cover one session and ordinary clicks; they do not establish every DNT/browser case, keyboard/middle-click coverage, queue retraction, universal exactly-once delivery, Google attribution, or financial outcomes. The parent confirmed the stable 15-event count at 16:28 UTC and recorded the QA exclusion window as September 25, 16:15–16:28 UTC. This resolves the final reporting cleanup; the browser was left on Essential only.
