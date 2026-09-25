@@ -61,3 +61,20 @@ The parent task subsequently reported that the matching PostHog project had no e
 Smallest repair: add only `token` and `$process_person_profile` to the final allowlist. No SDK upgrade, new identifier, consent change, profile enablement, session tracking, or server ingestion path is required. Private application tokens such as password-reset tokens remain excluded; this exact `token` field is assigned by the SDK from its public project configuration before the filter runs.
 
 Verification now executes the installed SDK's real `calculateEventProperties` and `capture`, the application's actual configured `before_send`, the SDK queue formatter and JSON serializer. The SDK is not initialized; persistence and queue are in-memory test doubles, a nonproduction fixture token is used, and transport throws if called. The retained regression initially failed because the serialized project token was undefined, then passed with the two-field repair. All **33 checks pass**, including false profile processing and continued private-property removal for pageview, guide-click and affiliate-click events. This is source/serialization proof; deployment and actual PostHog receipt remain a separate parent-task verification. No raw event API sends were used.
+
+## Live follow-up: Web vitals and consent at the SDK hook
+
+The parent reported successful deployment of `09e64bf` (Railway deployment `d18dca37`) and actual receipt of a controlled pageview plus an unexpected Web vitals event. The pageview's inspected properties retained false person processing and the sanitized path. The parent also observed IP/GeoIP fields added on the server. The outgoing allowlist does not prevent server enrichment; no claim of absence of all personal information is supported.
+
+Installed SDK evidence explains the Web vitals event:
+
+- `posthog-core.js:123` defaults `capture_performance` to undefined; the application previously omitted it.
+- `extensions/web-vitals/index.js:211` defines `isEnabled`: on HTTPS, an explicit client boolean takes precedence; otherwise it uses `_enabledServerSide`. `autocapture: false` is not part of that decision.
+- `extensions/web-vitals/index.js:242` reads remote `capturePerformance.web_vitals`, then sets the server-enabled state at line 255. `advanced_disable_feature_flags` does not disable the remote configuration loader; `_shouldDisableFlags` in `posthog-core.js:3374` concerns other settings.
+- The extension calls SDK `capture` directly at `extensions/web-vitals/index.js:63`, bypassing the application's `track` wrapper. A consent check in that wrapper alone cannot guard every SDK-originated capture.
+
+The independent validator also identified the equivalent remote fallback for exceptions: `extensions/exception-autocapture/index.js:62` uses `_remoteEnabled` when `capture_exceptions` is undefined. Explicit false leaves unhandled errors, unhandled rejections and console-error capture disabled. This was source-confirmed, not observed as a production exception event.
+
+Approved follow-up: explicitly set `capture_performance: false` and `capture_exceptions: false`, and recheck `analyticsAllowed()` in the existing `before_send` hook. No remote configuration, feature-flag setting, event-name allowlist or queue behavior was changed. Documentation names the particular disabled collection types rather than claiming every possible automatic SDK event is disabled.
+
+All **36 isolated checks pass**. The installed Web vitals getter is evaluated without running its constructor or starting observers: omitted setting plus remote enablement returns true; the application's explicit false returns false. The installed exception configuration method similarly proves explicit false overrides remote enablement. A separate check proves the actual hook returns null for explicit and SDK-originated event fixtures after consent is revoked. This checks subsequent capture gating, not cancellation of already queued or delivered events. This follow-up's deployment and live suppression check remain with the parent task.

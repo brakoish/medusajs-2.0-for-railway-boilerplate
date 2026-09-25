@@ -27,6 +27,8 @@ export async function track(
       api_host: "https://us.i.posthog.com",
       capture_pageview: false,
       capture_pageleave: false,
+      capture_performance: false,
+      capture_exceptions: false,
       autocapture: false,
       disable_session_recording: true,
       disable_surveys: true,
@@ -35,7 +37,7 @@ export async function track(
       persistence: "memory",
       respect_dnt: true,
       before_send: (event) =>
-        event
+        event && analyticsAllowed()
           ? {
               ...event,
               properties: safeAnalyticsProperties(

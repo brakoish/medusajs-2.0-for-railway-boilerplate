@@ -5,13 +5,13 @@ Checked September 24, 2026 against the current storefront source. Read-only sour
 ## Measurement that exists now
 
 - `src/app/posthog-provider.tsx` explicitly requests `$pageview` when the public pathname changes and when analytics is allowed. Checkout, account, order and password-reset routes are excluded. The SEO plan's earlier statement that no explicit pageview was found is superseded by current source.
-- `src/lib/util/analytics.ts` loads PostHog only on `thedabpal.com` with the stored `analytics` choice. It checks consent again after loading. Essential-only, missing choice, other hostnames and inaccessible browser storage suppress collection. Automatic pageviews, autocapture and session replay are disabled; persistence is memory-only and Do Not Track is configured.
-- `src/lib/util/analytics-properties.ts` applies a final property allowlist. Article slug, product ID, placement and own-product destination survive. Queries, fragments, full referrers, nested properties and unexpected identity/contact properties are removed. Order/account/checkout paths are reduced to their route family. Referrers are reduced to `referrer_host`.
+- `src/lib/util/analytics.ts` loads PostHog only on `thedabpal.com` with the stored `analytics` choice. It checks consent again after loading and in `before_send`. Essential-only, missing choice, other hostnames and inaccessible browser storage suppress new capture attempts at those gates. Automatic pageviews/pageleave, click autocapture, Web vitals/performance capture, exception capture and session replay are explicitly disabled; persistence is memory-only and Do Not Track is configured. This is not a claim that every possible SDK automatic event type is disabled. Revocation blocks subsequent capture through the hook; it does not retract events already queued or delivered.
+- `src/lib/util/analytics-properties.ts` applies a final outgoing-property allowlist. Article slug, product ID, placement and own-product destination survive. Queries, fragments, full referrers, nested properties and unexpected identity/contact properties are removed from that outgoing payload. Order/account/checkout paths are reduced to their route family. Referrers are reduced to `referrer_host`. This filter does not control PostHog's server enrichment: the parent's September 25 live inspection found IP/GeoIP properties on a received pageview. Do not describe the resulting stored event as free of all personal information.
 - Installed PostHog 1.373.3 defaults `save_referrer` to true, and its capture path updates referrer information before computing event properties. Thus source supports the sanitizer receiving SDK referrer data. Actual receipt and referrer coverage have not been verified. Empty/malformed referrers are omitted; host alone does not reliably classify every visit as organic, paid or direct.
 - `src/modules/blog/affiliate-link.tsx` requests one `affiliate_click` per click handler invocation with `article_slug`, public ASIN as `product_id`, and `placement: article_supplies`. The link is a normal new-tab anchor qualified with `sponsored noopener`; tracking cannot block navigation. It uses the shared consent gate.
 - Existing `guide_product_click` records article slug, destination and placement for the relevant own-product links. These events measure consented interest, not all article readers.
 
-## Isolated checks: 33 passed
+## Isolated checks: 36 passed
 
 Run `node scripts/check-affiliate-analytics.cjs` from the storefront directory. The retained script transpiles the current TypeScript modules in memory and executes them with a fake SDK, browser storage/location, and React effects. No network requests are made. The original 21 assertions cover these behaviors:
 
@@ -24,7 +24,7 @@ Run `node scripts/check-affiliate-analytics.cjs` from the storefront directory. 
 7. Essential-only blocks capture.
 8. Nonproduction hostname blocks capture.
 9. One consented affiliate call reaches fake capture once.
-10. SDK automatic collection/replay settings are disabled and DNT configured.
+10. Automatic pageviews, click autocapture, performance capture, exception capture and replay are disabled in configuration; DNT is configured.
 11. Revocation blocks subsequent calls.
 12. Affiliate anchor preserves its qualification and new-tab behavior.
 13. One click-handler invocation requests one event.
@@ -38,6 +38,8 @@ Run `node scripts/check-affiliate-analytics.cjs` from the storefront directory. 
 September 25 repair adds nine assertions: unpaid, authorized, captured and refunded confirmation fixtures all request `order_confirmation_viewed` without financial props; confirmation tracking sends no financial data or order ID and suppresses repeat attempts in the same tab; fresh session storage can count another view; checkout retains its amount/currency; denied consent suppresses confirmation tracking; and unavailable session storage does not interrupt confirmation or send an event.
 
 The September 25 ingestion investigation adds three assertions through the installed SDK's real enrichment, capture, configured `before_send`, request batching and JSON serialization. The final allowlist had removed SDK-added `token` and `$process_person_profile`, losing project routing and the explicit no-profile flag. Those two protocol fields now survive. The checks cover pageview, guide click and affiliate click, preserving the required token and `false` profile-processing flag while continuing to remove private properties, queries and full referrers. They use an offline fixture token and in-memory storage/queue with network transport forbidden; the SDK is never initialized. The token-retention regression failed before the two-field fix and passes afterward. See `measurement-repair-audit.md` for installed SDK and upstream evidence.
+
+The live parent check subsequently received a pageview and an unexpected Web vitals event. The follow-up sets `capture_performance: false` and `capture_exceptions: false` explicitly: leaving these undefined lets remote configuration enable their respective automatic collectors independently of `autocapture: false`. Three additional checks prove the installed Web vitals and exception configuration code respects explicit false even when the server enables them, and the actual `before_send` hook returns null after consent revocation. These do not test removal of already queued events. Exception capture was identified in source, not observed in production.
 
 These checks validate application behavior with mocks and installed SDK serialization, not PostHog networking, ingestion, browser hydration, real route transitions, keyboard/middle-click coverage, or receipt in a dashboard. DNT behavior was checked as configuration, not executed inside the real SDK.
 

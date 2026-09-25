@@ -69,8 +69,10 @@ async function main() {
     assert.equal(captures[0].event, "affiliate_click")
     assert.equal(captures[0].properties.product_id, "B0BPLQ9XZH")
   })
-  check("automatic collection disabled and DNT configured", () => {
+  check("automatic pageviews, click capture, performance, exceptions and replay disabled; DNT configured", () => {
     assert.equal(config.capture_pageview, false); assert.equal(config.autocapture, false)
+    assert.equal(config.capture_performance, false)
+    assert.equal(config.capture_exceptions, false)
     assert.equal(config.disable_session_recording, true); assert.equal(config.persistence, "memory")
     assert.equal(config.respect_dnt, true)
   })
@@ -115,9 +117,40 @@ async function main() {
       assert.equal(event.properties.referrer_host, "www.google.com")
     }
   })
+  const vitalsFile = require.resolve("posthog-js/lib/src/extensions/web-vitals/index")
+  const vitalsRequire = require("node:module").createRequire(vitalsFile)
+  const vitalsModule = { exports: {} }
+  vm.runInNewContext(fs.readFileSync(vitalsFile, "utf8"), {
+    module: vitalsModule, exports: vitalsModule.exports,
+    require: name => name === "../../utils/globals" ? { location: { protocol: "https:" } } : vitalsRequire(name),
+  }, { filename: vitalsFile })
+  // Use the installed getter without starting observers, timers or external scripts.
+  const vitals = Object.create(vitalsModule.exports.WebVitalsAutocapture.prototype)
+  vitals._instance = { config: { ...config, capture_performance: undefined } }
+  vitals._enabledServerSide = true
+  check("explicit performance false overrides remote Web vitals enablement", () => {
+    assert.equal(vitals.isEnabled, true)
+    vitals._instance.config.capture_performance = config.capture_performance
+    assert.equal(vitals.isEnabled, false)
+  })
+  const { ExceptionObserver } = require("posthog-js/lib/src/extensions/exception-autocapture")
+  const exceptions = Object.create(ExceptionObserver.prototype)
+  exceptions._instance = { config: { ...config, capture_exceptions: undefined } }
+  exceptions._remoteEnabled = true
+  check("explicit exceptions false overrides remote exception capture enablement", () => {
+    assert.equal(exceptions._requiredConfig().capture_unhandled_errors, true)
+    exceptions._instance.config.capture_exceptions = config.capture_exceptions
+    assert.deepEqual(exceptions._requiredConfig(), {
+      capture_unhandled_errors: false, capture_unhandled_rejections: false, capture_console_errors: false,
+    })
+  })
   choice = "essential"
   await analytics.track("affiliate_click")
   check("revocation blocks later capture", () => assert.equal(captures.length, 1))
+  check("SDK before_send also blocks capture after consent revocation", () => {
+    assert.equal(config.before_send({ event: "$web_vitals", properties: { token: "phc_offline_fixture" } }), null)
+    assert.equal(config.before_send({ event: "$pageview", properties: {} }), null)
+  })
   const blockedStorage = load("src/lib/util/analytics.ts", { "./analytics-properties": properties }, { window, localStorage: { getItem() { throw Error("blocked") } } })
   check("unavailable storage fails closed", () => assert.equal(blockedStorage.analyticsAllowed(), false))
 

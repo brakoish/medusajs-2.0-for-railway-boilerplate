@@ -27,6 +27,7 @@ The older store and swab snapshots show no user-declared canonical, while their 
 
 - Requested indexing for the updated swab guide once. Google confirmed it was added to a priority crawl queue. This is a request, not proof of a fresh crawl or ranking change.
 - Requested indexing for the new Hot Knife guide once; Google confirmed the same priority-queue acceptance.
+- Requested a fresh crawl for the updated store once; Google confirmed priority-queue acceptance. Its indexed snapshot had still been from August 30.
 - Resubmitted the existing sitemap once. Google confirmed success and updated its September 25 read to **31 discovered pages**, resolving the earlier 21-page discovery gap. Discovered does not mean indexed.
 
 ### Query-to-page evidence and decision
@@ -46,9 +47,25 @@ Decision: preserve the homepage's buyer intent for cleaning-kit searches and the
 
 - Signed into the existing US PostHog account and matched project 421092's public token to the storefront source. No new key or permission was created.
 - Unfiltered Activity showed no matching events in the last seven days at the initial check.
-- A controlled consented visit and one affiliate-link click were performed from a separate QA tab; no purchase or cart action. Receipt is still under investigation. These QA actions must not be counted as customer demand.
-- The confirmation-view event is being corrected separately; actual paid/refunded records remain the financial source of truth.
+- Initial pre-repair consented navigation and affiliate-click checks produced no observed receipt. The installed SDK regression then isolated the sanitizer's removal of its required public routing token and no-profile flag.
+- Source `09e64bf` deployed successfully as Railway release `d18dca37-8a8b-4d8c-990b-c4d1e27bac6c`; health check passed. After reloading the public guide, its first real pageview was timestamped September 25, 16:15:22 UTC in PostHog. An actual affiliate click and guide-to-store click were subsequently received, followed by store and privacy route pageviews. The affiliate event retained the correct article slug, public product ASIN and placement; the pageview retained the sanitized path and profile-processing flag `false`.
+- Re-selecting Allow analytics on Privacy did not add another pageview in the observed interval. This is a narrow browser check, not a universal exactly-once guarantee.
+- The same live run exposed unexpected automatic Web vitals events. Installed SDK inspection confirmed that omitted `capture_performance` inherits remote settings despite `autocapture: false`. A follow-up explicitly disables performance collection and rechecks consent in the final hook. Final release verification is pending below.
+- PostHog's received event includes server-side IP/GeoIP enrichment. The outgoing property allowlist is not proof that the analytics service stores no network or derived location data. No raw IP or location values are recorded here.
+- All these checks were controlled QA visits; no purchase or cart action. Exclude this window from customer-demand claims. No raw event ingestion API was used.
+- The misleading browser `purchase` event is now named `order_confirmation_viewed`, without value/currency. The first release above is the source cutoff, but already-open old tabs may run the previous bundle. Actual captured/refunded payment records remain the financial source of truth. No real order confirmation event was triggered or claimed verified.
 
 ## Original evidence and distribution
 
 The companion files in `marketing/growth-2026-09-25/` contain a practical filming brief, blank fit-results sheet, and five source-backed prospect records. No outreach was sent. Actual specialty-swab fit, demonstration filming, and measured results still require physical work by the owner.
+
+## Next measurement decisions
+
+- First confirm the September 24 guides have been crawled/indexed; do not treat their first few days of zero clicks as failure. Check individual URLs that remain excluded and act on their actual reason.
+- After a full 28-day post-release window, compare the same GSC page/query filters with the preceding 28 days. Report clicks, impressions, CTR and average position separately; small totals and a changing query mix limit conclusions. Keep July–September figures above as context, not a directly comparable 28-day baseline.
+- Prioritize the swab guide and Puffco overview/Pivot pages using their existing impressions and observed query ownership. Add original evidence to the existing relevant page rather than multiplying near-duplicate articles.
+- Use consented pageviews, guide-to-product clicks and affiliate clicks to find where readers stop. Exclude this sprint's QA window from any customer-growth claim. Memory-only identity and consent coverage prevent treating this as a complete customer journey.
+- Report Medusa captured payments/refunds and Amazon qualifying earnings separately. Neither article clicks nor confirmation views prove revenue or article-level order attribution.
+- Begin only the first two relevant outreach conversations after the demonstration exists and sending is authorized. Record responses and referral visits before widening the list; do not buy links or require favorable reviews.
+
+These are manual follow-up decision points, not an installed monitoring automation or a promise of ranking growth.

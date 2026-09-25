@@ -4,7 +4,7 @@ Reviewer: fresh independent agent, September 25, 2026. This review separates loc
 
 ## Status: review in progress
 
-Local analytics source and checks are accepted. Final sprint acceptance is pending finished Search Console evidence and release/receipt evidence. The current working report is explicitly unfinished; its pending items must not be presented as completed work.
+Both local analytics repairs passed independent review. Final sprint acceptance is pending the follow-up release/receipt evidence. Search Console reporting now includes completed inspection outcomes and query-to-page decisions; those account observations were supplied by the parent reviewer.
 
 ## Findings established independently
 
@@ -14,7 +14,13 @@ Installed `posthog-js` 1.373.3 calculates `properties.token` and `properties.$pr
 
 **Resolved in the reviewed local patch:** the allowlist now retains exactly those two protocol fields. Independently ran `node scripts/check-affiliate-analytics.cjs` from `storefront`: all 33 assertions pass. The added regression executes the installed SDK's actual property calculation, capture hook, batch formatter, and JSON serializer with in-memory storage/queue doubles and forbidden transport. Independently removed the two entries only from the source loaded in memory: the regression fails on the missing token, confirming it detects the original defect. No files were altered by that negative check. `git diff --check` passes. This verifies the serialization contract, not full SDK initialization, networking, DNT execution, browser behavior, or ingestion.
 
-The actual SDK overwrites caller-supplied `token` with its configured public routing token and computes the profile flag from `person_profiles: "never"` before the hook. The application wrapper does not expose capture options carrying top-level person updates; with current configuration the SDK does not add initial person updates. No new transmission of order IDs, email, full referrers, queries, nested properties, or session IDs was introduced. Consent/configuration code is unchanged. PostHog's [upstream defect report](https://github.com/PostHog/posthog-js/pull/3756) independently corroborates the missing-token ingestion mechanism.
+The actual SDK overwrites caller-supplied `token` with its configured public routing token and computes the profile flag from `person_profiles: "never"` before the hook. The application wrapper does not expose capture options carrying top-level person updates; with current configuration the SDK does not add initial person updates. No new transmission of order IDs, email, full referrers, queries, nested properties, or session IDs was introduced by the allowlist repair. PostHog's [upstream defect report](https://github.com/PostHog/posthog-js/pull/3756) independently corroborates the missing-token ingestion mechanism. This is an outgoing browser-payload review; it does not promise that the analytics server adds no IP-derived metadata.
+
+### Automatic collection follow-up
+
+The parent observed unexpected Web vitals events after the first successful release. SDK source confirms that undefined `capture_performance` can inherit remote configuration even with normal autocapture disabled. Independently found the same pattern in `extensions/exception-autocapture/index.js`: undefined `capture_exceptions` can inherit `_remoteEnabled`. No live exception capture was observed by this reviewer or reported by the parent. Both settings should explicitly be false to preserve the intended limited event collection; tests should exercise the real SDK decision with the server-side setting enabled. The parent accepted this finding. The follow-up also rechecks current consent in `before_send`, protecting SDK-originated capture after revocation. This does not establish cancellation of events already queued while consent was granted.
+
+**Resolved in the reviewed follow-up patch:** both settings are explicitly false, and `before_send` rechecks `analyticsAllowed()`. Independently reran the final 36 assertions and `git diff --check`, both passing. The actual Web vitals enabled getter and exception observer configuration method are exercised with remote enablement true: omitted settings enable collection, explicit false disables it. The actual configured application hook returns null after revocation. This resolves the identified source-level findings without enabling profiles or restoring private properties.
 
 ### Commerce measurement scope is appropriate
 
@@ -36,8 +42,8 @@ These establish relevance, not acceptance, deliverability, audience size, demand
 
 ## Completion gates
 
-1. **Passed locally:** final source diff inspected; 33 application/SDK assertions and whitespace check pass. Denied-consent/nonproduction suppression and existing privacy exclusions remain; serialized events retain the routing token and false profile-processing flag.
-2. Replace the Search Console report's in-progress inspection with the observed outcome or an explicit unresolved limitation. Include actual query-to-page evidence and the resulting decision; indexing counts alone do not establish search demand or ranking gains.
+1. **Passed locally:** final source diff inspected; 36 application/SDK assertions and whitespace check pass. Denied-consent/nonproduction suppression and existing privacy exclusions remain; serialized events retain the routing token and false profile-processing flag. Automatic performance/exception settings and hook-level consent recheck are covered.
+2. **Passed as an account-evidence report:** Search Console report now distinguishes old snapshots, discovery, indexing, accepted requests, and pending ranking outcomes. It includes two dated exact-query/page mappings and a restrained decision to strengthen existing relevant pages with original proof. These live account facts are parent-observed, not independently accessed by this reviewer.
 3. Record release identity/status and real receipt evidence separately from offline test success. Controlled QA traffic must remain distinguished from customer demand. Do not claim essential-only suppression, route transitions, preference deduplication, or referrer receipt unless tested at that stated level.
 4. Record the deployment cutoff for the misleading legacy event if deployed; retain historical data with its view-based limitation. Do not describe the new confirmation event as actually ingested without an appropriate real observation.
 5. Keep physical media/testing, outreach, indexing/ranking results, and commercial lift explicitly pending wherever not completed.
