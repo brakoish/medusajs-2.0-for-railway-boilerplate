@@ -40,3 +40,14 @@ Snapshots, upload URLs, transaction script and verification results are in `../m
 ## Remaining physical media
 
 The demo video is still earlier-model footage and is now labeled accordingly. Replace it when a new physical demonstration is available. Historical order photographs are intentionally retained. Previously cached third-party social previews may persist until those services refresh.
+
+## Additional reference-based scenes
+
+On the owner's follow-up request, two further images were generated from the approved Slate references. A fresh independent visual reviewer passed both for their intended display sizes, but recommended retaining the existing hero because its geometry was more faithful. The alternate hero is archived in `../marketing/product-photos-2026-09-25/additional-shots/`; it is not deployed.
+
+The accepted desktop scene is deployed as `dab-pal-slate-desktop.webp` (1536 × 1024, 124,744 bytes) in the Slate-only secondary product gallery and the cleaning-kit guide. Both preserve the full 3:2 frame and explain that the cloth and swabs are not included. The main product photos, orange-circle hero, Medusa records and purchase flow are unchanged.
+
+- Source `dd76b2e`; Storefront deployment `9f5bee92-2e3e-406f-8ca3-043febca5e8e` reached SUCCESS.
+- Production build, lint and type checks passed; independent image/source reviewer passed.
+- Rendered product checks covered narrow phone and desktop widths. Switching to Marble removed the Slate scene.
+- Live Slate, Marble and guide routes returned 200 with the image present only in the intended placements. The live guide image loaded at 272 × 181 CSS pixels on a 320px page without horizontal overflow; desktop rendering retained full framing and its caption.
