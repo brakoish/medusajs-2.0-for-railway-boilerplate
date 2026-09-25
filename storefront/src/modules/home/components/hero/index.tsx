@@ -1,4 +1,4 @@
-import Image from "next/image"
+import HeroImage from "./hero-image"
 import { ArrowDown, ArrowRight } from "@medusajs/icons"
 
 export default function Hero() {
@@ -20,15 +20,7 @@ export default function Hero() {
           </a>
         </div>
       </div>
-      <div className="studio-hero-image">
-        <Image
-          src="/dab-pal/model-2026-09/dab-pal-slate-open-cutout.webp"
-          alt="Slate Dab Pal case with a bottle and example swabs, shown open"
-          fill
-          priority
-          sizes="(max-width: 700px) 100vw, 50vw"
-        />
-      </div>
+      <HeroImage />
     </section>
   )
 }
