@@ -141,6 +141,12 @@ export default function UnifiedProduct({ catalog, settings, children }: { catalo
           <div className="relative aspect-square"><Image src={settings.finishes[finish].detail_image} alt={`Dab Pal — ${finishName}, open case with a bottle and example swabs`} fill sizes="(max-width: 1023px) 100vw, 50vw" className="object-contain" /></div>
           <figcaption className="mt-2 text-sm text-gray-600">{finish === "marble" && "Marble color preview. "}One kit shown. Swabs and isopropyl alcohol not included; the bottle ships empty.</figcaption>
         </figure>
+        {finish === "slate" && (
+          <figure className="rounded-lg border border-gray-300 p-3">
+            <Image src="/dab-pal/model-2026-09/dab-pal-slate-desktop.webp" alt="Closed Slate Dab Pal on a wooden desk beside cotton swabs and a folded cloth" width={1536} height={1024} sizes="(max-width: 1023px) 100vw, 50vw" className="h-auto w-full rounded" />
+            <figcaption className="mt-2 text-sm text-gray-600">Slate shown in a styled scene. Cloth and swabs not included.</figcaption>
+          </figure>
+        )}
       </div>
     </div>
   )

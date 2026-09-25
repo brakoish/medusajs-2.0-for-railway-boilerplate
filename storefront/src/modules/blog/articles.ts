@@ -259,6 +259,11 @@ export const blogArticles: BlogArticle[] = [
       },
       {
         heading: "A portable kit needs less",
+        photo: {
+          src: "/dab-pal/model-2026-09/dab-pal-slate-desktop.webp", width: 1536, height: 1024,
+          alt: "Closed Slate Dab Pal on a wooden desk beside cotton swabs and a folded cloth",
+          caption: "Slate shown in a styled scene. Cloth and swabs are not included with Dab Pal.",
+        },
         body: [
           "Pack the supplies for the cleanup you expect to do: fresh swabs, a closed cleaner bottle if needed, and a separate space for used swabs. Keep larger soaking supplies at the cleaning station. Follow the cleaner label's storage and handling directions wherever you keep the kit.",
           "A covered swab container and a separate used-swab container can do this job. Choose an organizer if keeping everything in one place makes the routine easier for you.",
