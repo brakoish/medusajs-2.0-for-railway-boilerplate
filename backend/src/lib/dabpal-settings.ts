@@ -30,8 +30,8 @@ export const defaultSettings: DabPalSettings = {
   construction: "3D printed to order. Small variations in texture and visible print layers are part of the process.",
   instructions: ["Fill the 1 oz bottle with your preferred 90%+ isopropyl alcohol.", "Load clean cotton swabs into the clean side.", "Swab your Puffco bowl, e-rig chamber, or banger after each dab.", "Slide used swabs behind the slider, toward the hinge, until you can toss them."],
   finishes: {
-    slate: { description: "Dark speckled finish. 3D printed to order.", image: "/dab-pal/studio/black.webp", detail_image: "/dab-pal/product-front.png" },
-    marble: { description: "Light, marble-look finish. 3D printed, not stone.", image: "/dab-pal/studio/white.webp", detail_image: "/dab-pal/product-front-white.jpg" },
+    slate: { description: "Dark speckled finish. 3D printed to order.", image: "/dab-pal/model-2026-09/dab-pal-slate-closed.webp", detail_image: "/dab-pal/model-2026-09/dab-pal-slate-open.webp" },
+    marble: { description: "Light, marble-look finish. 3D printed, not stone.", image: "/dab-pal/model-2026-09/dab-pal-marble-closed.webp", detail_image: "/dab-pal/model-2026-09/dab-pal-marble-open.webp" },
   },
   custom: { enabled: false, palettes: { body: [black, white, pink, amber, sage], lid: [black, white, amber, pink, { name: "Blue", value: "#6f95c9" }], slider: [white, black, amber, pink, sage] } },
 }

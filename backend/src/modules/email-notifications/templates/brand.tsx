@@ -2,8 +2,8 @@ import { Img } from "@react-email/components"
 import * as React from "react"
 
 const LOGO_URL = "https://thedabpal.com/dab-pal/logo/dab-pal-long-amber.png"
-const BLACK_PRODUCT_URL = "https://thedabpal.com/dab-pal/product-front.png"
-const WHITE_PRODUCT_URL = "https://thedabpal.com/dab-pal/product-front-white.jpg"
+const BLACK_PRODUCT_URL = "https://thedabpal.com/dab-pal/model-2026-09/dab-pal-slate-closed.jpg"
+const WHITE_PRODUCT_URL = "https://thedabpal.com/dab-pal/model-2026-09/dab-pal-marble-closed.jpg"
 
 const S = {
   logo: {
@@ -17,7 +17,7 @@ const S = {
     borderRadius: "10px",
     display: "block",
     height: "auto",
-    objectFit: "cover" as const,
+    objectFit: "contain" as const,
   },
 }
 

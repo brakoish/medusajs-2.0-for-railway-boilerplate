@@ -267,7 +267,7 @@ export const blogArticles: BlogArticle[] = [
       {
         heading: "What Dab Pal includes",
         photo: {
-          src: "/dab-pal/product-front.png", width: 1024, height: 1024,
+          src: "/dab-pal/model-2026-09/dab-pal-slate-open.webp", width: 1254, height: 1254,
           alt: "Open Slate Dab Pal case with cotton swabs beside the capped bottle",
           caption: "Dab Pal shown with swabs loaded. Swabs and alcohol are not included; the included 1 oz bottle ships empty.",
         },
@@ -892,9 +892,9 @@ export const blogArticles: BlogArticle[] = [
       {
         heading: "Keep the everyday supplies together",
         photo: {
-          src: "/dab-pal/product-front-white.jpg", width: 1024, height: 1024,
+          src: "/dab-pal/model-2026-09/dab-pal-marble-open.webp", width: 1254, height: 1254,
           alt: "Open Marble Dab Pal case with cotton swabs and its capped bottle",
-          caption: "An optional case for everyday supplies, not a case for the Proxy itself. Swabs and alcohol are not included; the bottle ships empty.",
+          caption: "Marble color preview. An optional case for everyday supplies, not a case for the Proxy itself. Swabs and alcohol are not included; the bottle ships empty.",
         },
         body: [
           "You do not need a special organizer to follow these steps. Keep fresh cotton swabs covered and a separate place for used ones. Leave your soaking container and drying area at the cleaning station.",

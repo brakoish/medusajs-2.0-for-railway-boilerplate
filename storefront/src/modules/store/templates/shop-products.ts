@@ -22,7 +22,7 @@ export const shopProducts: ShopProduct[] = [
       "A 3D-printed swab case in a dark speckled finish. Keep fresh and used swabs separate, with room for 30 regular Q-tips and the included empty 1 oz bottle. Swabs and iso not included.",
     seoDescription:
       "Dab Pal — Slate: a 3D-printed dab swab case in a dark speckled finish. Includes a divider and empty 1 oz bottle. Made to order in Astoria, NY.",
-    image: "/dab-pal/product-front.png",
+    image: "/dab-pal/model-2026-09/dab-pal-slate-closed.webp",
     price: "From $25",
     badge: "Best seller",
     cta: "View product",
@@ -38,7 +38,7 @@ export const shopProducts: ShopProduct[] = [
       "A 3D-printed swab case with a light, marble-look finish. Keep fresh and used swabs separate, with room for 30 regular Q-tips and the included empty 1 oz bottle. Swabs and iso not included.",
     seoDescription:
       "Dab Pal — Marble: a 3D-printed dab swab case with a marble-look finish. Includes a divider and empty 1 oz bottle. Made to order in Astoria, NY.",
-    image: "/dab-pal/product-front-white.jpg",
+    image: "/dab-pal/model-2026-09/dab-pal-marble-closed.webp",
     price: "From $25",
     badge: "Made to order",
     cta: "View product",
@@ -54,7 +54,7 @@ export const shopProducts: ShopProduct[] = [
       "Pick the body, lid, and slider colors for a made-to-order Dab Pal printed in NY.",
     seoDescription:
       "Custom Dab Pal lets you choose body, lid, and slider colors for a made-to-order Puffco cleaning kit and dab swab case.",
-    image: "/dab-pal/lineup.png",
+    image: "/dab-pal/model-2026-09/dab-pal-slate-open.webp",
     price: "$35",
     badge: "Preview",
     cta: "Preview",

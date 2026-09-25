@@ -26,11 +26,11 @@ export default function DetailBlock() {
         <div className="grid grid-cols-1 small:grid-cols-2 gap-12 small:gap-20 items-center">
           <div className="relative aspect-square w-full bg-zinc-900 rounded-lg overflow-hidden">
             <Image
-              src="/dab-pal/hero.jpg"
-              alt="Dab Pal portable Q-tip and isopropyl case on a black background"
+              src="/dab-pal/model-2026-09/dab-pal-slate-open.webp"
+              alt="Open Slate Dab Pal case with a bottle and example swabs"
               fill
               sizes="(max-width: 800px) 100vw, 50vw"
-              className="object-cover"
+              className="object-contain"
             />
           </div>
           <div className="flex flex-col gap-8">

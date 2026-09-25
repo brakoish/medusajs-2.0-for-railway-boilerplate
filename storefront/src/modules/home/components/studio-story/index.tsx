@@ -51,7 +51,7 @@ export default function StudioStory() {
             muted
             playsInline
             preload="none"
-            poster="/dab-pal/studio/black.webp"
+            poster="/dab-pal/model-2026-09/dab-pal-slate-open.webp"
             aria-label="See the Dab Pal slider in action"
           >
             <source
@@ -74,7 +74,7 @@ export default function StudioStory() {
             </p>
             <p>
               Swabs and isopropyl alcohol are not included. Specialty swab fit
-              varies.
+              varies. Slider demonstration filmed with an earlier model.
             </p>
             <LocalizedClientLink href="/care" className="studio-text-link">
               Care for your Pal <ArrowRight />

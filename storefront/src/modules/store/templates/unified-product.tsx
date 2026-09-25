@@ -68,8 +68,8 @@ export default function UnifiedProduct({ catalog, settings, children }: { catalo
 
   return (
     <div className="grid grid-cols-1 small:grid-cols-[1.08fr_0.92fr] small:grid-rows-[auto_1fr] gap-6 small:gap-12 items-start">
-      <div className="order-1 relative aspect-[16/9] max-h-[320px] small:max-h-none rounded-lg overflow-hidden bg-[#cec6bc]">
-        <Image src={settings.finishes[finish].image} alt={`Dab Pal — ${finishName}, open case with an example bottle and swabs`} fill priority sizes="(max-width: 1023px) 100vw, 55vw" className="object-contain" />
+      <div className="order-1 relative aspect-square rounded-lg overflow-hidden bg-[#eae4dc]">
+        <Image src={settings.finishes[finish].image} alt={`Dab Pal — ${finishName}, closed case${finish === "marble" ? " — color preview" : ""}`} fill priority sizes="(max-width: 1023px) 100vw, 55vw" className="object-contain" />
       </div>
       <div className="order-2 min-w-0 small:row-span-2">
         <h1 className="text-4xl small:text-5xl leading-tight">{settings.title}</h1>
@@ -92,7 +92,7 @@ export default function UnifiedProduct({ catalog, settings, children }: { catalo
                 </label>
               ))}
             </div>
-            <p className="mt-2 text-sm text-gray-600">{settings.finishes[finish].description}</p>
+            <p className="mt-2 text-sm text-gray-600">{settings.finishes[finish].description}{finish === "marble" && " Color preview shown."}</p>
           </fieldset>
           <fieldset disabled={pending} aria-describedby={pack !== "1" ? "pack-contents" : undefined}>
             <legend className="text-sm font-semibold mb-2">Pack size</legend>
@@ -138,8 +138,8 @@ export default function UnifiedProduct({ catalog, settings, children }: { catalo
         <div className="hidden small:block"><ProductDemo poster={settings.finishes[finish].image} /></div>
 
         <figure className="rounded-lg border border-gray-300 p-3">
-          <div className="relative aspect-[4/3]"><Image src={settings.finishes[finish].detail_image} alt={`Dab Pal — ${finishName}, case and bottle detail`} fill sizes="(max-width: 1023px) 100vw, 50vw" className="object-contain" /></div>
-          <figcaption className="mt-2 text-sm text-gray-600">One complete kit shown. Swabs and isopropyl alcohol not included.</figcaption>
+          <div className="relative aspect-square"><Image src={settings.finishes[finish].detail_image} alt={`Dab Pal — ${finishName}, open case with a bottle and example swabs`} fill sizes="(max-width: 1023px) 100vw, 50vw" className="object-contain" /></div>
+          <figcaption className="mt-2 text-sm text-gray-600">{finish === "marble" && "Marble color preview. "}One kit shown. Swabs and isopropyl alcohol not included; the bottle ships empty.</figcaption>
         </figure>
       </div>
     </div>
@@ -153,6 +153,7 @@ function ProductDemo({ poster }: { poster: string }) {
           <video controls muted playsInline preload="none" poster={poster} className="block aspect-video w-full bg-black object-contain" aria-label="Dab Pal product demo video">
             <source src="https://bucket-production-a39d.up.railway.app/medusa-media/dabpal_video-01KRBQAN081CB5FHH4QC6G6PKN.mp4" type="video/mp4" />
           </video>
+          <p className="px-4 py-3 text-sm text-gray-600">Slider demonstration filmed with an earlier model.</p>
         </details>
   )
 }

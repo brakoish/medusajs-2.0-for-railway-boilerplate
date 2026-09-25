@@ -130,9 +130,9 @@ export default function PalPickerClient({
               <div className="studio-finish-photo">
                 <Image
                   src={item.image}
-                  alt={`${item.name} Dab Pal open case`}
-                  width={1000}
-                  height={563}
+                  alt={`${item.name} Dab Pal closed case${item.name === "Marble" ? " — color preview" : ""}`}
+                  width={1254}
+                  height={1254}
                   sizes="(max-width: 700px) 45vw, 30vw"
                 />
               </div>
@@ -143,6 +143,7 @@ export default function PalPickerClient({
                 {item.name}
                 {selected === item.handle ? " selected" : ""}
                 {!item.available ? " · Unavailable" : ""}
+                {item.name === "Marble" && <span className="block text-xs font-normal">Color preview</span>}
               </span>
             </label>
           ))}

@@ -6,13 +6,13 @@ const finishes = [
   {
     name: "Slate",
     href: "/store?finish=slate",
-    image: "/dab-pal/product-front.png",
+    image: "/dab-pal/model-2026-09/dab-pal-slate-closed.webp",
     swatch: "bg-zinc-950",
   },
   {
     name: "Marble",
     href: "/store?finish=marble",
-    image: "/dab-pal/product-front-white.jpg",
+    image: "/dab-pal/model-2026-09/dab-pal-marble-closed.webp",
     swatch: "bg-white",
   },
 ]
@@ -75,8 +75,8 @@ export default function ProductFamilyGallery() {
         <div className="order-1 small:order-2 grid grid-cols-2 gap-3 small:gap-4">
           <div className="relative col-span-2 aspect-[16/10] rounded-lg bg-zinc-50 overflow-hidden">
             <Image
-              src="/dab-pal/lineup.png"
-              alt="Dab Pal finish lineup"
+              src="/dab-pal/model-2026-09/dab-pal-slate-open.webp"
+              alt="Open Slate Dab Pal case with a bottle and example swabs"
               fill
               sizes="(max-width: 800px) 100vw, 55vw"
               className="object-contain p-6 small:p-10"

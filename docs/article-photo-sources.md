@@ -1,5 +1,9 @@
 # Article photo sources
 
+## Product photography update — 2026-09-25
+
+The two in-article Dab Pal images now use `/dab-pal/model-2026-09/dab-pal-slate-open.webp` and `dab-pal-marble-open.webp` (1254 × 1254). These supersede the older product photographs documented below. The new Slate images are AI-assisted studio edits of the owner's current-model photos; Marble is a digital color preview, identified in its caption. Approved masters are in `marketing/product-photos-2026-09-25/matched-shallow-logo` outside the repository. Product texture, shallow logo and full open-lid framing were retained. Generic editorial photographs and their credits remain unchanged.
+
 Checked 2026-09-24. These are real photographs, not generated illustrations. Rights and visual content were checked on the file description pages; shortlisted images were also opened and visually inspected in the browser. No image was downloaded or added to the application in this research task.
 
 ## Best immediate choices
