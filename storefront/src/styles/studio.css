@@ -3,7 +3,7 @@
 @font-face { font-family: "DM Sans"; src: url("/fonts/dm-sans-bold.woff2") format("woff2"); font-weight: 600 900; font-display: swap; }
 
 :root, .light, .dark {
-  --studio-cream: #f1eadf; --studio-ink: #20211e; --studio-orange: #ec6239; --studio-line: #c9c2b6;
+  --studio-cream: #f1eadf; --studio-ink: #20211e; --studio-orange: #eb5729; --studio-line: #c9c2b6;
   --fg-interactive: #9b371c; --fg-interactive-hover: #752711;
   --bg-interactive: #20211e; --border-interactive: #20211e;
 }
@@ -18,7 +18,7 @@ a, button, input, select, summary { -webkit-tap-highlight-color: transparent; }
 .studio-container { width: calc(100% - 80px); max-width: 1456px; margin-inline: auto; }
 .studio-nav { position: sticky; top: 0; z-index: 50; background: var(--studio-cream); }
 .studio-nav-inner { display: flex; align-items: center; min-height: 104px; gap: 50px; border-bottom: 1px solid var(--studio-line); }
-.studio-logo { color: #eb5729; margin-right: auto; flex-shrink: 0; display: flex; }
+.studio-logo { color: var(--studio-orange); margin-right: auto; flex-shrink: 0; display: flex; }
 .studio-logo svg { width: clamp(180px, 20vw, 296px); height: auto; }
 .studio-nav-links { display: flex; gap: clamp(24px, 4vw, 64px); align-items: center; font-size: 17px; }
 .studio-nav-links a { display: flex; align-items: center; min-height: 44px; white-space: nowrap; }
@@ -36,7 +36,7 @@ a, button, input, select, summary { -webkit-tap-highlight-color: transparent; }
 .studio-button svg, .studio-text-link svg { width: 24px; height: 24px; flex-shrink: 0; }
 .studio-text-link { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 18px; font-weight: 700; text-decoration: underline; text-underline-offset: 8px; }
 .studio-hero-image { overflow: hidden; height: 100%; position: relative; }
-.studio-hero-image::before { content: ""; position: absolute; width: min(75%, 410px); aspect-ratio: 1; border-radius: 50%; background: #ff7626; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.studio-hero-image::before { content: ""; position: absolute; width: min(75%, 410px); aspect-ratio: 1; border-radius: 50%; background: var(--studio-orange); top: 50%; left: 50%; transform: translate(-50%, -50%); }
 .studio-hero-image img { object-fit: contain; object-position: center; transform: rotate(-14deg) scale(.92); filter: drop-shadow(8px 14px 8px #20211e24); }
 .studio-picker { border-top: 1px solid var(--studio-line); display: grid; grid-template-columns: 35% 1fr; gap: 42px; padding-block: 20px 42px; scroll-margin-top: 112px; }
 .studio-picker-copy { border-right: 1px solid var(--studio-line); padding: 14px 30px 0 4px; }
