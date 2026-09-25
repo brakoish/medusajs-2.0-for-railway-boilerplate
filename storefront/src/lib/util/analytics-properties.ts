@@ -14,6 +14,9 @@ export function safeAnalyticsProperties(
   origin: string
 ) {
   const allowed = [
+    // SDK protocol fields: route events and preserve person_profiles: "never".
+    "token",
+    "$process_person_profile",
     "distinct_id",
     "$device_id",
     "$browser",

@@ -1,4 +1,4 @@
-// Isolated application checks: no browser, network, SDK ingestion, or orders.
+// Isolated application/SDK serialization checks: no browser, network, ingestion, or orders.
 const fs = require("node:fs")
 const path = require("node:path")
 const vm = require("node:vm")
@@ -74,6 +74,47 @@ async function main() {
     assert.equal(config.disable_session_recording, true); assert.equal(config.persistence, "memory")
     assert.equal(config.respect_dnt, true)
   })
+
+  // Exercise the installed SDK's actual enrichment -> before_send -> batch serialization.
+  // Never initialize it: storage/queue stay in memory and transport is forbidden.
+  const { PostHog } = require("posthog-js/lib/src/posthog-core")
+  const { RequestQueue } = require("posthog-js/lib/src/request-queue")
+  const { jsonStringify } = require("posthog-js/lib/src/request")
+  const realSdk = new PostHog(), queued = []
+  realSdk.__loaded = true
+  realSdk.config = { ...realSdk.config, ...config, token: "phc_offline_fixture", save_referrer: false, save_campaign_params: false }
+  realSdk.is_capturing = () => true
+  realSdk._is_bot = () => false
+  realSdk.persistence = {
+    get_property: () => undefined, set_property() {}, remove_event_timer: () => undefined,
+    properties: () => ({ distinct_id: "anonymous-fixture", $device_id: "anonymous-fixture" }),
+  }
+  realSdk.sessionPersistence = {
+    get_property: () => undefined, update_search_keyword() {},
+    properties: () => ({ $session_id: "private-session", $referrer: "https://www.google.com/search?q=private" }),
+  }
+  realSdk.pageViewManager = { doPageView: () => ({}), doEvent: () => ({}) }
+  realSdk._requestQueue = { enqueue: request => queued.push(request) }
+  realSdk._send_retriable_request = () => { throw Error("Network forbidden in isolated checks") }
+  for (const event of ["$pageview", "guide_product_click", "affiliate_click"]) {
+    realSdk.capture(event, { path: "/blog/fixture?private=secret", email: "private@example.test", order_id: "order_private" })
+  }
+  const batches = RequestQueue.prototype._formatQueue.call({ _queue: queued })
+  const serialized = JSON.parse(jsonStringify(Object.values(batches)[0].data))
+  check("installed SDK serialized events retain the required project token", () => {
+    assert.equal(serialized.length, 3)
+    for (const event of serialized) assert.equal(event.properties.token, "phc_offline_fixture")
+  })
+  check("installed SDK serialized events retain disabled person processing", () => {
+    for (const event of serialized) assert.equal(event.properties.$process_person_profile, false)
+  })
+  check("SDK protocol fields do not restore stripped private properties", () => {
+    for (const event of serialized) {
+      for (const key of ["email", "order_id", "$session_id", "$referrer"]) assert.equal(event.properties[key], undefined)
+      assert.equal(event.properties.path, "/blog/fixture")
+      assert.equal(event.properties.referrer_host, "www.google.com")
+    }
+  })
   choice = "essential"
   await analytics.track("affiliate_click")
   check("revocation blocks later capture", () => assert.equal(captures.length, 1))
@@ -117,6 +158,62 @@ async function main() {
   check("new consent grants a pageview", () => assert.equal(requested.length, 1))
   allow.props.onClick()
   check("reselecting existing consent does not duplicate pageview", () => assert.equal(requested.length, 1))
-  console.log(JSON.stringify({ passed: passed.length, checks: passed, scope: "Mocked source checks only; no network or actual PostHog receipt." }, null, 2))
+
+  let commerceAllowed = true, session = new Map(), storageUnavailable = false
+  const commerceRequests = []
+  const commerce = load("src/modules/common/components/commerce-event/index.tsx", {
+    react: { useEffect: effect => effect() },
+    "@lib/util/analytics": {
+      analyticsAllowed: () => commerceAllowed,
+      track: (event, properties) => commerceRequests.push({ event, properties }),
+    },
+  }, { sessionStorage: {
+    getItem: key => { if (storageUnavailable) throw Error("blocked"); return session.get(key) },
+    setItem: (key, value) => session.set(key, value),
+  } }).default
+  const confirmation = load("src/modules/order/templates/order-completed-template.tsx", {
+    "@modules/common/components/commerce-event": commerce,
+    "@medusajs/ui": { Heading: "h2" },
+    "next/headers": { cookies: async () => ({ get: () => undefined }) },
+    ...Object.fromEntries([
+      "@modules/common/components/cart-totals", "@modules/order/components/help",
+      "@modules/order/components/items", "@modules/order/components/onboarding-cta",
+      "@modules/order/components/order-details", "@modules/order/components/shipping-details",
+      "@modules/order/components/payment-details",
+    ].map(name => [name, () => null])),
+  }, { process: { env: { NODE_ENV: "production" } } }).default
+  for (const payment_status of ["not_paid", "authorized", "captured", "refunded"]) {
+    const rendered = await confirmation({ order: { id: "order_private", payment_status, total: 25, currency_code: "usd" } })
+    const event = rendered.props.children[0]
+    check(`${payment_status} confirmation means a view without financial payload`, () => {
+      assert.equal(event.type, commerce)
+      assert.equal(event.props.event, "order_confirmation_viewed")
+      assert.equal(event.props.value, undefined); assert.equal(event.props.currency, undefined)
+    })
+  }
+  const view = { event: "order_confirmation_viewed", sessionKey: "order_private" }
+  commerce(view); commerce(view)
+  check("confirmation tracking has no financial data or ID and suppresses repeat attempts", () => {
+    assert.equal(commerceRequests.length, 1)
+    assert.equal(commerceRequests[0].event, "order_confirmation_viewed")
+    assert.equal(Object.keys(commerceRequests[0].properties).length, 0)
+    assert.equal(session.get("dabpal-event:order_confirmation_viewed:order_private"), "attempted")
+  })
+  session = new Map(); commerce(view)
+  check("fresh tab storage permits another view, not a unique-order count", () => assert.equal(commerceRequests.length, 2))
+  commerce({ event: "begin_checkout", value: 25, currency: "usd", sessionKey: "cart_private" })
+  check("checkout keeps its existing amount and currency without ID", () => {
+    assert.equal(commerceRequests[2].event, "begin_checkout")
+    assert.equal(commerceRequests[2].properties.value, 25)
+    assert.equal(commerceRequests[2].properties.currency, "usd")
+    assert.equal(Object.keys(commerceRequests[2].properties).length, 2)
+  })
+  session = new Map(); commerceAllowed = false; commerce(view)
+  check("confirmation consent denial suppresses the attempt", () => assert.equal(commerceRequests.length, 3))
+  commerceAllowed = true; storageUnavailable = true
+  check("unavailable session storage does not interrupt confirmation or send", () => {
+    assert.doesNotThrow(() => commerce(view)); assert.equal(commerceRequests.length, 3)
+  })
+  console.log(JSON.stringify({ passed: passed.length, checks: passed, scope: "Isolated source/SDK serialization checks only; no network or actual PostHog receipt." }, null, 2))
 }
 main().catch(error => { console.error(error); process.exitCode = 1 })

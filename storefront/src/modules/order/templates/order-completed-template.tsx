@@ -22,7 +22,7 @@ export default async function OrderCompletedTemplate({
 
   return (
     <main className="py-6 min-h-[calc(100vh-64px)]">
-      <CommerceEvent event="purchase" value={order.total ?? 0} currency={order.currency_code} sessionKey={order.id} />
+      <CommerceEvent event="order_confirmation_viewed" sessionKey={order.id} />
       <div className="content-container flex flex-col justify-center items-center gap-y-10 max-w-4xl h-full w-full">
         {process.env.NODE_ENV !== "production" && isOnboarding && <OnboardingCta orderId={order.id} />}
         <div
