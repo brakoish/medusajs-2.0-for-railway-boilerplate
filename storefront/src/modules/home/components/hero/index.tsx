@@ -22,7 +22,7 @@ export default function Hero() {
       </div>
       <div className="studio-hero-image">
         <Image
-          src="/dab-pal/model-2026-09/dab-pal-slate-open.webp"
+          src="/dab-pal/studio/hero.webp"
           alt="Slate Dab Pal case with a bottle and example swabs, shown open"
           fill
           priority
