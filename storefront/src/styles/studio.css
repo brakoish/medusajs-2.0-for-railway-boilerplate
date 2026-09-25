@@ -36,7 +36,8 @@ a, button, input, select, summary { -webkit-tap-highlight-color: transparent; }
 .studio-button svg, .studio-text-link svg { width: 24px; height: 24px; flex-shrink: 0; }
 .studio-text-link { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 18px; font-weight: 700; text-decoration: underline; text-underline-offset: 8px; }
 .studio-hero-image { overflow: hidden; height: 100%; position: relative; }
-.studio-hero-image img { object-fit: cover; object-position: center; }
+.studio-hero-image::before { content: ""; position: absolute; width: min(75%, 410px); aspect-ratio: 1; border-radius: 50%; background: #ff7626; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.studio-hero-image img { object-fit: contain; object-position: center; transform: rotate(-14deg) scale(.92); filter: drop-shadow(8px 14px 8px #20211e24); }
 .studio-picker { border-top: 1px solid var(--studio-line); display: grid; grid-template-columns: 35% 1fr; gap: 42px; padding-block: 20px 42px; scroll-margin-top: 112px; }
 .studio-picker-copy { border-right: 1px solid var(--studio-line); padding: 14px 30px 0 4px; }
 .studio-picker h1, .studio-picker h2 { font-size: clamp(40px, 4.8vw, 74px); white-space: nowrap; }
@@ -142,7 +143,7 @@ a, button, input, select, summary { -webkit-tap-highlight-color: transparent; }
  .studio-hero-actions { margin-top: 20px; gap: 22px; }
  .studio-button { font-size: 16px; min-height: 48px; padding: 12px 22px; }
  .studio-text-link { font-size: 15px; gap: 6px; }
- .studio-hero-image { height: auto; aspect-ratio: 1.35; margin-inline: -18px; }
+ .studio-hero-image { height: auto; aspect-ratio: 1.15; margin-inline: -18px; }
  .studio-hero-image img { object-fit: contain; }
  .studio-picker { grid-template-columns: 1fr; gap: 24px; padding-block: 28px 40px; scroll-margin-top: 122px; }
  .studio-picker-copy { border-right: 0; padding: 0; }
@@ -208,8 +209,6 @@ a, button, input, select, summary { -webkit-tap-highlight-color: transparent; }
 .studio-account input { min-height: 48px; font-size: 16px; }
 .studio-account button[type="submit"] { min-height: 48px; background: var(--studio-ink); }
 .studio-not-found h1 { font-family: "Coiny", sans-serif; }
-
-@media(min-width: 1101px) { .studio-hero-image img { transform: scale(1.18); } }
 
 @media(max-width: 360px) {
  .studio-cart table, .studio-cart tbody { display: block; }
