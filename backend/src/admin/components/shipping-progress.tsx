@@ -71,6 +71,17 @@ export default function ShippingProgress({
   const batchLabels = [
     ...new Set(rows.flatMap((row) => row.batch_label_urls || [])),
   ]
+  const printLink = {
+    display: "inline-flex",
+    alignItems: "center",
+    minHeight: 44,
+    padding: "8px 14px",
+    borderRadius: 6,
+    background: "#1d4ed8",
+    color: "#fff",
+    fontWeight: 600,
+    whiteSpace: "nowrap" as const,
+  }
   return (
     <div>
       {error && (
@@ -84,7 +95,7 @@ export default function ShippingProgress({
           href={url}
           target="_blank"
           rel="noreferrer"
-          style={{ color: "inherit", display: "inline-block", margin: 14 }}
+          style={{ ...printLink, margin: 14 }}
         >
           Print batch labels{batchLabels.length > 1 ? ` ${index + 1}` : ""} ↗
         </a>
@@ -146,7 +157,7 @@ export default function ShippingProgress({
                     {row.label_url && (
                       <a
                         href={row.label_url}
-                        style={{ color: "inherit" }}
+                        style={printLink}
                         target="_blank"
                         rel="noreferrer"
                       >

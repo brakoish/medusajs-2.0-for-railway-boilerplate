@@ -88,12 +88,13 @@ const S: Record<string, React.CSSProperties> = {
   heading: {
     fontSize: 22,
     fontWeight: 700,
-    color: "#111827",
+    color: "var(--fg-base)",
     margin: "0 0 4px",
   },
-  sub: { fontSize: 14, color: "#6b7280", margin: "0 0 28px" },
+  sub: { fontSize: 14, color: "var(--fg-subtle)", margin: "0 0 28px" },
   card: {
     background: "#fff",
+    color: "#111827",
     border: "1px solid #e5e7eb",
     borderRadius: 12,
     overflow: "hidden",
@@ -402,7 +403,7 @@ export default function BulkFulfillPage() {
             ) : loadError ? (
               <div style={{ padding: 32, textAlign: "center", color: "#991b1b" }}>{loadError}</div>
             ) : orders.length === 0 ? (
-              <div style={{ padding: 32, textAlign: "center", color: "#9ca3af" }}>No orders ready for a new label. Check shipping progress below for existing purchases.</div>
+              <div style={{ padding: 32, textAlign: "center", color: "#4b5563" }}>No orders ready for a new label. Print purchased labels from Shipping progress below.</div>
             ) : (
               <table style={S.table}>
                 <thead>
