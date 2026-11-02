@@ -4,6 +4,10 @@ const mockGetTransaction = jest.fn()
 const mockBatchSync = jest.fn()
 const mockTransactionSync = jest.fn()
 const mockPurchase = jest.fn()
+const mockAllowRetry = jest.fn()
+jest.mock("../shipping-attempts", () => ({
+  allowFailedShippingRetry: (...args: unknown[]) => mockAllowRetry(...args),
+}))
 jest.mock("../shipping-queue", () => ({
   shippingQueue: (...args: unknown[]) => mockQueue(...args),
 }))
@@ -81,5 +85,24 @@ test("refresh failures remain explicit and never fall back to buying", async () 
   expect(res.json.mock.calls[0][0].error).toContain(
     "No new label was purchased",
   )
+  expect(mockPurchase).not.toHaveBeenCalled()
+  expect(mockAllowRetry).not.toHaveBeenCalled()
+})
+
+test.each([false, true])("failed transaction recovery checks whether fulfillment exists: %s", async (exists) => {
+  mockQueue.mockResolvedValue({ orders: [], progress: [{ fulfillment_id: "ful_1", transaction_id: "tx_1" }] })
+  const tx = { object_id: "tx_1", metadata: "ful_1", status: "ERROR" }
+  mockGetTransaction.mockResolvedValue(tx)
+  const graph = jest.fn().mockResolvedValue({ data: exists ? [{ id: "ful_1" }] : [] })
+  await POST({ ...request, scope: { resolve: () => ({ graph }) } }, response() as any)
+  expect(mockGetTransaction).toHaveBeenCalledWith("tx_1")
+  expect(graph).toHaveBeenCalledWith({ entity: "fulfillment", fields: ["id"], filters: { id: "ful_1" } })
+  if (exists) {
+    expect(mockAllowRetry).not.toHaveBeenCalled()
+    expect(mockTransactionSync).toHaveBeenCalled()
+  } else {
+    expect(mockAllowRetry).toHaveBeenCalledWith("order_1", tx)
+    expect(mockTransactionSync).not.toHaveBeenCalled()
+  }
   expect(mockPurchase).not.toHaveBeenCalled()
 })

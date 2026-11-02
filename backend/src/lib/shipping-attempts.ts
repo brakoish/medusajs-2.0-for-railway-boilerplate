@@ -1,10 +1,11 @@
 import { Pool, PoolClient } from "pg"
 import { AsyncLocalStorage } from "node:async_hooks"
+import type { ShippoTransaction } from "../modules/shippo/types"
 
 const lockConnection = new AsyncLocalStorage<PoolClient>()
 
 // A durable purchase reservation survives workflow rollback, process restarts,
-// and lost Shippo responses. Never clear it automatically or repurchase on retry.
+// and lost Shippo responses. Only a verified failed transaction permits a retry.
 let pool: Pool | undefined
 let initialized: Promise<unknown> | undefined
 
@@ -37,13 +38,36 @@ export async function claimShippingAttempt(
 ) {
   const result = await (lockConnection.getStore() || (await db())).query(
     `INSERT INTO dabpal_shipping_attempt (order_id, fulfillment_id, state)
-     VALUES ($1, $2, 'processing') ON CONFLICT (order_id) DO NOTHING RETURNING order_id`,
+     VALUES ($1, $2, 'processing') ON CONFLICT (order_id) DO UPDATE
+     SET fulfillment_id=EXCLUDED.fulfillment_id, state='processing', updated_at=now(),
+       details=jsonb_build_object('previous_attempts',
+         COALESCE(dabpal_shipping_attempt.details->'previous_attempts', '[]'::jsonb) ||
+         jsonb_build_array(dabpal_shipping_attempt.details - 'previous_attempts'))
+     WHERE dabpal_shipping_attempt.state='retry_ready' RETURNING order_id`,
     [orderId, fulfillmentId || null],
   )
   if (!result.rowCount)
     throw new Error(
       "A label purchase already exists or needs review. Refresh shipping progress before taking another action.",
     )
+}
+
+// Caller must confirm the rolled-back fulfillment no longer exists and fetch
+// this transaction directly from Shippo. Retain its evidence for the next claim.
+export async function allowFailedShippingRetry(orderId: string, tx: ShippoTransaction) {
+  if (tx.status !== "ERROR" || tx.label_url || tx.tracking_number || !tx.metadata)
+    return false
+  const result = await (lockConnection.getStore() || (await db())).query(
+    `UPDATE dabpal_shipping_attempt SET state='retry_ready', updated_at=now()
+     WHERE order_id=$1 AND state='needs_attention' AND fulfillment_id=$3
+       AND details->>'transaction_id'=$2
+       AND NOT (details ? 'batch_id')
+       AND COALESCE(details->>'label_url', '')=''
+       AND COALESCE(details->>'tracking_number', '')=''
+     RETURNING order_id`,
+    [orderId, tx.object_id, tx.metadata],
+  )
+  return !!result.rowCount
 }
 
 export async function recordShippingAttempt(

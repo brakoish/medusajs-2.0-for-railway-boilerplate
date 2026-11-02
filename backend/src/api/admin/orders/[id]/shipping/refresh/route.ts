@@ -5,6 +5,7 @@ import {
   updateFulfillmentFromTransaction,
 } from "../../../../../../lib/shippo-sync"
 import { shippingQueue } from "../../../../../../lib/shipping-queue"
+import { allowFailedShippingRetry } from "../../../../../../lib/shipping-attempts"
 
 // Reconcile existing purchases only. Never create a batch or buy a label here.
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
@@ -49,6 +50,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         allowed.has(entry.fulfillment_id)
       ) {
         const tx = await client.getTransaction(entry.transaction_id)
+        if (tx.status === "ERROR") {
+          const { data: fulfillments } = await req.scope.resolve("query").graph({
+            entity: "fulfillment",
+            fields: ["id"],
+            filters: { id: entry.fulfillment_id },
+          })
+          if (!fulfillments.length) {
+            await allowFailedShippingRetry(orderId, tx)
+            continue
+          }
+        }
         await updateFulfillmentFromTransaction(req, {
           ...tx,
           metadata: entry.fulfillment_id,

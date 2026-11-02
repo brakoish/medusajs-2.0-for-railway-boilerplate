@@ -151,6 +151,18 @@ test("queue includes unfinished work beyond the first page", async () => {
   expect(result.progress[0].order_id).toBe("order_old")
 })
 
+test("a verified failed reservation returns the unfulfilled order to rate selection", async () => {
+  jest.mocked(shippingAttempts).mockResolvedValueOnce([{
+    order_id: "order_retry", fulfillment_id: "ful_failed", state: "retry_ready",
+    details: { transaction_id: "tx_failed" }, updated_at: new Date(),
+  }])
+  const result = await shippingQueue({ resolve: () => ({
+    graph: async () => ({ data: [{ id: "order_retry", items: [{ id: "i", quantity: 1 }] }] }),
+  }) } as any)
+  expect(result.orders.map(o => o.id)).toEqual(["order_retry"])
+  expect(result.progress).toEqual([])
+})
+
 
 test("Medusa label relationships supply tracking and print links", () => {
   expect(shippingProgress({ id: "ful_1", labels: [{ tracking_number: "123", tracking_url: "https://track.test", label_url: "https://label.test" }] })).toMatchObject({ stage: "label_ready", tracking_number: "123", tracking_url: "https://track.test", label_url: "https://label.test" })

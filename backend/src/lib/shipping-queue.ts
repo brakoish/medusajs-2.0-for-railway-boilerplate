@@ -10,7 +10,8 @@ export async function shippingQueue(
   const query = scope.resolve("query")
   const attempts = await shippingAttempts(orderIds)
   const byOrder = new Map(
-    attempts.map((attempt) => [attempt.order_id, attempt]),
+    attempts.filter((attempt) => attempt.state !== "retry_ready")
+      .map((attempt) => [attempt.order_id, attempt]),
   )
   const orders: any[] = []
   // Walk pages so older unfinished labels do not vanish behind recent orders.
