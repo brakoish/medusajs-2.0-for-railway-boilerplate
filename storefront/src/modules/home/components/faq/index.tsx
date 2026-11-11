@@ -12,6 +12,10 @@ const faqs = [
     a: "Yes, the Dab Pal is designed for Puffco Peak, Peak Pro, and Proxy users, plus traditional quartz bangers and any e-rig setup. The kit holds the Q-tips and iso you use after every dab.",
   },
   {
+    q: "Is Dab Pal made by Puffco?",
+    a: "No. Dab Pal is an independent cleaning kit made in Astoria, NY. It is designed to hold the swabs and iso you use with Puffco devices and other e-rigs, but it is not made, endorsed, or sponsored by Puffco.",
+  },
+  {
     q: "Is the iso bottle filled?",
     a: "No. The 1oz bottle ships empty. Q-tips and isopropyl alcohol are not included; add your own before use.",
   },

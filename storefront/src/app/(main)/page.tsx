@@ -9,9 +9,9 @@ import StructuredData from "@modules/home/components/structured-data"
 import BreadcrumbSchema from "@modules/common/components/breadcrumb-schema"
 
 export const metadata: Metadata = {
-  title: "Dab Pal | Puffco Cleaning Kit and Dab Swab Case",
+  title: { absolute: "Dab Pal | Cleaning Kit for Puffco Peak, Pro, Proxy & E-Rigs" },
   description:
-    "Portable dab cleaning kit for Puffco Peak, Pro, Proxy, e-rigs, and quartz bangers. Case, slider and empty 1oz bottle. Holds 30 regular Q-tips; swabs and iso not included.",
+    "A portable Puffco cleaning kit: keep clean Q-tips, used swabs and your iso bottle in one case. Fits Peak, Pro, Proxy, e-rig and banger routines. $25, made to order in NY.",
   alternates: {
     canonical: getBaseURL(),
   },
