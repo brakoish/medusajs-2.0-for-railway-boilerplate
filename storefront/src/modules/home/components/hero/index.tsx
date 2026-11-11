@@ -5,12 +5,17 @@ export default function Hero() {
   return (
     <section className="studio-hero studio-container">
       <div className="studio-hero-copy">
-        <h1 className="studio-display">
-          Keep the
-          <br />
-          session clean
+        <h1>
+          <span className="studio-eyebrow studio-hero-kicker">
+            Cleaning kit for Puffco &amp; e-rigs
+          </span>
+          <span className="studio-display">
+            Keep the
+            <br />
+            session clean
+          </span>
         </h1>
-        <p>Keep clean and used swabs separate.</p>
+        <p>Clean swabs, used swabs and your iso, in one pocket case.</p>
         <div className="studio-hero-actions">
           <a href="#shop" className="studio-button">
             Pick your Pal <ArrowDown />

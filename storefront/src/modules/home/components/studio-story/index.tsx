@@ -32,8 +32,8 @@ export default function StudioStory() {
             </h2>
           </div>
           <p>
-            A portable dab swab case for your Puffco, e-rig, or quartz banger
-            clean-up supplies.
+            A portable Puffco cleaning kit and dab swab case for your Peak,
+            Pro, Proxy, e-rig, or quartz banger clean-up supplies.
           </p>
         </div>
         <div className="studio-steps">
@@ -93,7 +93,7 @@ export default function StudioStory() {
           </LocalizedClientLink>
         </div>
         <div className="studio-notes-grid">
-          {blogArticles.filter((article) => ["how-to-clean-puffco-peak-pro-proxy", "best-swabs-for-dabs", "what-to-keep-in-a-dab-cleaning-kit"].includes(article.slug)).map((article) => (
+          {blogArticles.filter((article) => ["puffco-cleaning-kit", "how-to-clean-puffco-peak-pro-proxy", "best-swabs-for-dabs"].includes(article.slug)).map((article) => (
             <LocalizedClientLink
               key={article.slug}
               href={`/blog/${article.slug}`}

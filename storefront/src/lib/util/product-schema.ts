@@ -74,8 +74,8 @@ export function buildProductGroupSchema(
     "@context": "https://schema.org",
     "@type": "ProductGroup",
     "@id": `${base}/store#dab-pal`,
-    name: content?.title || "Dab Pal",
-    description: "3D-printed dab swab case with separate clean and used swab storage, a slider, and an empty 1 oz bottle. Swabs and isopropyl alcohol not included.",
+    name: `${content?.title || "Dab Pal"} Cleaning Kit for Puffco & E-Rigs`,
+    description: "Portable cleaning kit and dab swab case for Puffco and e-rig users, with separate clean and used swab storage, a slider, and an empty 1 oz bottle. Swabs and isopropyl alcohol not included. Not affiliated with Puffco.",
     url: `${base}/store`,
     productGroupID: "DABPAL",
     brand: { "@type": "Brand", name: "Dab Pal" },
@@ -86,7 +86,7 @@ export function buildProductGroupSchema(
         const pack = variant.sku!.endsWith("-3") ? "3-pack" : variant.sku!.endsWith("-6") ? "6-pack" : "Single"
         return {
           ...buildProductSchema({ ...product, sku: variant.sku! }, { ...catalog, variants: [variant] }, base, content),
-          name: `${content?.title || "Dab Pal"} — ${product.title} · ${pack}`,
+          name: `${content?.title || "Dab Pal"} Cleaning Kit for Puffco & E-Rigs — ${product.title} · ${pack}`,
           color: product.title === "Marble" ? "White" : "Black",
           size: pack,
           inProductGroupWithID: "DABPAL",

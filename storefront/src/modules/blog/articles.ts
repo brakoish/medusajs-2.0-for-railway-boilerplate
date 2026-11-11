@@ -1,6 +1,7 @@
 import type { AffiliateProductId } from "./affiliate-supplies"
 import { careGuides } from "./new-guides-care"
 import { accessoryGuides } from "./new-guides-accessories"
+import { puffcoCleaningKitGuide } from "./puffco-cleaning-kit"
 
 export type BlogSection = {
   heading: string
@@ -56,6 +57,7 @@ export type BlogArticle = {
 }
 
 export const blogArticles: BlogArticle[] = [
+  puffcoCleaningKitGuide,
   ...careGuides,
   ...accessoryGuides,
   {
@@ -125,7 +127,7 @@ export const blogArticles: BlogArticle[] = [
     description:
       "Find the cleaning guide for your Puffco Peak, Peak Pro, Proxy, Pivot, or Plus. Start with your model before choosing chamber and glass cleaning steps.",
     keywords: [
-      "puffco cleaning kit",
+      "how to clean a puffco",
       "how to clean puffco peak",
       "puffco peak pro cleaning kit",
       "puffco proxy cleaning kit",
@@ -163,6 +165,7 @@ export const blogArticles: BlogArticle[] = [
         label: "Plus",
         description: "For the pen-style Plus.",
       },
+      { slug: "puffco-cleaning-kit", label: "Build your Puffco cleaning kit", description: "Swabs, iso, a soak container and a place for used swabs." },
       { slug: "how-to-clean-puffco-hot-knife", label: "Hot Knife accessory", description: "Clean the ceramic tip without soaking the powered tool." },
       { slug: "how-long-puffco-dry-after-cleaning", label: "Drying after cleaning", description: "Know what to check before reassembly." },
     ],

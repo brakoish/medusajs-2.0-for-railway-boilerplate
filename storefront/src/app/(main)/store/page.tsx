@@ -9,12 +9,12 @@ const base = getBaseURL()
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getDabPalSettings()
   return {
-  title: { absolute: `${settings.title} | 3D-Printed Dab Swab Case` },
+  title: { absolute: `${settings.title} | Cleaning Kit for Puffco & E-Rigs` },
   description: `${settings.description} ${settings.included}`,
   alternates: { canonical: `${base}/store` },
-  twitter: { card: "summary_large_image", title: `${settings.title} | 3D-Printed Dab Swab Case`, description: `${settings.description} ${settings.included}`, images: [settings.finishes.slate.image] },
+  twitter: { card: "summary_large_image", title: `${settings.title} | Cleaning Kit for Puffco & E-Rigs`, description: `${settings.description} ${settings.included}`, images: [settings.finishes.slate.image] },
   openGraph: {
-    title: `${settings.title} | 3D-Printed Dab Swab Case`,
+    title: `${settings.title} | Cleaning Kit for Puffco & E-Rigs`,
     description: `${settings.description} ${settings.included}`,
     url: `${base}/store`,
     images: [settings.finishes.slate.image],

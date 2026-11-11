@@ -59,7 +59,10 @@ export default function Footer() {
           </div>
         </div>
         <div className="studio-footer-bottom">
-          <span>© {new Date().getFullYear()} Dab Pal.</span>
+          <span>
+            © {new Date().getFullYear()} Dab Pal. Puffco is a trademark of its
+            owner; Dab Pal is not affiliated with or endorsed by Puffco.
+          </span>
           <div className="flex gap-6"><LocalizedClientLink href="/privacy">Privacy</LocalizedClientLink><LocalizedClientLink href="/terms">Terms</LocalizedClientLink></div>
         </div>
       </div>
